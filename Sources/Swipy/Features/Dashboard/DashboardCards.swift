@@ -119,10 +119,12 @@ public struct DashboardSensitivityCard: View {
                     .foregroundColor(Color(hex: "171717"))
             }
 
-            Slider(value: $appState.settings.cursorSensitivity, in: 0.2...4.0, step: 0.05)
-                .onChange(of: appState.settings.cursorSensitivity) {
-                    appState.settings.save()
-                }
+            CustomSliderBar(
+                value: $appState.settings.cursorSensitivity,
+                range: 0.2...4.0,
+                step: 0.05,
+                onCommit: { appState.settings.save() }
+            )
 
             HStack(spacing: 6) {
                 presetChip(title: "0.7x", value: 0.7)
@@ -197,14 +199,16 @@ public struct DashboardPointerCard: View {
                     }
                 }
 
-                HStack {
+                HStack(spacing: 12) {
                     Text("Size")
                         .font(.system(size: 11))
                         .foregroundColor(Color(hex: "777777"))
-                    Slider(value: $appState.settings.pointer.size, in: 16...48, step: 2)
-                        .onChange(of: appState.settings.pointer.size) {
-                            appState.settings.save()
-                        }
+                    CustomSliderBar(
+                        value: $appState.settings.pointer.size,
+                        range: 16...48,
+                        step: 2,
+                        onCommit: { appState.settings.save() }
+                    )
                     Text("\(Int(appState.settings.pointer.size))px")
                         .font(.system(size: 11, design: .monospaced))
                         .foregroundColor(Color(hex: "777777"))

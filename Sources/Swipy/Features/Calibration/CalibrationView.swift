@@ -97,9 +97,7 @@ public struct CalibrationView: View {
                 .font(.system(size: 13))
                 .foregroundColor(Color(hex: "777777"))
                 .multilineTextAlignment(.center)
-            Slider(value: $appState.settings.activeRegionWidth, in: 0.4...0.9) {
-                Text("Region Width")
-            }
+            CustomSliderBar(value: $appState.settings.activeRegionWidth, range: 0.4...0.9, step: 0.05)
             Text("Width Coverage: \(Int(appState.settings.activeRegionWidth * 100))%")
                 .font(.system(size: 12, design: .monospaced))
                 .foregroundColor(Color(hex: "777777"))
@@ -141,7 +139,7 @@ public struct CalibrationView: View {
             Text("Adjust cursor tracking speed and One Euro filter jitter reduction.")
                 .font(.system(size: 13))
                 .foregroundColor(Color(hex: "777777"))
-            Slider(value: $appState.settings.cursorSensitivity, in: 0.5...2.5)
+            CustomSliderBar(value: $appState.settings.cursorSensitivity, range: 0.5...2.5, step: 0.05)
             Text(String(format: "Sensitivity: %.2fx", appState.settings.cursorSensitivity))
                 .font(.system(size: 12, design: .monospaced))
                 .foregroundColor(Color(hex: "777777"))

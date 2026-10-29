@@ -50,14 +50,9 @@ struct SwipyApp: App {
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 10) {
                 SwipyLogoView(size: 26, showShadow: true)
-                VStack(alignment: .leading, spacing: 1) {
-                    Text("Swipy")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(Color(hex: "171717"))
-                    Text("v1.0.0")
-                        .font(.system(size: 10, weight: .medium, design: .monospaced))
-                        .foregroundColor(Color(hex: "999999"))
-                }
+                Text("Swipy")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundColor(.white)
                 Spacer()
             }
             .padding(.horizontal, 16)

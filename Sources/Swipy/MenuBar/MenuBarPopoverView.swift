@@ -101,7 +101,7 @@ public struct MenuBarPopoverView: View {
     }
 
     private var sensitivitySlider: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 6) {
             HStack {
                 Text("Sensitivity")
                     .font(.system(size: 12))
@@ -110,12 +110,12 @@ public struct MenuBarPopoverView: View {
                 Text(String(format: "%.2fx", appState.settings.cursorSensitivity))
                     .font(.system(size: 11, design: .monospaced))
             }
-            Slider(value: $appState.settings.cursorSensitivity, in: 0.2...4.0) {
-                Text("Sensitivity")
-            }
-            .onChange(of: appState.settings.cursorSensitivity) {
-                appState.settings.save()
-            }
+            CustomSliderBar(
+                value: $appState.settings.cursorSensitivity,
+                range: 0.2...4.0,
+                step: 0.05,
+                onCommit: { appState.settings.save() }
+            )
         }
     }
 
