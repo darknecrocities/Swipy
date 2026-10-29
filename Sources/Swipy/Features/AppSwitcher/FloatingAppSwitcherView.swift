@@ -1,7 +1,7 @@
 import SwiftUI
 import AppKit
 
-/// Floating glassmorphic application switcher overlay.
+/// Floating glassmorphic application switcher overlay with auto-dismiss.
 public struct FloatingAppSwitcherView: View {
     @Binding var isPresented: Bool
     @StateObject private var viewModel = AppSwitcherViewModel()
@@ -38,12 +38,17 @@ public struct FloatingAppSwitcherView: View {
         }
         .padding(20)
         .frame(width: 480)
-        .background(Color.white.opacity(0.95))
+        .background(Color.white.opacity(0.96))
         .cornerRadius(16)
         .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color(hex: "EAEAEA"), lineWidth: 1))
         .shadow(color: Color.black.opacity(0.12), radius: 24, x: 0, y: 8)
         .onAppear {
             viewModel.refreshRunningApps()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                if isPresented {
+                    isPresented = false
+                }
+            }
         }
     }
 

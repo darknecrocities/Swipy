@@ -103,13 +103,63 @@ public struct DashboardView: View {
                 }
             )
         }
-        if !appState.isAccessibilityTrusted {
-            permissionBanner(
-                title: "Accessibility Permission Required",
-                message: "Accessibility trust enables Swipy to move the cursor and click across apps.",
-                buttonText: "Grant Accessibility",
-                action: { AccessibilityPermissionManager.shared.openAccessibilitySettings() }
-            )
+        if !appState.isAccessibilityTrusted && !appState.isAccessibilityBannerDismissed {
+            HStack {
+                VStack(alignment: .leading, spacing: 3) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "hand.raised.fill")
+                            .font(.system(size: 11))
+                            .foregroundColor(Color.orange)
+                        Text("Accessibility Permission")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(Color(hex: "171717"))
+                    }
+                    Text("Enables moving the cursor. If already ON in System Settings, toggle it OFF and ON once to re-authorize this build.")
+                        .font(.system(size: 11))
+                        .foregroundColor(Color(hex: "777777"))
+                        .lineLimit(2)
+                }
+                Spacer()
+                HStack(spacing: 6) {
+                    Button(action: { AccessibilityPermissionManager.shared.openAccessibilitySettings() }) {
+                        Text("Open Settings")
+                            .font(.system(size: 11, weight: .medium))
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                            .background(Color(hex: "171717"))
+                            .foregroundColor(.white)
+                            .cornerRadius(6)
+                    }
+                    .buttonStyle(.plain)
+
+                    Button(action: { appState.refreshPermissions() }) {
+                        Text("Refresh")
+                            .font(.system(size: 11, weight: .medium))
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 6)
+                            .background(Color.white)
+                            .foregroundColor(Color(hex: "171717"))
+                            .cornerRadius(6)
+                            .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color(hex: "EAEAEA"), lineWidth: 1))
+                    }
+                    .buttonStyle(.plain)
+
+                    Button(action: { appState.isAccessibilityBannerDismissed = true }) {
+                        Text("Continue")
+                            .font(.system(size: 11, weight: .medium))
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 6)
+                            .background(Color(hex: "F0F0F0"))
+                            .foregroundColor(Color(hex: "555555"))
+                            .cornerRadius(6)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(14)
+            .background(Color(hex: "FAFAFA"))
+            .cornerRadius(10)
+            .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color(hex: "EAEAEA"), lineWidth: 1))
         }
     }
 

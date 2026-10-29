@@ -30,7 +30,15 @@ struct SwipyApp: App {
             }
             .overlay {
                 if appState.showFloatingAppSwitcher {
-                    FloatingAppSwitcherView(isPresented: $appState.showFloatingAppSwitcher)
+                    ZStack {
+                        Color.black.opacity(0.15)
+                            .ignoresSafeArea()
+                            .onTapGesture {
+                                appState.showFloatingAppSwitcher = false
+                            }
+                        FloatingAppSwitcherView(isPresented: $appState.showFloatingAppSwitcher)
+                    }
+                    .transition(.opacity)
                 }
             }
         }

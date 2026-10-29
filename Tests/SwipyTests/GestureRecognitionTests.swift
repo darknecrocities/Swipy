@@ -8,6 +8,7 @@ public struct GestureRecognitionTests {
         testPointingState()
         testPinchToClick()
         testPinchHeldWithMotionTriggersDrag()
+        testOpenHandWithoutVelocityDoesNotSwipe()
     }
 
     private static func makeHand(
@@ -65,8 +66,8 @@ public struct GestureRecognitionTests {
         let releasedHand = makeHand(indexTip: CGPoint(x: 0.5, y: 0.5), thumbTip: CGPoint(x: 0.4, y: 0.3))
         let state3 = machine.process(skeleton: releasedHand, settings: settings, timestamp: 1.15)
 
-        if case .leftClicked = state3 {
-            TestHarness.assertTrue(true, "Short pinch release emitted left click")
+        if case .leftClicked(let pt) = state3 {
+            TestHarness.assertEqual(pt.x, 0.5, accuracy: 0.001, "Short pinch release anchored left click X")
         } else {
             TestHarness.fail("Expected .leftClicked on short pinch release, got \(state3)")
         }
@@ -91,8 +92,48 @@ public struct GestureRecognitionTests {
         }
     }
 
+    private static func testOpenHandWithoutVelocityDoesNotSwipe() {
+        let history = GestureHistory()
+        let resolver = GestureConflictResolver()
+        let machine = GestureStateMachine(history: history, resolver: resolver)
+        let settings = SwipySettings()
+
+        var joints: [HandJointName: HandJoint] = [:]
+        joints[.wrist] = HandJoint(name: .wrist, x: 0.5, y: 0.2, confidence: 1.0)
+        joints[.indexMCP] = HandJoint(name: .indexMCP, x: 0.45, y: 0.4, confidence: 1.0)
+        joints[.indexPIP] = HandJoint(name: .indexPIP, x: 0.45, y: 0.6, confidence: 1.0)
+        joints[.indexTip] = HandJoint(name: .indexTip, x: 0.45, y: 0.8, confidence: 1.0)
+
+        joints[.middleMCP] = HandJoint(name: .middleMCP, x: 0.5, y: 0.4, confidence: 1.0)
+        joints[.middlePIP] = HandJoint(name: .middlePIP, x: 0.5, y: 0.6, confidence: 1.0)
+        joints[.middleTip] = HandJoint(name: .middleTip, x: 0.5, y: 0.85, confidence: 1.0)
+
+        joints[.ringMCP] = HandJoint(name: .ringMCP, x: 0.55, y: 0.4, confidence: 1.0)
+        joints[.ringPIP] = HandJoint(name: .ringPIP, x: 0.55, y: 0.6, confidence: 1.0)
+        joints[.ringTip] = HandJoint(name: .ringTip, x: 0.55, y: 0.8, confidence: 1.0)
+
+        joints[.littleMCP] = HandJoint(name: .littleMCP, x: 0.6, y: 0.4, confidence: 1.0)
+        joints[.littlePIP] = HandJoint(name: .littlePIP, x: 0.6, y: 0.55, confidence: 1.0)
+        joints[.littleTip] = HandJoint(name: .littleTip, x: 0.6, y: 0.7, confidence: 1.0)
+
+        joints[.thumbTip] = HandJoint(name: .thumbTip, x: 0.35, y: 0.4, confidence: 1.0)
+
+        let openHand = HandSkeleton(chirality: .right, joints: joints)
+
+        let s1 = machine.process(skeleton: openHand, settings: settings, timestamp: 1.0)
+        let s2 = machine.process(skeleton: openHand, settings: settings, timestamp: 1.1)
+
+        TestHarness.assertTrue(!isSwiping(s1), "Open hand frame 1 does not swipe")
+        TestHarness.assertTrue(!isSwiping(s2), "Open hand frame 2 does not swipe")
+    }
+
     private static func isPinchPending(_ state: RecognizedGestureState) -> Bool {
         if case .pinchPending = state { return true }
+        return false
+    }
+
+    private static func isSwiping(_ state: RecognizedGestureState) -> Bool {
+        if case .swiping = state { return true }
         return false
     }
 }

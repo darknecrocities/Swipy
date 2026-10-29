@@ -22,8 +22,9 @@ public final class AccessibilityPermissionManager: @unchecked Sendable {
         _ = AXIsProcessTrustedWithOptions(options)
     }
 
-    /// Opens System Settings > Privacy & Security > Accessibility.
+    /// Opens System Settings > Privacy & Security > Accessibility after triggering the system prompt.
     public func openAccessibilitySettings() {
+        promptForAccessibility()
         if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") {
             NSWorkspace.shared.open(url)
         }

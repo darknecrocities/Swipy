@@ -152,27 +152,13 @@ public final class GestureRecognizer: @unchecked Sendable {
         let mapped = coordinateMapper.mapToScreen(
             normalizedPoint: normalizedPt,
             previousPoint: previousScreenPoint,
-            screenFrame: displayFrame
+            screenFrame: displayFrame,
+            sensitivity: settings.cursorSensitivity
         )
         let smoothed = smoother.filter(point: mapped, timestamp: timestamp)
-
-        let finalPoint: CGPoint
-        if let prev = previousScreenPoint {
-            let dt = max(0.001, timestamp - (lastTimestamp ?? timestamp))
-            let delta = CGVector(dx: smoothed.x - prev.x, dy: smoothed.y - prev.y)
-            let accel = CursorAcceleration(isAdaptive: settings.isAdaptiveAcceleration, sensitivity: settings.cursorSensitivity)
-            let acceleratedDelta = accel.accelerate(delta: delta, dt: dt)
-
-            let clampedX = max(displayFrame.minX, min(displayFrame.maxX, prev.x + acceleratedDelta.dx))
-            let clampedY = max(displayFrame.minY, min(displayFrame.maxY, prev.y + acceleratedDelta.dy))
-            finalPoint = CGPoint(x: clampedX, y: clampedY)
-        } else {
-            finalPoint = smoothed
-        }
-
-        previousScreenPoint = finalPoint
+        previousScreenPoint = smoothed
         lastTimestamp = timestamp
-        return finalPoint
+        return smoothed
     }
 
     private func handleHalt() {

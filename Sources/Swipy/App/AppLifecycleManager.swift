@@ -54,6 +54,7 @@ public final class AppLifecycleManager: ObservableObject {
     @Published public var activeGesture: RecognizedGestureState = .idle
     @Published public var isCameraAuthorized: Bool = false
     @Published public var isAccessibilityTrusted: Bool = false
+    @Published public var isAccessibilityBannerDismissed: Bool = false
     @Published public var isCalibrating: Bool = false
     @Published public var showFloatingAppSwitcher: Bool = false
     @Published public var isOnboardingPresented: Bool = false

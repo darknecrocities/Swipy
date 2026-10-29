@@ -39,7 +39,7 @@ public final class GestureStateMachine: @unchecked Sendable {
         history.add(skeleton: skeleton, timestamp: timestamp)
         let indexPt = CGPoint(x: indexTip.x, y: indexTip.y)
 
-        // 1. Check for multi-finger directional swipes
+        // 1. Check for intentional multi-finger directional swipes
         if let swipeState = evaluateSwipe(skeleton: skeleton, settings: settings, timestamp: timestamp) {
             return swipeState
         }
@@ -71,17 +71,26 @@ public final class GestureStateMachine: @unchecked Sendable {
         guard isIndex && isMiddle && isRing else { return nil }
         let fingerCount = isLittle ? 4 : 3
 
+        // Require genuine physical displacement across the observation window
+        guard let disp = history.displacement(for: .wrist, windowSeconds: 0.20) else { return nil }
+        let distance = (disp.dx * disp.dx + disp.dy * disp.dy).squareRoot()
+        guard distance >= 0.14 else { return nil }
+
         guard let vel = history.velocity(for: .wrist, windowSeconds: 0.18) else { return nil }
         let speed = (vel.dx * vel.dx + vel.dy * vel.dy).squareRoot()
 
-        guard speed >= settings.swipeVelocityThreshold,
+        // 4-finger swipes require higher velocity threshold to eliminate spurious triggers from open hand gestures
+        let requiredSpeed = fingerCount == 4 ? max(2.0, settings.swipeVelocityThreshold) : max(1.6, settings.swipeVelocityThreshold)
+        guard speed >= requiredSpeed,
               resolver.canExecuteSwipe(timestamp: timestamp, cooldownMs: settings.swipeCooldownMs) else {
             return nil
         }
 
+        // Mirror X velocity to account for selfie camera orientation (dx < 0 is user swiping right)
+        let mirroredVx = -vel.dx
         let direction: SwipeDirection
-        if abs(vel.dx) > abs(vel.dy) {
-            direction = vel.dx > 0 ? .right : .left
+        if abs(mirroredVx) > abs(vel.dy) * 1.3 {
+            direction = mirroredVx > 0 ? .right : .left
         } else {
             direction = vel.dy > 0 ? .up : .down
         }
@@ -153,11 +162,12 @@ public final class GestureStateMachine: @unchecked Sendable {
             let dy = indexPt.y - startPt.y
             let dist = (dx * dx + dy * dy).squareRoot()
 
-            if isDragging || (elapsedMs > settings.dragDelayMs && dist > 0.015) {
+            if isDragging || (elapsedMs > settings.dragDelayMs && dist > 0.025) {
                 currentState = .pinching(startTime: startTime, startPoint: startPt, isDragging: true)
                 return .dragging(screenPoint: indexPt)
             } else {
-                return .pinchPending(normalizedPoint: indexPt, duration: timestamp - startTime)
+                // Lock to startPt during pinch contact so cursor stays firmly in place on target
+                return .pinchPending(normalizedPoint: startPt, duration: timestamp - startTime)
             }
         default:
             currentState = .pinching(startTime: timestamp, startPoint: indexPt, isDragging: false)
@@ -171,7 +181,7 @@ public final class GestureStateMachine: @unchecked Sendable {
         timestamp: TimeInterval
     ) -> RecognizedGestureState {
         switch currentState {
-        case .pinching(let startTime, _, let isDragging):
+        case .pinching(let startTime, let startPt, let isDragging):
             currentState = .pointing
             let durationMs = Int((timestamp - startTime) * 1000.0)
 
@@ -182,10 +192,12 @@ public final class GestureStateMachine: @unchecked Sendable {
                 let doubleClickLimit = Double(settings.doubleClickWindowMs) / 1000.0
                 if timestamp - lastClickTimestamp <= doubleClickLimit {
                     lastClickTimestamp = 0
-                    return .doubleClicked(screenPoint: indexPt)
+                    // Anchor click precisely at point where pinch was initiated
+                    return .doubleClicked(screenPoint: startPt)
                 } else {
                     lastClickTimestamp = timestamp
-                    return .leftClicked(screenPoint: indexPt)
+                    // Anchor click precisely at point where pinch was initiated
+                    return .leftClicked(screenPoint: startPt)
                 }
             }
             return .pointing(normalizedPoint: indexPt)

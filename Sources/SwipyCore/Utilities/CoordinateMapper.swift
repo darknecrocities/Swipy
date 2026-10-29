@@ -1,7 +1,7 @@
 import Foundation
 import CoreGraphics
 
-/// Maps normalized camera coordinate spaces into macOS screen coordinate space.
+/// Maps normalized camera coordinate spaces into macOS screen coordinate space with front-facing webcam mirroring.
 public struct CoordinateMapper: Sendable {
     public var activeRegion: CGRect
     public var deadZoneRadius: Double
@@ -18,13 +18,20 @@ public struct CoordinateMapper: Sendable {
     }
 
     /// Maps normalized Vision coordinates (0..1, origin bottom-left) to a target screen frame.
+    /// - Parameters:
+    ///   - normalizedPoint: Hand coordinate from Apple Vision framework (0..1).
+    ///   - previousPoint: Previous screen point for micro-deadzone stability.
+    ///   - screenFrame: Target display bounds in Core Graphics points.
+    ///   - sensitivity: Movement amplification factor around screen center (default: 1.0).
     public func mapToScreen(
         normalizedPoint: CGPoint,
         previousPoint: CGPoint?,
-        screenFrame: CGRect
+        screenFrame: CGRect,
+        sensitivity: Double = 1.0
     ) -> CGPoint {
-        // Invert Y because Vision uses bottom-left origin while screen uses top-left origin
-        let visionX = Double(normalizedPoint.x)
+        // Mirror X for selfie webcam so hand moving to user's right moves cursor right.
+        // Invert Y because Vision uses bottom-left origin while screen uses top-left origin.
+        let visionX = 1.0 - Double(normalizedPoint.x)
         let visionY = 1.0 - Double(normalizedPoint.y)
 
         // Sub-region clamping & expansion
@@ -33,15 +40,19 @@ public struct CoordinateMapper: Sendable {
         let regionWidth = max(0.01, Double(activeRegion.size.width))
         let regionHeight = max(0.01, Double(activeRegion.size.height))
 
-        var rawU = (visionX - regionMinX) / regionWidth
-        var rawV = (visionY - regionMinY) / regionHeight
+        let rawU = (visionX - regionMinX) / regionWidth
+        let rawV = (visionY - regionMinY) / regionHeight
+
+        // Apply center-scaled sensitivity expansion
+        var scaledU = (rawU - 0.5) * sensitivity + 0.5
+        var scaledV = (rawV - 0.5) * sensitivity + 0.5
 
         // Apply edge overscan to guarantee corners & dock are easily reachable
-        rawU = (rawU - 0.5) * (1.0 + overscanMargin * 2.0) + 0.5
-        rawV = (rawV - 0.5) * (1.0 + overscanMargin * 2.0) + 0.5
+        scaledU = (scaledU - 0.5) * (1.0 + overscanMargin * 2.0) + 0.5
+        scaledV = (scaledV - 0.5) * (1.0 + overscanMargin * 2.0) + 0.5
 
-        let u = max(0.0, min(1.0, rawU))
-        let v = max(0.0, min(1.0, rawV))
+        let u = max(0.0, min(1.0, scaledU))
+        let v = max(0.0, min(1.0, scaledV))
 
         let targetX = Double(screenFrame.origin.x) + u * Double(screenFrame.size.width)
         let targetY = Double(screenFrame.origin.y) + v * Double(screenFrame.size.height)

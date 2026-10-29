@@ -54,6 +54,8 @@ cat << 'EOF' > "${CONTENTS_DIR}/Info.plist"
     <true/>
     <key>NSCameraUsageDescription</key>
     <string>Swipy requires camera access to detect hand gestures for touchless cursor control. Video frames are processed entirely on-device in real time and are never recorded or transmitted.</string>
+    <key>NSAccessibilityUsageDescription</key>
+    <string>Swipy requires accessibility access to move the macOS system cursor and perform clicks across applications.</string>
 </dict>
 </plist>
 EOF
