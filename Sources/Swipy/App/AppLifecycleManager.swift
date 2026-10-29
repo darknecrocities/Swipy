@@ -76,6 +76,19 @@ public final class AppLifecycleManager: ObservableObject {
         setupSystemActionBindings()
         setupCameraPipeline()
         startTelemetryTimer()
+        setupAppActivationObserver()
+    }
+
+    private func setupAppActivationObserver() {
+        NotificationCenter.default.addObserver(
+            forName: NSApplication.didBecomeActiveNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in
+                self?.refreshPermissions()
+            }
+        }
     }
 
     private func setupSystemActionBindings() {
@@ -197,16 +210,32 @@ public final class AppLifecycleManager: ObservableObject {
         activeGesture = .idle
     }
 
+    /// Polls and updates current system privacy permissions in real time.
+    @MainActor
+    public func refreshPermissions() {
+        let cameraOk = CameraPermissionManager.shared.isAuthorized
+        let accessibilityOk = AccessibilityPermissionManager.shared.isTrusted
+
+        self.isCameraAuthorized = cameraOk
+        self.isAccessibilityTrusted = accessibilityOk
+
+        // Automatically start or recover tracking session if user enabled it and permissions just cleared
+        if cameraOk && accessibilityOk && settings.isTrackingEnabled && !settings.isPaused && trackingState != .tracking {
+            startTrackingSession()
+        }
+    }
+
     private func startTelemetryTimer() {
-        telemetryTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
+        let timer = Timer(timeInterval: 0.5, repeats: true) { [weak self] _ in
             guard let self = self else { return }
             Task { @MainActor in
+                self.refreshPermissions()
                 self.currentFPS = DiagnosticsLogger.shared.currentFPS
                 self.currentInferenceMs = DiagnosticsLogger.shared.averageInferenceMs
-                self.isAccessibilityTrusted = AccessibilityPermissionManager.shared.isTrusted
-                self.isCameraAuthorized = CameraPermissionManager.shared.isAuthorized
             }
         }
+        RunLoop.main.add(timer, forMode: .common)
+        self.telemetryTimer = timer
     }
 
     /// Applies and persists a new profile preset.

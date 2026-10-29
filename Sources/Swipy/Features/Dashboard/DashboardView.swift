@@ -16,6 +16,7 @@ public struct DashboardView: View {
                 headerBar
                 permissionAlerts
                 masterHeroCard
+                DashboardLiveCameraCard(appState: appState)
 
                 // 2-Column Responsive Control Grid
                 HStack(alignment: .top, spacing: 16) {
@@ -123,16 +124,30 @@ public struct DashboardView: View {
                     .foregroundColor(Color(hex: "777777"))
             }
             Spacer()
-            Button(action: action) {
-                Text(buttonText)
-                    .font(.system(size: 11, weight: .medium))
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(Color(hex: "171717"))
-                    .foregroundColor(.white)
-                    .cornerRadius(6)
+            HStack(spacing: 8) {
+                Button(action: action) {
+                    Text(buttonText)
+                        .font(.system(size: 11, weight: .medium))
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(Color(hex: "171717"))
+                        .foregroundColor(.white)
+                        .cornerRadius(6)
+                }
+                .buttonStyle(.plain)
+
+                Button(action: { appState.refreshPermissions() }) {
+                    Text("Refresh")
+                        .font(.system(size: 11, weight: .medium))
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(Color.white)
+                        .foregroundColor(Color(hex: "171717"))
+                        .cornerRadius(6)
+                        .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color(hex: "EAEAEA"), lineWidth: 1))
+                }
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
         }
         .padding(14)
         .background(Color(hex: "FAFAFA"))
@@ -154,6 +169,23 @@ public struct DashboardView: View {
                         .foregroundColor(Color(hex: "777777"))
                 }
                 Spacer()
+
+                Button(action: { appState.toggleTracking() }) {
+                    HStack(spacing: 6) {
+                        Image(systemName: appState.settings.isTrackingEnabled ? "stop.fill" : "play.fill")
+                            .font(.system(size: 11))
+                        Text(appState.settings.isTrackingEnabled ? "Stop Tracking" : "Start Tracking")
+                            .font(.system(size: 12, weight: .semibold))
+                    }
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 7)
+                    .background(appState.settings.isTrackingEnabled ? Color(hex: "FAFAFA") : Color(hex: "171717"))
+                    .foregroundColor(appState.settings.isTrackingEnabled ? Color(hex: "171717") : .white)
+                    .cornerRadius(8)
+                    .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(hex: "EAEAEA"), lineWidth: 1))
+                }
+                .buttonStyle(.plain)
+
                 Toggle("", isOn: Binding(
                     get: { appState.settings.isTrackingEnabled },
                     set: { _ in appState.toggleTracking() }

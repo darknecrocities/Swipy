@@ -8,9 +8,11 @@ public final class AccessibilityPermissionManager: @unchecked Sendable {
 
     public init() {}
 
-    /// Checks if the process is trusted for accessibility.
+    /// Checks if the process is trusted for accessibility (forcing a fresh non-cached TCC query).
     public var isTrusted: Bool {
-        AXIsProcessTrusted()
+        let promptKey = "AXTrustedCheckOptionPrompt" as CFString
+        let options = [promptKey: false] as CFDictionary
+        return AXIsProcessTrustedWithOptions(options)
     }
 
     /// Prompts the user to grant accessibility permission in System Settings.

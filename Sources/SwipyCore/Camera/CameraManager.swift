@@ -21,6 +21,11 @@ public final class CameraManager: NSObject, CameraFrameProvider, @unchecked Send
         return _isRunning
     }
 
+    /// Provides access to the underlying AVCaptureSession for live video rendering layers.
+    public var session: AVCaptureSession {
+        captureSession
+    }
+
     public override init() {
         super.init()
     }
