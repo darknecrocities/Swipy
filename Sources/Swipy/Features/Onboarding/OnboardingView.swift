@@ -51,9 +51,7 @@ public struct OnboardingView: View {
 
     private var welcomeStep: some View {
         VStack(spacing: 12) {
-            Image(systemName: "hand.point.up.left.fill")
-                .font(.system(size: 40))
-                .foregroundColor(Color(hex: "171717"))
+            SwipyLogoView(size: 64, showShadow: true)
             Text("Welcome to Swipy")
                 .font(.system(size: 22, weight: .bold))
             Text("Your hands. Your Mac. No touch required.\nTransform your built-in camera into a touchless trackpad.")

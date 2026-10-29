@@ -39,13 +39,53 @@ struct SwipyApp: App {
     }
 
     private var sidebarView: some View {
-        List(NavigationSection.allCases, selection: $appState.selectedNav) { section in
-            Label(section.rawValue, systemImage: section.icon)
-                .tag(section)
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(spacing: 10) {
+                SwipyLogoView(size: 26, showShadow: true)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text("Swipy")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(Color(hex: "171717"))
+                    Text("v1.0.0")
+                        .font(.system(size: 10, weight: .medium, design: .monospaced))
+                        .foregroundColor(Color(hex: "999999"))
+                }
+                Spacer()
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 14)
+            .padding(.bottom, 12)
+
+            Divider().background(Color(hex: "F0F0F0"))
+
+            List(NavigationSection.allCases, selection: $appState.selectedNav) { section in
+                Label(section.rawValue, systemImage: section.icon)
+                    .font(.system(size: 13, weight: .medium))
+                    .tag(section)
+            }
+            .listStyle(.sidebar)
+
+            Spacer()
+
+            sidebarStatusFooter
         }
-        .listStyle(.sidebar)
-        .navigationTitle("Swipy")
-        .frame(minWidth: 180)
+        .frame(minWidth: 200)
+    }
+
+    private var sidebarStatusFooter: some View {
+        HStack(spacing: 8) {
+            Circle()
+                .fill(appState.settings.isTrackingEnabled ? Color.green : Color.orange)
+                .frame(width: 8, height: 8)
+            Text(appState.settings.isTrackingEnabled ? "Tracking Active" : "Paused")
+                .font(.system(size: 11, weight: .medium))
+                .foregroundColor(Color(hex: "777777"))
+            Spacer()
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(Color(hex: "FAFAFA"))
+        .overlay(Rectangle().frame(height: 1).foregroundColor(Color(hex: "F0F0F0")), alignment: .top)
     }
 
     @ViewBuilder

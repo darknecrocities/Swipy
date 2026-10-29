@@ -16,6 +16,12 @@ mkdir -p "${MACOS_DIR}"
 mkdir -p "${RESOURCES_DIR}"
 
 cp ".build/release/${APP_NAME}" "${MACOS_DIR}/${APP_NAME}"
+if [ -f "Resources/AppIcon.icns" ]; then
+    cp "Resources/AppIcon.icns" "${RESOURCES_DIR}/AppIcon.icns"
+fi
+if [ -f "Resources/AppLogo.png" ]; then
+    cp "Resources/AppLogo.png" "${RESOURCES_DIR}/AppLogo.png"
+fi
 
 cat << 'EOF' > "${CONTENTS_DIR}/Info.plist"
 <?xml version="1.0" encoding="UTF-8"?>
@@ -26,6 +32,8 @@ cat << 'EOF' > "${CONTENTS_DIR}/Info.plist"
     <string>en</string>
     <key>CFBundleExecutable</key>
     <string>Swipy</string>
+    <key>CFBundleIconFile</key>
+    <string>AppIcon</string>
     <key>CFBundleIdentifier</key>
     <string>com.swipy.Swipy</string>
     <key>CFBundleInfoDictionaryVersion</key>

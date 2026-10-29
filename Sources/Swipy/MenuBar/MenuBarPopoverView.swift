@@ -34,9 +34,10 @@ public struct MenuBarPopoverView: View {
     }
 
     private var headerRow: some View {
-        HStack {
+        HStack(spacing: 8) {
+            SwipyLogoView(size: 20)
             Text("Swipy")
-                .font(.system(size: 16, weight: .bold))
+                .font(.system(size: 15, weight: .bold))
                 .foregroundColor(Color(hex: "171717"))
             Spacer()
             Toggle("", isOn: Binding(
