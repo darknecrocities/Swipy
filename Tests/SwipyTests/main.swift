@@ -6,19 +6,19 @@ print("==================================================")
 
 let startTime = CFAbsoluteTimeGetCurrent()
 
-print("\n[1/6] Running CoordinateMapperTests...")
+print("\n[1/7] Running CoordinateMapperTests...")
 CoordinateMapperTests.run()
 
-print("\n[2/6] Running HandPoseMappingTests...")
+print("\n[2/7] Running HandPoseMappingTests...")
 HandPoseMappingTests.run()
 
-print("\n[3/6] Running GestureRecognitionTests...")
+print("\n[3/7] Running GestureRecognitionTests...")
 GestureRecognitionTests.run()
 
-print("\n[4/6] Running MotionSmootherTests...")
+print("\n[4/7] Running MotionSmootherTests...")
 MotionSmootherTests.run()
 
-print("\n[5/6] Running SettingsTests...")
+print("\n[5/7] Running SettingsTests...")
 SettingsTests.run()
 
 print("\n[6/7] Running CursorAccelerationTests...")

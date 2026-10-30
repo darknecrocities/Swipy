@@ -11,13 +11,10 @@ public final class AppDelegate: NSObject, NSApplicationDelegate {
         MenuBarController.shared.setupStatusItem(
             appState: appState,
             onOpenDashboard: {
-                NSApp.activate(ignoringOtherApps: true)
-                if let window = NSApp.windows.first {
-                    window.makeKeyAndOrderFront(nil)
-                }
+                appState.openDashboard()
             },
             onOpenCalibration: {
-                appState.isCalibrating = true
+                appState.openCalibration()
             }
         )
 
@@ -29,6 +26,11 @@ public final class AppDelegate: NSObject, NSApplicationDelegate {
                 }
             }
         }
+    }
+
+    public func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        AppLifecycleManager.shared.openDashboard()
+        return true
     }
 
     public func applicationWillTerminate(_ notification: Notification) {

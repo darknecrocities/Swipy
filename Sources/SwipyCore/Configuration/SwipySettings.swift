@@ -68,7 +68,7 @@ public struct SwipySettings: Codable, Equatable, Sendable {
         activeRegionWidth: Double = 0.70,
         activeRegionHeight: Double = 0.70,
         pointer: PointerSettings = PointerSettings(),
-        pinchThreshold: Double = 0.048,
+        pinchThreshold: Double = 0.32,
         dragDelayMs: Int = 250,
         doubleClickWindowMs: Int = 380,
         scrollSpeed: Double = 1.0,

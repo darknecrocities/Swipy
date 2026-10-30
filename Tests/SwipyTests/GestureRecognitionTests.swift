@@ -5,9 +5,13 @@ import SwipyCore
 @MainActor
 public struct GestureRecognitionTests {
     public static func run() {
+        testFingerPoseClassification()
         testPointingState()
         testPinchToClick()
+        testLongPinchWithoutDragRegistersClick()
         testPinchHeldWithMotionTriggersDrag()
+        testFistRejectedAsIdle()
+        testTwoFingerScroll()
         testOpenHandWithoutVelocityDoesNotSwipe()
     }
 
@@ -33,6 +37,14 @@ public struct GestureRecognitionTests {
         return HandSkeleton(chirality: .right, joints: joints)
     }
 
+    private static func testFingerPoseClassification() {
+        let hand1 = makeHand(indexTip: CGPoint(x: 0.5, y: 0.6), thumbTip: CGPoint(x: 0.3, y: 0.3), isMiddleExtended: false)
+        TestHarness.assertEqual(hand1.fingerPoseState, .oneFinger, "Index only extended is .oneFinger")
+
+        let hand2 = makeHand(indexTip: CGPoint(x: 0.5, y: 0.6), thumbTip: CGPoint(x: 0.3, y: 0.3), isMiddleExtended: true)
+        TestHarness.assertEqual(hand2.fingerPoseState, .twoFingers, "Index and middle extended is .twoFingers")
+    }
+
     private static func testPointingState() {
         let history = GestureHistory()
         let resolver = GestureConflictResolver()
@@ -54,7 +66,7 @@ public struct GestureRecognitionTests {
         let history = GestureHistory()
         let resolver = GestureConflictResolver()
         let machine = GestureStateMachine(history: history, resolver: resolver)
-        let settings = SwipySettings(pinchThreshold: 0.05, dragDelayMs: 250)
+        let settings = SwipySettings(pinchThreshold: 0.32, dragDelayMs: 250)
 
         let pinchedHand = makeHand(indexTip: CGPoint(x: 0.5, y: 0.5), thumbTip: CGPoint(x: 0.51, y: 0.5))
         let state1 = machine.process(skeleton: pinchedHand, settings: settings, timestamp: 1.0)
@@ -73,11 +85,81 @@ public struct GestureRecognitionTests {
         }
     }
 
+    private static func testLongPinchWithoutDragRegistersClick() {
+        let history = GestureHistory()
+        let resolver = GestureConflictResolver()
+        let machine = GestureStateMachine(history: history, resolver: resolver)
+        let settings = SwipySettings(pinchThreshold: 0.32, dragDelayMs: 250)
+
+        let pinchedHand = makeHand(indexTip: CGPoint(x: 0.5, y: 0.5), thumbTip: CGPoint(x: 0.51, y: 0.5))
+        _ = machine.process(skeleton: pinchedHand, settings: settings, timestamp: 1.0)
+
+        // Held for 400ms without dragging (dist = 0)
+        _ = machine.process(skeleton: pinchedHand, settings: settings, timestamp: 1.40)
+
+        let releasedHand = makeHand(indexTip: CGPoint(x: 0.5, y: 0.5), thumbTip: CGPoint(x: 0.4, y: 0.3))
+        let releaseState = machine.process(skeleton: releasedHand, settings: settings, timestamp: 1.45)
+
+        if case .leftClicked(let pt) = releaseState {
+            TestHarness.assertEqual(pt.x, 0.5, accuracy: 0.001, "Long pinch release executes left click without drop")
+        } else {
+            TestHarness.fail("Expected .leftClicked on long pinch release without drag, got \(releaseState)")
+        }
+    }
+
+    private static func testFistRejectedAsIdle() {
+        let history = GestureHistory()
+        let resolver = GestureConflictResolver()
+        let machine = GestureStateMachine(history: history, resolver: resolver)
+        let settings = SwipySettings()
+
+        // Hand where all fingertips are curled towards wrist
+        var joints: [HandJointName: HandJoint] = [:]
+        joints[.wrist] = HandJoint(name: .wrist, x: 0.5, y: 0.1, confidence: 1.0)
+        joints[.indexMCP] = HandJoint(name: .indexMCP, x: 0.5, y: 0.2, confidence: 1.0)
+        joints[.indexPIP] = HandJoint(name: .indexPIP, x: 0.5, y: 0.25, confidence: 1.0)
+        joints[.indexTip] = HandJoint(name: .indexTip, x: 0.5, y: 0.15, confidence: 1.0) // curled below PIP
+
+        joints[.middleMCP] = HandJoint(name: .middleMCP, x: 0.6, y: 0.2, confidence: 1.0)
+        joints[.middlePIP] = HandJoint(name: .middlePIP, x: 0.6, y: 0.25, confidence: 1.0)
+        joints[.middleTip] = HandJoint(name: .middleTip, x: 0.6, y: 0.15, confidence: 1.0)
+
+        joints[.thumbTip] = HandJoint(name: .thumbTip, x: 0.45, y: 0.2, confidence: 1.0)
+
+        let fist = HandSkeleton(chirality: .right, joints: joints)
+        let state = machine.process(skeleton: fist, settings: settings, timestamp: 1.0)
+
+        if case .idle = state {
+            TestHarness.assertTrue(true, "Fist posture recognized as .idle")
+        } else {
+            TestHarness.fail("Expected .idle for fist posture, got \(state)")
+        }
+    }
+
+    private static func testTwoFingerScroll() {
+        let history = GestureHistory()
+        let resolver = GestureConflictResolver()
+        let machine = GestureStateMachine(history: history, resolver: resolver)
+        let settings = SwipySettings()
+
+        let scrollHand1 = makeHand(indexTip: CGPoint(x: 0.5, y: 0.6), thumbTip: CGPoint(x: 0.3, y: 0.3), isMiddleExtended: true)
+        _ = machine.process(skeleton: scrollHand1, settings: settings, timestamp: 1.0)
+
+        let scrollHand2 = makeHand(indexTip: CGPoint(x: 0.5, y: 0.65), thumbTip: CGPoint(x: 0.3, y: 0.3), isMiddleExtended: true)
+        let s2 = machine.process(skeleton: scrollHand2, settings: settings, timestamp: 1.05)
+
+        if case .scrolling(let dy, _) = s2 {
+            TestHarness.assertEqual(dy, 0.05, accuracy: 0.001, "Two finger scroll delta Y")
+        } else {
+            TestHarness.fail("Expected .scrolling state, got \(s2)")
+        }
+    }
+
     private static func testPinchHeldWithMotionTriggersDrag() {
         let history = GestureHistory()
         let resolver = GestureConflictResolver()
         let machine = GestureStateMachine(history: history, resolver: resolver)
-        let settings = SwipySettings(pinchThreshold: 0.05, dragDelayMs: 200)
+        let settings = SwipySettings(pinchThreshold: 0.32, dragDelayMs: 200)
 
         let initialHand = makeHand(indexTip: CGPoint(x: 0.5, y: 0.5), thumbTip: CGPoint(x: 0.51, y: 0.5))
         _ = machine.process(skeleton: initialHand, settings: settings, timestamp: 1.0)

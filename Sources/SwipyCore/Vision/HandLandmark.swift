@@ -68,6 +68,15 @@ public enum Finger: String, CaseIterable, Sendable {
     case little
 }
 
+/// High-level discrete classification of the number of extended fingers for deterministic gesture gating.
+public enum ExtendedFingerState: String, Codable, CaseIterable, Sendable {
+    case zeroFingers = "Fist (Idle)"
+    case oneFinger   = "1 Finger (Pointer)"
+    case twoFingers  = "2 Fingers (Scroll)"
+    case threeFingers = "3 Fingers (Spaces)"
+    case fourFingers = "4 Fingers (Open Palm)"
+}
+
 /// Complete normalized representation of a single recognized hand.
 public struct HandSkeleton: Codable, Equatable, Sendable {
     public let chirality: HandChirality
@@ -93,6 +102,44 @@ public struct HandSkeleton: Codable, Equatable, Sendable {
     public func distance(between first: HandJointName, and second: HandJointName) -> Double? {
         guard let p1 = joints[first], let p2 = joints[second] else { return nil }
         return p1.distance(to: p2)
+    }
+
+    /// Anatomical palm scale: rigid distance from wrist to base of middle finger (metacarpal bone reference).
+    public var palmScale: Double {
+        guard let wrist = joints[.wrist], let middleMCP = joints[.middleMCP] else { return 0.20 }
+        return max(0.05, wrist.distance(to: middleMCP))
+    }
+
+    /// Scale-invariant pinch ratio (distance between thumb and index tips divided by rigid palm length).
+    public var pinchRatio: Double {
+        guard let dist = distance(between: .thumbTip, and: .indexTip) else { return 1.0 }
+        return dist / palmScale
+    }
+
+    /// Scale-invariant middle-finger pinch ratio for secondary / right clicks.
+    public var middlePinchRatio: Double {
+        guard let dist = distance(between: .thumbTip, and: .middleTip) else { return 1.0 }
+        return dist / palmScale
+    }
+
+    /// Evaluates which non-thumb fingers are extended to classify the macro gesture mode.
+    public var fingerPoseState: ExtendedFingerState {
+        let isIndex = isFingerExtended(.index)
+        let isMiddle = isFingerExtended(.middle)
+        let isRing = isFingerExtended(.ring)
+        let isLittle = isFingerExtended(.little)
+
+        if isIndex && isMiddle && isRing && isLittle {
+            return .fourFingers
+        } else if isIndex && isMiddle && isRing {
+            return .threeFingers
+        } else if isIndex && isMiddle && !isRing && !isLittle {
+            return .twoFingers
+        } else if isIndex && !isRing && !isLittle {
+            return .oneFinger
+        } else {
+            return .zeroFingers
+        }
     }
 
     /// Evaluates whether a given finger is extended based on joint hierarchy geometry.

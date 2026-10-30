@@ -108,18 +108,32 @@ public struct DashboardLiveCameraCard: View {
     }
 
     private var telemetryBadge: some View {
-        HStack(spacing: 6) {
-            Circle()
-                .fill(Color.green)
-                .frame(width: 6, height: 6)
-            Text(String(format: "30 FPS • %.1f ms", appState.currentInferenceMs))
-                .font(.system(size: 10, weight: .semibold, design: .monospaced))
-                .foregroundColor(.white)
+        HStack(spacing: 8) {
+            HStack(spacing: 6) {
+                Circle()
+                    .fill(Color.green)
+                    .frame(width: 6, height: 6)
+                Text(String(format: "30 FPS • %.1f ms", appState.currentInferenceMs))
+                    .font(.system(size: 10, weight: .semibold, design: .monospaced))
+                    .foregroundColor(.white)
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(Color.black.opacity(0.65))
+            .cornerRadius(6)
+
+            if let hand = appState.primaryHand {
+                HStack(spacing: 4) {
+                    Text(hand.fingerPoseState.rawValue)
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundColor(.white)
+                }
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(Color.black.opacity(0.65))
+                .cornerRadius(6)
+            }
         }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 4)
-        .background(Color.black.opacity(0.65))
-        .cornerRadius(6)
     }
 
     private func skeletonOverlay(skeleton: HandSkeleton) -> some View {

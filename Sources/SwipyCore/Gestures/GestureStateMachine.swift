@@ -39,38 +39,48 @@ public final class GestureStateMachine: @unchecked Sendable {
         history.add(skeleton: skeleton, timestamp: timestamp)
         let indexPt = CGPoint(x: indexTip.x, y: indexTip.y)
 
-        // 1. Check for intentional multi-finger directional swipes
-        if let swipeState = evaluateSwipe(skeleton: skeleton, settings: settings, timestamp: timestamp) {
-            return swipeState
-        }
+        // Deterministic gating based on discrete finger extension count
+        switch skeleton.fingerPoseState {
+        case .zeroFingers:
+            // Fist / resting hand: neutralize state and reject accidental gestures
+            if case .pinching = currentState {
+                currentState = .idle
+            }
+            return .idle
 
-        // 2. Check for two-finger scrolling
-        if let scrollState = evaluateScroll(skeleton: skeleton, currentPt: indexPt) {
-            return scrollState
-        }
+        case .fourFingers:
+            // Open palm: check for rapid 4-finger application switch swipe
+            if let swipe = evaluateSwipe(skeleton: skeleton, settings: settings, timestamp: timestamp, fingerCount: 4) {
+                return swipe
+            }
+            return .idle
 
-        // 3. Check for thumb-middle pinch (Right Click)
-        if let rightClick = evaluateRightClick(skeleton: skeleton, settings: settings) {
-            return rightClick
-        }
+        case .threeFingers:
+            // 3 fingers: evaluate Spaces navigation and Mission Control flicks
+            if let swipe = evaluateSwipe(skeleton: skeleton, settings: settings, timestamp: timestamp, fingerCount: 3) {
+                return swipe
+            }
+            return .idle
 
-        // 4. Check for thumb-index pinch (Click & Drag)
-        return evaluatePinchAndPoint(skeleton: skeleton, indexPt: indexPt, settings: settings, timestamp: timestamp)
+        case .twoFingers:
+            // 2 fingers: evaluate Right Click or smooth 2-finger scrolling (cursor locked)
+            if let rightClick = evaluateRightClick(skeleton: skeleton, settings: settings) {
+                return rightClick
+            }
+            return evaluateScroll(skeleton: skeleton, currentPt: indexPt)
+
+        case .oneFinger:
+            // 1 finger (Index only): precision pointer glide, pinch-to-click, and drag
+            return evaluatePinchAndPoint(skeleton: skeleton, indexPt: indexPt, settings: settings, timestamp: timestamp)
+        }
     }
 
     private func evaluateSwipe(
         skeleton: HandSkeleton,
         settings: SwipySettings,
-        timestamp: TimeInterval
+        timestamp: TimeInterval,
+        fingerCount: Int
     ) -> RecognizedGestureState? {
-        let isIndex = skeleton.isFingerExtended(.index)
-        let isMiddle = skeleton.isFingerExtended(.middle)
-        let isRing = skeleton.isFingerExtended(.ring)
-        let isLittle = skeleton.isFingerExtended(.little)
-
-        guard isIndex && isMiddle && isRing else { return nil }
-        let fingerCount = isLittle ? 4 : 3
-
         // Require genuine physical displacement across the observation window
         guard let disp = history.displacement(for: .wrist, windowSeconds: 0.20) else { return nil }
         let distance = (disp.dx * disp.dx + disp.dy * disp.dy).squareRoot()
@@ -79,8 +89,7 @@ public final class GestureStateMachine: @unchecked Sendable {
         guard let vel = history.velocity(for: .wrist, windowSeconds: 0.18) else { return nil }
         let speed = (vel.dx * vel.dx + vel.dy * vel.dy).squareRoot()
 
-        // 4-finger swipes require higher velocity threshold to eliminate spurious triggers from open hand gestures
-        let requiredSpeed = fingerCount == 4 ? max(2.0, settings.swipeVelocityThreshold) : max(1.6, settings.swipeVelocityThreshold)
+        let requiredSpeed = fingerCount == 4 ? max(2.0, settings.swipeVelocityThreshold) : max(1.5, settings.swipeVelocityThreshold)
         guard speed >= requiredSpeed,
               resolver.canExecuteSwipe(timestamp: timestamp, cooldownMs: settings.swipeCooldownMs) else {
             return nil
@@ -98,20 +107,7 @@ public final class GestureStateMachine: @unchecked Sendable {
         return .swiping(direction: direction, fingers: fingerCount)
     }
 
-    private func evaluateScroll(skeleton: HandSkeleton, currentPt: CGPoint) -> RecognizedGestureState? {
-        let isIndex = skeleton.isFingerExtended(.index)
-        let isMiddle = skeleton.isFingerExtended(.middle)
-        let isRing = skeleton.isFingerExtended(.ring)
-        let isLittle = skeleton.isFingerExtended(.little)
-
-        // Two fingers extended, other two curled
-        guard isIndex && isMiddle && !isRing && !isLittle else {
-            if case .scrolling = currentState {
-                currentState = .idle
-            }
-            return nil
-        }
-
+    private func evaluateScroll(skeleton: HandSkeleton, currentPt: CGPoint) -> RecognizedGestureState {
         switch currentState {
         case .scrolling(let lastPt):
             let dy = Double(currentPt.y - lastPt.y)
@@ -125,13 +121,11 @@ public final class GestureStateMachine: @unchecked Sendable {
     }
 
     private func evaluateRightClick(skeleton: HandSkeleton, settings: SwipySettings) -> RecognizedGestureState? {
-        guard let dist = skeleton.distance(between: .thumbTip, and: .middleTip),
-              dist < settings.pinchThreshold,
-              !skeleton.isFingerExtended(.middle) else {
-            return nil
+        if skeleton.middlePinchRatio <= settings.pinchThreshold {
+            let indexPt = skeleton[.indexTip].map { CGPoint(x: $0.x, y: $0.y) } ?? .zero
+            return .rightClicked(screenPoint: indexPt)
         }
-        let indexPt = skeleton[.indexTip].map { CGPoint(x: $0.x, y: $0.y) } ?? .zero
-        return .rightClicked(screenPoint: indexPt)
+        return nil
     }
 
     private func evaluatePinchAndPoint(
@@ -140,8 +134,8 @@ public final class GestureStateMachine: @unchecked Sendable {
         settings: SwipySettings,
         timestamp: TimeInterval
     ) -> RecognizedGestureState {
-        let pinchDist = skeleton.distance(between: .thumbTip, and: .indexTip) ?? 1.0
-        let isPinched = resolver.resolvePinch(distance: pinchDist, baseThreshold: settings.pinchThreshold)
+        // Anatomical palm-scale invariant pinch ratio
+        let isPinched = resolver.resolvePinch(distance: skeleton.pinchRatio, baseThreshold: settings.pinchThreshold)
 
         if isPinched {
             return handlePinchActive(indexPt: indexPt, settings: settings, timestamp: timestamp)
@@ -162,11 +156,12 @@ public final class GestureStateMachine: @unchecked Sendable {
             let dy = indexPt.y - startPt.y
             let dist = (dx * dx + dy * dy).squareRoot()
 
+            // Transition to drag when moved past threshold or held with motion
             if isDragging || (elapsedMs > settings.dragDelayMs && dist > 0.025) {
                 currentState = .pinching(startTime: startTime, startPoint: startPt, isDragging: true)
                 return .dragging(screenPoint: indexPt)
             } else {
-                // Lock to startPt during pinch contact so cursor stays firmly in place on target
+                // Stabilize cursor firmly on target icon during pinch contact
                 return .pinchPending(normalizedPoint: startPt, duration: timestamp - startTime)
             }
         default:
@@ -181,26 +176,23 @@ public final class GestureStateMachine: @unchecked Sendable {
         timestamp: TimeInterval
     ) -> RecognizedGestureState {
         switch currentState {
-        case .pinching(let startTime, let startPt, let isDragging):
+        case .pinching(_, let startPt, let isDragging):
             currentState = .pointing
-            let durationMs = Int((timestamp - startTime) * 1000.0)
 
             if isDragging {
                 // Drag ended; released without triggering click
                 return .pointing(normalizedPoint: indexPt)
-            } else if durationMs < settings.dragDelayMs {
+            } else {
+                // Guaranteed click on release of any stationary pinch (fixes dropped click bug)
                 let doubleClickLimit = Double(settings.doubleClickWindowMs) / 1000.0
                 if timestamp - lastClickTimestamp <= doubleClickLimit {
                     lastClickTimestamp = 0
-                    // Anchor click precisely at point where pinch was initiated
                     return .doubleClicked(screenPoint: startPt)
                 } else {
                     lastClickTimestamp = timestamp
-                    // Anchor click precisely at point where pinch was initiated
                     return .leftClicked(screenPoint: startPt)
                 }
             }
-            return .pointing(normalizedPoint: indexPt)
 
         default:
             currentState = .pointing

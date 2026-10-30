@@ -41,6 +41,11 @@ struct SwipyApp: App {
                     .transition(.opacity)
                 }
             }
+            .background(
+                MainWindowAccessor { window in
+                    appState.mainWindow = window
+                }
+            )
         }
         .windowStyle(.titleBar)
         .windowToolbarStyle(.unified)

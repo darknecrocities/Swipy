@@ -61,6 +61,8 @@ public final class AppLifecycleManager: ObservableObject {
     @Published public var selectedNav: NavigationSection = .dashboard
     @Published public var practiceClickCount: Int = 0
 
+    public weak var mainWindow: NSWindow?
+
     private let cameraManager = CameraManager.shared
     private let visionService = HandPoseService()
     private let gestureRecognizer = GestureRecognizer.shared
@@ -244,5 +246,23 @@ public final class AppLifecycleManager: ObservableObject {
         settings.applyProfile(profile)
         settings.save()
         updateCachedSettings(settings)
+    }
+
+    /// Restores, activates, and presents the main Dashboard window.
+    public func openDashboard() {
+        NSApp.activate(ignoringOtherApps: true)
+        selectedNav = .dashboard
+        if let window = mainWindow ?? NSApp.windows.first(where: { !($0 is NSPanel) && $0.canBecomeMain }) {
+            window.setIsVisible(true)
+            window.deminiaturize(nil)
+            window.makeKeyAndOrderFront(nil)
+            window.orderFrontRegardless()
+        }
+    }
+
+    /// Restores the main window and launches the bounds calibration sheet.
+    public func openCalibration() {
+        openDashboard()
+        isCalibrating = true
     }
 }

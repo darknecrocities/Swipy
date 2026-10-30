@@ -12,12 +12,12 @@ public struct SettingsGesturesTab: View {
     public var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             SettingsSliderRow(
-                title: "Pinch Activation Distance",
-                subtitle: "Maximum distance between thumb and index finger to trigger a click.",
+                title: "Pinch Sensitivity Ratio",
+                subtitle: "Scale-invariant ratio between fingertip contact and rigid palm length (0.32 recommended).",
                 value: $appState.settings.pinchThreshold,
-                range: 0.02...0.08,
-                step: 0.002,
-                format: "%.3f",
+                range: 0.18...0.48,
+                step: 0.01,
+                format: "%.2f",
                 unit: "",
                 onCommit: { appState.settings.save() }
             )
