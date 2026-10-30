@@ -11,4 +11,7 @@ DerivedData/
 *.swp
 *~
 assets/video-demo/*.mov
+assets/showcase-video/
+*.mov
+
 

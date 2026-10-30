@@ -29,7 +29,7 @@
 /* Modular Spatial Blocks Bento Section */
 .tetris-arch-section {
   width: 100%;
-  padding: var(--space-xl) var(--space-lg);
+  padding: var(--space-xl) clamp(1rem, 3vw, var(--space-lg));
   background: var(--color-canvas-pure);
 }
 
@@ -214,12 +214,31 @@
   transform: scale(1) translateY(0);
 }
 
-@media (max-width: 960px) {
+@media (max-width: 1080px) {
+  .tetris-bento-card {
+    grid-column: span 6;
+  }
+  .tetris-bento-card.tetris-block-wide {
+    grid-column: span 12;
+  }
+}
+
+@media (max-width: 640px) {
   .tetris-bento-card,
   .tetris-bento-card.tetris-block-wide {
     grid-column: span 12;
   }
   .tetris-combo-blocks {
     grid-template-columns: repeat(2, 1fr);
+  }
+  .tetris-arch-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 380px) {
+  .tetris-combo-blocks {
+    grid-template-columns: 1fr;
   }
 }

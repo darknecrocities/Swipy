@@ -29,7 +29,11 @@
       navButtons.forEach(function (btn) {
         if (!btn.classList.contains('nav-pill-btn') && !btn.classList.contains('carousel-dot-pill')) return;
         const isMatch = btn.getAttribute('data-nav-target') === targetKey;
+        const wasMatch = btn.getAttribute('aria-current') === 'true';
         btn.setAttribute('aria-current', isMatch ? 'true' : 'false');
+        if (isMatch && !wasMatch && window.innerWidth <= 1080 && btn.classList.contains('nav-pill-btn')) {
+          btn.scrollIntoView({ inline: 'center', behavior: 'smooth', block: 'nearest' });
+        }
       });
     }
 
@@ -185,6 +189,24 @@
           setActiveNav('tetris-architecture');
         } else {
           setActiveNav(HORIZ_STATIONS[activeStationIdx]);
+        }
+      } else {
+        const st3 = document.getElementById('station-03');
+        const st2 = document.getElementById('station-02');
+        if (gestureLibrary && gestureLibrary.getBoundingClientRect().top <= vh * 0.45) {
+          setActiveNav('gesture-library');
+        } else if (verticalStage && verticalStage.getBoundingClientRect().top <= vh * 0.45) {
+          setActiveNav('vertical-stage');
+        } else if (testItOutStage && testItOutStage.getBoundingClientRect().top <= vh * 0.48) {
+          setActiveNav('test-it-out');
+        } else if (tetrisArchStage && tetrisArchStage.getBoundingClientRect().top <= vh * 0.48) {
+          setActiveNav('tetris-architecture');
+        } else if (st3 && st3.getBoundingClientRect().top <= vh * 0.5) {
+          setActiveNav('station-03');
+        } else if (st2 && st2.getBoundingClientRect().top <= vh * 0.5) {
+          setActiveNav('station-02');
+        } else {
+          setActiveNav('station-01');
         }
       }
 
