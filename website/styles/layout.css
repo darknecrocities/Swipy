@@ -8,56 +8,59 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-sm);
-  padding: 0.7rem var(--space-lg);
+  gap: var(--space-xs);
+  padding: 0.65rem clamp(0.75rem, 0.5rem + 1vw, 2rem);
   background: oklch(1.0 0 0 / 0.82);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   border-bottom: 1px solid var(--color-border-hairline);
+  box-sizing: border-box;
 }
 
 .brand-mark {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.55rem;
   text-decoration: none;
   color: var(--color-ink-primary);
   cursor: pointer;
+  flex-shrink: 0;
 }
 
 .brand-mark img {
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   border-radius: 8px;
   box-shadow: var(--shadow-xs);
 }
 
 .brand-mark span {
   font-family: var(--font-sans);
-  font-size: 1.05rem;
+  font-size: 1.02rem;
   font-weight: 700;
   letter-spacing: -0.025em;
 }
 
 .nav-links {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   gap: 0.2rem;
-  padding: 4px;
+  padding: 3px 4px;
   background: oklch(0.96 0 0 / 0.9);
   border: 1px solid var(--color-border-hairline);
   border-radius: 999px;
+  max-width: 100%;
 }
 
 .nav-pill-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 36px;
-  padding: 0 0.95rem;
+  white-space: nowrap;
+  min-height: 34px;
+  padding: 0 0.9rem;
   font-family: var(--font-sans);
-  font-size: 0.82rem;
+  font-size: 0.81rem;
   font-weight: 600;
   letter-spacing: -0.01em;
   text-decoration: none;
@@ -66,12 +69,8 @@
   border: 1px solid transparent;
   border-radius: 999px;
   cursor: pointer;
-  transition:
-    transform 0.22s var(--ease-expo),
-    background-color 0.22s var(--ease-expo),
-    color 0.22s var(--ease-expo),
-    box-shadow 0.22s var(--ease-expo),
-    border-color 0.22s var(--ease-expo);
+  flex-shrink: 0;
+  transition: transform 0.2s var(--ease-expo), background-color 0.2s, color 0.2s, box-shadow 0.2s;
 }
 
 .nav-pill-btn:hover,
@@ -109,39 +108,41 @@ footer .nav-pill-btn:hover {
 .nav-download-group {
   display: flex;
   align-items: center;
-  gap: 0.55rem;
+  gap: 0.45rem;
+  flex-shrink: 0;
 }
 
-.nav-github-btn {
+.nav-github-btn,
+.nav-download-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.45rem;
-  min-height: 42px;
-  padding: 0 1.05rem;
+  min-height: 40px;
+  border-radius: 999px;
   font-family: var(--font-sans);
-  font-size: 0.82rem;
+  font-size: 0.81rem;
   font-weight: 600;
   letter-spacing: -0.01em;
   text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.nav-github-btn {
+  padding: 0 0.95rem;
   color: var(--color-ink-primary);
   background: var(--color-surface-card);
   border: 1px solid var(--color-border-hairline);
-  border-radius: 999px;
   box-shadow: var(--shadow-xs);
-  cursor: pointer;
-  transition:
-    transform 0.25s var(--ease-expo),
-    background-color 0.25s var(--ease-expo),
-    color 0.25s var(--ease-expo),
-    border-color 0.25s var(--ease-expo),
-    box-shadow 0.25s var(--ease-expo);
+  transition: transform 0.2s var(--ease-expo), background-color 0.2s var(--ease-expo), color 0.2s var(--ease-expo), border-color 0.2s var(--ease-expo), box-shadow 0.2s var(--ease-expo);
 }
 
 .nav-github-btn svg {
-  width: 17px;
-  height: 17px;
+  width: 16px;
+  height: 16px;
   fill: currentColor;
+  flex-shrink: 0;
 }
 
 .nav-github-btn:hover,
@@ -154,38 +155,23 @@ footer .nav-pill-btn:hover {
 }
 
 .nav-download-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  min-height: 42px;
-  padding: 0 1.2rem;
-  font-family: var(--font-sans);
-  font-size: 0.82rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  text-decoration: none;
+  padding: 0 1.15rem;
   color: var(--color-ink-inverted);
   background: var(--color-surface-pitch);
   border: 1px solid var(--color-surface-pitch);
-  border-radius: 999px;
   box-shadow: 0 4px 14px oklch(0.12 0 0 / 0.14);
-  cursor: pointer;
-  transition:
-    transform 0.25s var(--ease-expo),
-    background-color 0.25s var(--ease-expo),
-    color 0.25s var(--ease-expo),
-    box-shadow 0.25s var(--ease-expo);
+  transition: transform 0.25s var(--ease-expo), background-color 0.25s var(--ease-expo), color 0.25s var(--ease-expo), box-shadow 0.25s var(--ease-expo);
 }
 
 .nav-download-btn svg {
-  width: 16px;
-  height: 16px;
+  width: 15px;
+  height: 15px;
   stroke: currentColor;
   fill: none;
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
+  flex-shrink: 0;
 }
 
 .nav-download-btn:hover,
@@ -197,7 +183,7 @@ footer .nav-pill-btn:hover {
   outline: none;
 }
 
-/* Phase A: Collision-Free Horizontal Scroll Carousel */
+/* Phase A: Minimalist Horizontal Scroll Carousel */
 .horizontal-scroll-stage {
   position: relative;
   height: 340vh;
@@ -220,31 +206,30 @@ footer .nav-pill-btn:hover {
   height: 100vh;
   width: 300vw;
   will-change: transform;
-  padding-top: 66px;
+  padding-top: 64px;
   padding-bottom: 64px;
 }
 
 .spatial-station {
   position: relative;
-  height: calc(100vh - 130px);
+  height: calc(100vh - 128px);
   width: 100vw;
   flex-shrink: 0;
-  padding: var(--space-sm) var(--space-lg);
+  padding: var(--space-xs) clamp(1rem, 2vw, 3rem);
   display: flex;
   align-items: center;
   justify-content: center;
-  container-type: inline-size;
-  container-name: station-box;
+  box-sizing: border-box;
 }
 
-/* Collision-Free 2-Column Slide Architecture */
+/* Fluid 2-Column Responsive Slide Architecture */
 .slide-two-col {
   width: 100%;
   max-width: 1420px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: minmax(340px, 0.9fr) minmax(420px, 1.1fr);
-  gap: var(--space-lg);
+  grid-template-columns: minmax(320px, 0.92fr) minmax(380px, 1.08fr);
+  gap: clamp(1.25rem, 2.5vw, 3.5rem);
   align-items: center;
 }
 
@@ -257,7 +242,7 @@ footer .nav-pill-btn:hover {
 }
 
 .hero-main-heading {
-  font-size: clamp(2.1rem, 1.65rem + 2.2vw, 3.55rem);
+  font-size: clamp(1.85rem, 1.35rem + 2.4vw, 3.55rem);
   letter-spacing: -0.04em;
   line-height: 1.08;
   margin-bottom: var(--space-sm);
@@ -274,6 +259,7 @@ footer .nav-pill-btn:hover {
 .hero-cta-row {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 0.65rem;
 }
 
@@ -283,12 +269,13 @@ footer .nav-pill-btn:hover {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  width: 100%;
 }
 
 .orb-floating-badge {
   position: absolute;
-  top: -34px;
-  right: -24px;
+  top: -30px;
+  right: -20px;
   z-index: 18;
 }
 
@@ -297,7 +284,8 @@ footer .nav-pill-btn:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-md);
+  gap: clamp(0.75rem, 1.5vw, 1.5rem);
+  width: 100%;
 }
 
 /* Floating Minimalist Carousel Dock */
@@ -357,6 +345,7 @@ footer .nav-pill-btn:hover {
   font-weight: 600;
   letter-spacing: -0.01em;
   cursor: pointer;
+  white-space: nowrap;
   transition: background-color 0.25s var(--ease-expo), color 0.25s var(--ease-expo);
 }
 
@@ -366,145 +355,34 @@ footer .nav-pill-btn:hover {
   color: var(--color-ink-inverted);
 }
 
-/* Full-Color MacBook Pro & macOS Window Hardware Frames */
-.macbook-pro-frame {
-  position: relative;
-  width: 100%;
-  max-width: 680px;
-  margin: 0 auto;
-  user-select: none;
-}
-
-.macbook-lid {
-  position: relative;
-  background: var(--color-surface-pitch);
-  border: 1px solid oklch(0.26 0 0);
-  border-radius: 20px 20px 4px 4px;
-  padding: 12px 12px 10px 12px;
-  box-shadow: 0 24px 54px -12px oklch(0.12 0 0 / 0.18), 0 4px 16px oklch(0.12 0 0 / 0.06);
-}
-
-.macbook-notch {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 96px;
-  height: 14px;
-  background: var(--color-surface-pitch);
-  border-radius: 0 0 8px 8px;
-  z-index: 6;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.macbook-notch::after {
-  content: '';
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: oklch(0.35 0 0);
-}
-
-.macbook-screen {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 16 / 10;
-  background: var(--color-canvas-pure);
-  border-radius: 10px;
-  overflow: hidden;
-  border: 1px solid oklch(0.24 0 0);
-}
-
-.macbook-screen img,
-.macbook-screen video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  transition: opacity 0.35s var(--ease-expo), transform 0.45s var(--ease-spring);
-}
-
-.macbook-screen img.is-morphing {
-  opacity: 0.25;
-  transform: scale(0.96);
-}
-
-.macbook-base {
-  position: relative;
-  width: 108%;
-  left: -4%;
-  height: 13px;
-  background: linear-gradient(180deg, oklch(0.92 0 0), oklch(0.84 0 0));
-  border: 1px solid oklch(0.76 0 0);
-  border-radius: 2px 2px 12px 12px;
-  box-shadow: 0 10px 24px oklch(0.12 0 0 / 0.1);
-}
-
-.macbook-base::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 84px;
-  height: 4px;
-  background: oklch(0.68 0 0);
-  border-radius: 0 0 6px 6px;
-}
-
-.macos-popover-frame {
-  width: 215px;
-  flex-shrink: 0;
-  border-radius: 20px;
-  overflow: hidden;
-  border: 1px solid var(--color-border-hairline);
-  background: var(--color-canvas-pure);
-  box-shadow: var(--shadow-floating);
-}
-
-.macos-popover-frame img {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
-.macos-window-card {
-  border-radius: 20px;
-  border: 1px solid var(--color-border-hairline);
-  background: var(--color-canvas-pure);
-  padding: 10px;
-  box-shadow: var(--shadow-card);
-}
-
 /* Phase D: Vertical Keeby-Style Showcase */
 .vertical-scroll-stage {
   position: relative;
   width: 100%;
-  padding: var(--space-xl) var(--space-lg);
+  padding: var(--space-xl) clamp(1rem, 2vw, 3rem);
   background: var(--color-canvas-pure);
+  box-sizing: border-box;
 }
 
 .keeby-sticky-grid {
   display: grid;
   grid-template-columns: 1.15fr 0.85fr;
-  gap: var(--space-xl);
+  gap: clamp(1.5rem, 3vw, 4rem);
   align-items: start;
   max-width: 1440px;
-  margin: 0 auto var(--space-xl) auto;
+  margin: 0 auto;
 }
 
 .keeby-sticky-hardware {
   position: sticky;
-  top: 110px;
+  top: 96px;
 }
 
 .keeby-steps-column {
   display: flex;
   flex-direction: column;
-  gap: 16vh;
-  padding: 4vh 0 12vh 0;
+  gap: 14vh;
+  padding: 4vh 0 10vh 0;
 }
 
 .keeby-step-card {
@@ -515,4 +393,103 @@ footer .nav-pill-btn:hover {
   padding: var(--space-md);
   box-shadow: var(--shadow-card);
   cursor: pointer;
+}
+
+/* ==========================================================================
+   Responsive Adaptations & Breakpoints (Mobile, Tablet, Desktop)
+   ========================================================================== */
+
+/* Tablet & Compact Desktop (<= 1080px) */
+@media (max-width: 1080px) {
+  .spatial-nav {
+    flex-wrap: nowrap;
+    gap: 0.5rem;
+  }
+  .nav-links {
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    flex-wrap: nowrap;
+  }
+  .nav-links::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Tablet & Mobile Breakpoint (<= 960px): Stacks Horizontal Slides Naturally */
+@media (max-width: 960px) {
+  .horizontal-scroll-stage { height: auto; }
+  .horizontal-sticky-viewport {
+    position: relative;
+    height: auto;
+    overflow: visible;
+    flex-direction: column;
+  }
+  .horizontal-track {
+    flex-direction: column;
+    width: 100%;
+    height: auto;
+    transform: none !important;
+    padding: 72px 0 24px;
+  }
+  .spatial-station {
+    width: 100% !important;
+    height: auto;
+    padding: clamp(2rem, 5vw, 4rem) clamp(1rem, 3vw, 2rem);
+  }
+  .slide-two-col {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  .carousel-dock { display: none; }
+  .keeby-sticky-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+  .keeby-sticky-hardware {
+    position: sticky;
+    top: 60px;
+    z-index: 12;
+    padding: 10px 0;
+    background: oklch(1.0 0 0 / 0.94);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+  .keeby-steps-column {
+    gap: 2rem;
+    padding: 0 0 4rem 0;
+  }
+}
+
+/* Mobile Screens (<= 768px) */
+@media (max-width: 768px) {
+  .slide-right-dual {
+    flex-direction: column;
+    align-items: center;
+    gap: 1.25rem;
+  }
+  .orb-floating-badge {
+    top: -14px;
+    right: 8px;
+  }
+}
+
+/* Compact Mobile Screens (<= 540px) */
+@media (max-width: 540px) {
+  .spatial-nav {
+    padding: 0.5rem 0.75rem;
+  }
+  .brand-mark span,
+  .nav-github-btn span {
+    display: none;
+  }
+  .nav-github-btn {
+    padding: 0 0.65rem;
+  }
+  .nav-download-btn {
+    padding: 0 0.85rem;
+    font-size: 0.76rem;
+  }
 }

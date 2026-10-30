@@ -58,20 +58,8 @@
   box-shadow: var(--shadow-card-hover);
 }
 
-/* Slide 02 & Slide 03 Grids */
-.mechanics-stagger-grid {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  grid-template-rows: repeat(6, 1fr);
-  gap: var(--space-sm);
-  height: 100%;
-  width: 100%;
-}
-
+/* Slide 02 Feature Cards */
 .mech-card-alpha {
-  grid-column: 1 / 5;
-  grid-row: 1 / 4;
-  align-self: start;
   background: var(--color-surface-pitch);
   color: var(--color-ink-inverted);
   padding: var(--space-md);
@@ -80,46 +68,13 @@
   box-shadow: var(--shadow-card);
 }
 
-.mech-card-beta {
-  grid-column: 5 / 11;
-  grid-row: 1 / 6;
-  align-self: center;
-}
-
-.mech-card-popover {
-  grid-column: 11 / 13;
-  grid-row: 1 / 6;
-  justify-self: end;
-  align-self: center;
-  z-index: 6;
-}
-
 .mech-card-gamma {
-  grid-column: 1 / 6;
-  grid-row: 4 / 7;
-  align-self: end;
   background: var(--color-surface-card);
   color: var(--color-ink-primary);
   border: 1px solid var(--color-border-hairline);
   border-radius: 22px;
   padding: var(--space-md);
   box-shadow: var(--shadow-card);
-}
-
-.station-three-grid {
-  display: grid;
-  grid-template-columns: 0.9fr 1.1fr;
-  gap: var(--space-lg);
-  align-items: center;
-  height: 100%;
-  width: 100%;
-}
-
-.pivot-twist-banner {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
 }
 
 /* Exact Native macOS Gesture Library Cards (Matching Uploaded Screenshot) */
@@ -312,20 +267,40 @@
 }
 
 @container library-box (max-width: 760px) {
-  .library-header-asym { grid-template-columns: 1fr; }
+  .library-header-asym {
+    grid-template-columns: 1fr;
+  }
 }
 
-@media (max-width: 960px) {
-  .horizontal-scroll-stage { height: auto; }
-  .horizontal-sticky-viewport { position: relative; height: auto; overflow: visible; flex-direction: column; }
-  .horizontal-track { flex-direction: column; width: 100%; height: auto; transform: none !important; }
-  .spatial-station { width: 100% !important; height: auto; padding: var(--space-lg) var(--space-md); }
-  .carousel-dock { position: relative; bottom: 0; left: 0; transform: none; margin: var(--space-md) auto; }
-  .asym-canvas, .mechanics-stagger-grid, .station-three-grid, .keeby-sticky-grid {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-md);
+@media (max-width: 768px) {
+  .matrix-orb-shell {
+    width: 108px;
+    height: 108px;
+    padding: 10px;
   }
-  .keeby-sticky-hardware { position: relative; top: 0; }
-  .keeby-steps-column { gap: var(--space-lg); padding: var(--space-md) 0; }
+  .matrix-orb-canvas {
+    width: 88px;
+    height: 88px;
+  }
+  .library-filter-bar {
+    overflow-x: auto;
+    scrollbar-width: none;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 6px;
+    margin-right: -1rem;
+    padding-right: 1rem;
+  }
+  .library-filter-bar::-webkit-scrollbar {
+    display: none;
+  }
+  .library-filter-pill {
+    flex-shrink: 0;
+  }
+}
+
+@media (max-width: 360px) {
+  .gesture-cards-matrix {
+    grid-template-columns: 1fr;
+  }
 }

@@ -1,0 +1,127 @@
+/* Full-Color MacBook Pro & macOS Window Hardware Frames */
+.macbook-pro-frame {
+  position: relative;
+  width: 100%;
+  max-width: 680px;
+  margin: 0 auto;
+  user-select: none;
+}
+
+.macbook-lid {
+  position: relative;
+  background: var(--color-surface-pitch);
+  border: 1px solid oklch(0.26 0 0);
+  border-radius: clamp(14px, 2.5vw, 20px) clamp(14px, 2.5vw, 20px) 4px 4px;
+  padding: clamp(8px, 1.2vw, 12px) clamp(8px, 1.2vw, 12px) clamp(6px, 1vw, 10px) clamp(8px, 1.2vw, 12px);
+  box-shadow: 0 24px 54px -12px oklch(0.12 0 0 / 0.18), 0 4px 16px oklch(0.12 0 0 / 0.06);
+}
+
+.macbook-notch {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: clamp(64px, 12vw, 96px);
+  height: clamp(10px, 1.5vw, 14px);
+  background: var(--color-surface-pitch);
+  border-radius: 0 0 8px 8px;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.macbook-notch::after {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: oklch(0.35 0 0);
+}
+
+.macbook-screen {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  background: var(--color-canvas-pure);
+  border-radius: clamp(6px, 1.2vw, 10px);
+  overflow: hidden;
+  border: 1px solid oklch(0.24 0 0);
+}
+
+.macbook-screen img,
+.macbook-screen video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: opacity 0.35s var(--ease-expo), transform 0.45s var(--ease-spring);
+}
+
+.macbook-screen img.is-morphing {
+  opacity: 0.25;
+  transform: scale(0.96);
+}
+
+.macbook-base {
+  position: relative;
+  width: 106%;
+  left: -3%;
+  height: clamp(9px, 1.2vw, 13px);
+  background: linear-gradient(180deg, oklch(0.92 0 0), oklch(0.84 0 0));
+  border: 1px solid oklch(0.76 0 0);
+  border-radius: 2px 2px clamp(8px, 1.5vw, 12px) clamp(8px, 1.5vw, 12px);
+  box-shadow: 0 10px 24px oklch(0.12 0 0 / 0.1);
+}
+
+.macbook-base::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: clamp(56px, 10vw, 84px);
+  height: 4px;
+  background: oklch(0.68 0 0);
+  border-radius: 0 0 6px 6px;
+}
+
+.macos-popover-frame {
+  width: clamp(160px, 24vw, 215px);
+  flex-shrink: 0;
+  border-radius: clamp(14px, 2vw, 20px);
+  overflow: hidden;
+  border: 1px solid var(--color-border-hairline);
+  background: var(--color-canvas-pure);
+  box-shadow: var(--shadow-floating);
+}
+
+.macos-popover-frame img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.macos-window-card {
+  border-radius: 20px;
+  border: 1px solid var(--color-border-hairline);
+  background: var(--color-canvas-pure);
+  padding: clamp(6px, 1vw, 10px);
+  box-shadow: var(--shadow-card);
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .macos-popover-frame {
+    width: 100%;
+    max-width: 250px;
+  }
+}
+
+@media (max-width: 540px) {
+  .macbook-base {
+    width: 100%;
+    left: 0;
+  }
+}
+

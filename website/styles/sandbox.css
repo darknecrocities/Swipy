@@ -1,7 +1,7 @@
 /* Phase C: Interactive "Test It Out?" Live Webcam Hand Vision Sandbox */
 .sandbox-section {
   width: 100%;
-  padding: var(--space-xl) var(--space-lg);
+  padding: var(--space-xl) clamp(1rem, 3vw, var(--space-lg));
   background: var(--color-canvas-paper);
 }
 
@@ -300,3 +300,61 @@
   background: var(--color-surface-pitch);
   color: var(--color-ink-inverted);
 }
+
+@media (max-width: 768px) {
+  .sandbox-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .sandbox-gesture-bar {
+    width: 100%;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+  }
+  .sandbox-gesture-bar::-webkit-scrollbar {
+    display: none;
+  }
+  .sandbox-action-btn {
+    flex-shrink: 0;
+  }
+  .sandbox-draggable-card {
+    width: 44%;
+    min-width: 120px;
+    border-radius: 12px;
+  }
+  .sandbox-draggable-card img {
+    height: 72px;
+  }
+  .sandbox-draggable-card p {
+    padding: 6px 8px;
+    font-size: 0.64rem;
+    line-height: 1.35;
+  }
+  .sandbox-webcam-pip {
+    width: 140px;
+    right: 8px;
+    bottom: 40px;
+    border-radius: 12px;
+  }
+  .sandbox-macos-dock {
+    max-width: 92%;
+    font-size: 0.62rem;
+    padding: 4px 10px;
+    gap: 6px;
+    bottom: 6px;
+  }
+  .dock-app-icon {
+    width: 20px !important;
+    height: 20px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .sandbox-menubar span:not(:first-child) {
+    display: none;
+  }
+}
+

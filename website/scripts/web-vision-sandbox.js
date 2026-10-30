@@ -41,6 +41,27 @@
       return { el: card, left: card.style.left, top: card.style.top };
     });
 
+    function resetCardPositions() {
+      stageCanvas.classList.remove('is-mission-control');
+      if (window.innerWidth <= 768) {
+        cards.forEach(function (card) {
+          const id = card.getAttribute('data-card-id');
+          if (id === 'camera') { card.style.left = '4%'; card.style.top = '6%'; }
+          else if (id === 'menubar') { card.style.left = '52%'; card.style.top = '6%'; }
+          else if (id === 'gestures') { card.style.left = '26%'; card.style.top = '48%'; }
+        });
+      } else {
+        initialPositions.forEach(function (item) {
+          item.el.style.left = item.left;
+          item.el.style.top = item.top;
+        });
+      }
+    }
+
+    if (window.innerWidth <= 768) {
+      resetCardPositions();
+    }
+
     function switchSpace(delta) {
       stageCanvas.classList.remove('is-mission-control');
       const slideDir = delta > 0 ? -42 : 42;
@@ -272,11 +293,7 @@
           stageCanvas.classList.toggle('is-mission-control');
         }
         if (action === 'reset-cards') {
-          stageCanvas.classList.remove('is-mission-control');
-          initialPositions.forEach(function (item) {
-            item.el.style.left = item.left;
-            item.el.style.top = item.top;
-          });
+          resetCardPositions();
         }
       });
     });
