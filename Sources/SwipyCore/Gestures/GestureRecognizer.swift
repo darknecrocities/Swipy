@@ -94,6 +94,7 @@ public final class GestureRecognizer: @unchecked Sendable {
             if isDraggingActive {
                 MouseEventController.shared.endDrag(at: screenPt)
                 isDraggingActive = false
+                trackpadMotion.resetReference(to: normalizedPt)
             }
             CursorController.shared.moveCursor(to: screenPt)
             onCursorUpdate?(screenPt, state)
@@ -111,7 +112,8 @@ public final class GestureRecognizer: @unchecked Sendable {
                 displayFrame: displayFrame,
                 settings: settings,
                 timestamp: timestamp,
-                skeleton: skeleton
+                skeleton: skeleton,
+                isDragging: true
             )
             if !isDraggingActive {
                 isDraggingActive = true
@@ -208,7 +210,8 @@ public final class GestureRecognizer: @unchecked Sendable {
         displayFrame: CGRect,
         settings: SwipySettings,
         timestamp: TimeInterval,
-        skeleton: HandSkeleton? = nil
+        skeleton: HandSkeleton? = nil,
+        isDragging: Bool = false
     ) -> CGPoint {
         switch settings.trackingMode {
         case .trackpad:
@@ -220,7 +223,8 @@ public final class GestureRecognizer: @unchecked Sendable {
                 screenFrame: displayFrame,
                 isAdaptive: settings.isAdaptiveAcceleration,
                 pinchRatio: ratio,
-                isPinching: isPinching
+                isPinching: isPinching,
+                isDragging: isDragging
             )
             previousScreenPoint = targetPoint
             lastTimestamp = timestamp

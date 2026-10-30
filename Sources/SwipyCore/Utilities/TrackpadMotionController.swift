@@ -36,7 +36,8 @@ public final class TrackpadMotionController: @unchecked Sendable {
     ///   - screenFrame: Target display bounds in Quartz coordinates.
     ///   - isAdaptive: Whether to apply non-linear trackpad acceleration curves.
     ///   - pinchRatio: Current distance ratio between thumb and index for pre-pinch damping.
-    ///   - isPinching: Whether fingers are actively touching/pinched (strict freeze).
+    ///   - isPinching: Whether fingers are actively touching/pinched (click stabilization).
+    ///   - isDragging: Whether user is actively dragging (smooth glide, no freeze).
     /// - Returns: New target cursor position in Quartz screen coordinates.
     public func update(
         normalizedPoint: CGPoint,
@@ -44,7 +45,8 @@ public final class TrackpadMotionController: @unchecked Sendable {
         screenFrame: CGRect,
         isAdaptive: Bool = true,
         pinchRatio: Double = 1.0,
-        isPinching: Bool = false
+        isPinching: Bool = false,
+        isDragging: Bool = false
     ) -> CGPoint {
         lock.lock()
         defer { lock.unlock() }
@@ -57,8 +59,8 @@ public final class TrackpadMotionController: @unchecked Sendable {
         )
         let activePos = internalScreenPosition ?? initialClamped
 
-        // Strict freeze: if pinching, lock cursor firmly on target position
-        if isPinching {
+        // Stationary pinch stabilization: firmly lock cursor on target icon for click aiming
+        if isPinching && !isDragging {
             previousNormalizedPoint = normalizedPoint
             return activePos
         }
@@ -86,8 +88,9 @@ public final class TrackpadMotionController: @unchecked Sendable {
         var pixelDx = dx * Double(screenFrame.size.width) * sensitivity * baseTravelMultiplier
         var pixelDy = dy * Double(screenFrame.size.height) * sensitivity * baseTravelMultiplier
 
-        // Pre-pinch damping: as fingers approach each other to prepare for a click, decelerate velocity
-        if pinchRatio < 0.60 {
+        // Pre-pinch damping: as fingers approach each other to prepare for a click, decelerate velocity.
+        // Bypassed during active dragging so dragged items follow the hand fluidly.
+        if pinchRatio < 0.60 && !isDragging {
             let damping = max(0.12, min(1.0, (pinchRatio - 0.30) / 0.30))
             pixelDx *= damping
             pixelDy *= damping

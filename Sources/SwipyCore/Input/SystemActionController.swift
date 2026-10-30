@@ -132,30 +132,41 @@ public final class SystemActionController: @unchecked Sendable {
         queue.async { [self] in
             var modifiers: [(CGKeyCode, CGEventFlags)] = [(kVK_Command, .maskCommand)]
             if reverse { modifiers.append((kVK_Shift, .maskShift)) }
-            postSequence(keyCode: kVK_Tab, modifiers: modifiers)
+            postSequence(keyCode: kVK_Tab, modifiers: modifiers, tap: .cghidEventTap)
             DiagnosticsLogger.shared.recordEvent()
         }
     }
 
-    private func postPair(keyCode: CGKeyCode, flags: CGEventFlags, source: CGEventSource?, taps: [CGEventTapLocation]) {
+    private func postPair(
+        keyCode: CGKeyCode,
+        flags: CGEventFlags,
+        source: CGEventSource?,
+        taps: [CGEventTapLocation],
+        holdMicroseconds: useconds_t = 30_000
+    ) {
         guard let down = CGEvent(keyboardEventSource: source, virtualKey: keyCode, keyDown: true),
               let up = CGEvent(keyboardEventSource: source, virtualKey: keyCode, keyDown: false) else { return }
         down.flags = flags
         up.flags = flags
         taps.forEach { down.post(tap: $0) }
-        usleep(20_000)
+        usleep(holdMicroseconds)
         taps.forEach { up.post(tap: $0) }
     }
 
     /// Presses modifiers, taps `keyCode`, then releases the modifiers in reverse order.
-    private func postSequence(keyCode: CGKeyCode, modifiers: [(CGKeyCode, CGEventFlags)]) {
+    /// Posts strictly to `.cghidEventTap` to bypass frontmost app key interception (Chrome, Terminal).
+    private func postSequence(
+        keyCode: CGKeyCode,
+        modifiers: [(CGKeyCode, CGEventFlags)],
+        tap: CGEventTapLocation = .cghidEventTap
+    ) {
         let source = CGEventSource(stateID: .hidSystemState)
         var held: CGEventFlags = []
 
         for (key, flag) in modifiers {
             held.insert(flag)
-            postFlagsChanged(key: key, flags: held, down: true, source: source)
-            usleep(8_000)
+            postFlagsChanged(key: key, flags: held, down: true, source: source, tap: tap)
+            usleep(12_000)
         }
 
         var eventFlags = held
@@ -164,21 +175,26 @@ public final class SystemActionController: @unchecked Sendable {
             eventFlags.insert(.maskSecondaryFn)
         }
 
-        postPair(keyCode: keyCode, flags: eventFlags, source: source, taps: [.cghidEventTap, .cgSessionEventTap])
-        usleep(8_000)
+        postPair(keyCode: keyCode, flags: eventFlags, source: source, taps: [tap], holdMicroseconds: 30_000)
+        usleep(12_000)
 
         for (key, flag) in modifiers.reversed() {
             held.remove(flag)
-            postFlagsChanged(key: key, flags: held, down: false, source: source)
-            usleep(8_000)
+            postFlagsChanged(key: key, flags: held, down: false, source: source, tap: tap)
+            usleep(12_000)
         }
     }
 
-    private func postFlagsChanged(key: CGKeyCode, flags: CGEventFlags, down: Bool, source: CGEventSource?) {
+    private func postFlagsChanged(
+        key: CGKeyCode,
+        flags: CGEventFlags,
+        down: Bool,
+        source: CGEventSource?,
+        tap: CGEventTapLocation = .cghidEventTap
+    ) {
         guard let event = CGEvent(keyboardEventSource: source, virtualKey: key, keyDown: down) else { return }
         event.type = .flagsChanged
         event.flags = flags
-        event.post(tap: .cghidEventTap)
-        event.post(tap: .cgSessionEventTap)
+        event.post(tap: tap)
     }
 }

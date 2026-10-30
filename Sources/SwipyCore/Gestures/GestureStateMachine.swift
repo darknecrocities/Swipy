@@ -206,8 +206,11 @@ public final class GestureStateMachine: @unchecked Sendable {
             let dy = indexPt.y - startPt.y
             let dist = (dx * dx + dy * dy).squareRoot()
 
-            // Transition to drag when moved past threshold or held with motion
-            if isDragging || (elapsedMs > settings.dragDelayMs && dist > 0.025) {
+            // Transition to drag when moved past threshold (pinch & swipe) or held with motion
+            let isDeliberateSwipe = dist > 0.012
+            let isSustainedMotion = elapsedMs > 180 && dist > 0.008
+
+            if isDragging || isDeliberateSwipe || isSustainedMotion {
                 currentState = .pinching(startTime: startTime, startPoint: startPt, isDragging: true)
                 return .dragging(screenPoint: indexPt)
             } else {

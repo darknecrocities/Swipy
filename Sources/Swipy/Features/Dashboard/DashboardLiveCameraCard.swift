@@ -124,7 +124,11 @@ public struct DashboardLiveCameraCard: View {
 
             if let hand = appState.primaryHand {
                 HStack(spacing: 4) {
-                    if hand.isThumbMiddleZooming {
+                    if case .dragging = appState.activeGesture {
+                        Text("✊ Dragging")
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundColor(.white)
+                    } else if hand.isThumbMiddleZooming {
                         Text("🔍 Thumb-Middle Zoom")
                             .font(.system(size: 10, weight: .semibold))
                             .foregroundColor(.white)
