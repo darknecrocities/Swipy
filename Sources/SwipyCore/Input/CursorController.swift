@@ -17,10 +17,9 @@ public final class CursorController: @unchecked Sendable {
     }
 
     /// Current cursor location in Core Graphics Quartz global coordinates (origin top-left).
+    /// Thread-safe and independent of NSScreen.main or window focus.
     public var currentQuartzCursorPosition: CGPoint {
-        let cocoaPos = NSEvent.mouseLocation
-        let primaryHeight = NSScreen.main?.frame.height ?? 900
-        return CGPoint(x: cocoaPos.x, y: max(0, primaryHeight - cocoaPos.y))
+        CGEvent(source: nil)?.location ?? .zero
     }
 
     /// Moves the actual macOS cursor to the specified screen coordinate.
@@ -32,24 +31,24 @@ public final class CursorController: @unchecked Sendable {
         // Warp hardware cursor position
         CGWarpMouseCursorPosition(point)
 
+        let source = CGEventSource(stateID: .hidSystemState)
+        source?.localEventsSuppressionInterval = 0.0
+
         // Post mouse moved event to update window focus and hover states in active GUI session
         if let event = CGEvent(
-            mouseEventSource: nil,
+            mouseEventSource: source,
             mouseType: .mouseMoved,
             mouseCursorPosition: point,
             mouseButton: .left
         ) {
-            event.post(tap: .cgSessionEventTap)
             event.post(tap: .cghidEventTap)
             DiagnosticsLogger.shared.recordEvent()
         }
     }
 
     /// Primary display frame in global screen coordinates.
+    /// Thread-safe via Quartz Display Services.
     public func primaryDisplayFrame() -> CGRect {
-        if let screen = NSScreen.main {
-            return screen.frame
-        }
-        return CGRect(x: 0, y: 0, width: 1440, height: 900)
+        CGDisplayBounds(CGMainDisplayID())
     }
 }

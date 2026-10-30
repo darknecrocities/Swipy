@@ -27,7 +27,7 @@ public final class ScrollController: @unchecked Sendable {
         guard scaledDeltaY != 0 || scaledDeltaX != 0 else { return }
 
         guard let event = CGEvent(
-            scrollWheelEvent2Source: nil,
+            scrollWheelEvent2Source: CGEventSource(stateID: .hidSystemState),
             units: .pixel,
             wheelCount: 2,
             wheel1: scaledDeltaY,
@@ -35,7 +35,8 @@ public final class ScrollController: @unchecked Sendable {
             wheel3: 0
         ) else { return }
 
-        event.post(tap: .cgSessionEventTap)
+        // Continuous scrolling flag is mandatory for Chromium/WebKit smooth scrolling
+        event.setIntegerValueField(.scrollWheelEventIsContinuous, value: 1)
         event.post(tap: .cghidEventTap)
         DiagnosticsLogger.shared.recordEvent()
     }

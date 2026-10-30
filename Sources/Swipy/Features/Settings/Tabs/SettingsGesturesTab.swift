@@ -52,12 +52,12 @@ public struct SettingsGesturesTab: View {
 
             SettingsSliderRow(
                 title: "Swipe Velocity Threshold",
-                subtitle: "Minimum hand flick speed required to trigger Spaces and Mission Control.",
+                subtitle: "How fast the open palm must travel to trigger Spaces and Mission Control (lower = easier). 1.0 means one camera-width per second.",
                 value: $appState.settings.swipeVelocityThreshold,
-                range: 0.8...3.0,
+                range: 0.5...2.5,
                 step: 0.1,
                 format: "%.1f",
-                unit: " m/s",
+                unit: " ×/s",
                 onCommit: { appState.settings.save() }
             )
 

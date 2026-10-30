@@ -53,6 +53,12 @@ public struct SwipySettings: Codable, Equatable, Sendable {
     // Bindings
     public var bindings: [GestureBinding]
 
+    /// Persisted-settings schema version. `nil` means the data predates versioning and needs migration.
+    public var schemaVersion: Int?
+
+    /// Bumped whenever previously saved values must be re-derived from current defaults.
+    public static let currentSchemaVersion = 3
+
     public init(
         isTrackingEnabled: Bool = false,
         isPaused: Bool = false,
@@ -74,7 +80,7 @@ public struct SwipySettings: Codable, Equatable, Sendable {
         scrollSpeed: Double = 1.0,
         isNaturalScroll: Bool = true,
         isHorizontalScrollEnabled: Bool = true,
-        swipeVelocityThreshold: Double = 0.60,
+        swipeVelocityThreshold: Double = 0.55,
         swipeCooldownMs: Int = 350,
         useNativeAppSwitcher: Bool = false,
         launchAtLogin: Bool = false,
@@ -82,7 +88,8 @@ public struct SwipySettings: Codable, Equatable, Sendable {
         showCameraPreview: Bool = false,
         showJointOverlay: Bool = true,
         showDiagnosticsOverlay: Bool = false,
-        bindings: [GestureBinding] = SwipySettings.defaultBindings
+        bindings: [GestureBinding] = SwipySettings.defaultBindings,
+        schemaVersion: Int? = SwipySettings.currentSchemaVersion
     ) {
         self.isTrackingEnabled = isTrackingEnabled
         self.isPaused = isPaused
@@ -113,6 +120,7 @@ public struct SwipySettings: Codable, Equatable, Sendable {
         self.showJointOverlay = showJointOverlay
         self.showDiagnosticsOverlay = showDiagnosticsOverlay
         self.bindings = bindings
+        self.schemaVersion = schemaVersion
     }
 
     /// Default bindings matching product identity specification.
@@ -125,10 +133,10 @@ public struct SwipySettings: Codable, Equatable, Sendable {
             GestureBinding(gestureType: .twoFingerScroll, category: .scrolling, action: .scroll),
             GestureBinding(gestureType: .threeFingerSwipeUp, category: .spaceNavigation, action: .missionControl),
             GestureBinding(gestureType: .threeFingerSwipeDown, category: .spaceNavigation, action: .showDesktop),
-            GestureBinding(gestureType: .threeFingerSwipeLeft, category: .spaceNavigation, action: .previousSpace),
-            GestureBinding(gestureType: .threeFingerSwipeRight, category: .spaceNavigation, action: .nextSpace),
-            GestureBinding(gestureType: .fourFingerSwipeLeft, category: .appSwitching, action: .previousApplication),
-            GestureBinding(gestureType: .fourFingerSwipeRight, category: .appSwitching, action: .nextApplication),
+            GestureBinding(gestureType: .threeFingerSwipeLeft, category: .spaceNavigation, action: .nextSpace),
+            GestureBinding(gestureType: .threeFingerSwipeRight, category: .spaceNavigation, action: .previousSpace),
+            GestureBinding(gestureType: .fourFingerSwipeLeft, category: .appSwitching, action: .nextSpace),
+            GestureBinding(gestureType: .fourFingerSwipeRight, category: .appSwitching, action: .previousSpace),
             GestureBinding(gestureType: .openPalmsPause, category: .safety, action: .toggleTrackingPause)
         ]
     }
@@ -166,6 +174,43 @@ public struct SwipySettings: Codable, Equatable, Sendable {
         pointer.sanitize()
     }
 
+    /// Re-derives values that older builds persisted from defaults that are now known to be unusable.
+    ///
+    /// v2: `swipeVelocityThreshold` was saved as 1.8 (a hand speed few people reach), `pinchThreshold` was
+    /// clamped to an unintended 0.15, and the 3/4-finger left/right bindings advertised actions the engine
+    /// never performed. Defaults only apply to fresh installs, so existing users must be migrated explicitly.
+    public mutating func migrateIfNeeded() {
+        guard (schemaVersion ?? 1) < Self.currentSchemaVersion || swipeVelocityThreshold > 0.8 else { return }
+
+        if let preset = Self.preset(for: selectedProfileKind) {
+            swipeVelocityThreshold = preset.swipeVelocityThreshold
+            pinchThreshold = preset.pinchThreshold
+        } else {
+            swipeVelocityThreshold = min(swipeVelocityThreshold, 0.65)
+        }
+
+        let swipeDefaults = Dictionary(uniqueKeysWithValues: Self.defaultBindings.map { ($0.gestureType, $0.action) })
+        let swipeTypes: Set<GestureType> = [
+            .threeFingerSwipeLeft, .threeFingerSwipeRight, .fourFingerSwipeLeft, .fourFingerSwipeRight
+        ]
+        for index in bindings.indices where swipeTypes.contains(bindings[index].gestureType) {
+            if let action = swipeDefaults[bindings[index].gestureType] {
+                bindings[index].action = action
+            }
+        }
+        schemaVersion = Self.currentSchemaVersion
+    }
+
+    private static func preset(for kind: ProfileKind) -> GestureProfile? {
+        switch kind {
+        case .balanced: return .balanced
+        case .precision: return .precision
+        case .fast: return .fast
+        case .presentation: return .presentation
+        case .custom: return nil
+        }
+    }
+
     // Persistence key
     private static let userDefaultsKey = "com.swipy.settings.v1"
 
@@ -176,7 +221,10 @@ public struct SwipySettings: Codable, Equatable, Sendable {
         }
         do {
             var settings = try JSONDecoder().decode(SwipySettings.self, from: data)
+            let needsMigration = (settings.schemaVersion ?? 1) < SwipySettings.currentSchemaVersion
+            settings.migrateIfNeeded()
             settings.sanitize()
+            if needsMigration { settings.save() }
             return settings
         } catch {
             return SwipySettings()

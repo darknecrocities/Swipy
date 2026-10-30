@@ -16,6 +16,7 @@ public final class GestureStateMachine: @unchecked Sendable {
     private let history: GestureHistory
     private let resolver: GestureConflictResolver
     private let lock = NSLock()
+    private let swipeTracker = SwipeTracker()
 
     private var isCurrentlyPinching: Bool {
         if case .pinching = currentState {
@@ -54,18 +55,39 @@ public final class GestureStateMachine: @unchecked Sendable {
         history.add(skeleton: skeleton, timestamp: timestamp)
         let indexPt = CGPoint(x: indexTip.x, y: indexTip.y)
 
+        let pose = skeleton.fingerPoseState
+        swipeTracker.observe(pose: pose, timestamp: timestamp)
+
+        // Multi-finger flicks come first: motion blur can make Vision misread an open palm mid-swipe,
+        // so a recent armed open palm plus a fast axis-aligned travel is enough to fire.
+        if swipeTracker.isFlickCandidate(timestamp: timestamp) {
+            if let flick = swipeTracker.evaluate(
+                skeleton: skeleton, history: history, settings: settings,
+                timestamp: timestamp, resolver: resolver
+            ) {
+                currentState = .idle
+                return .swiping(direction: flick.direction, fingers: flick.fingers)
+            }
+            // Blurred mid-flick frame: hold still instead of moving the cursor or scrolling.
+            if pose.fingerCount < 3,
+               swipeTracker.palmSpeed(skeleton: skeleton, history: history) >= max(0.35, settings.swipeVelocityThreshold) * 0.5 {
+                return .idle
+            }
+        }
+
         // Prioritize dedicated thumb + index pinch (and pinch release click)
         if skeleton.isThumbIndexPinching || isCurrentlyPinching {
             return evaluatePinchAndPoint(skeleton: skeleton, indexPt: indexPt, settings: settings, timestamp: timestamp)
         }
 
         // Thumb + Middle finger zoom (pinching in & pinching out, cursor strictly locked)
-        if skeleton.isThumbMiddleZooming || isCurrentlyZooming {
+        // Zoom requires index finger to NOT be extended (index extension always means pointing)
+        if (skeleton.isThumbMiddleZooming && !skeleton.isFingerExtended(.index)) || isCurrentlyZooming {
             return evaluateThumbMiddleZoom(skeleton: skeleton, settings: settings, timestamp: timestamp)
         }
 
         // Deterministic gating based on discrete finger extension count
-        switch skeleton.fingerPoseState {
+        switch pose {
         case .zeroFingers:
             // Fist / resting hand: neutralize state and reject accidental gestures
             if isCurrentlyPinching || isCurrentlyZooming {
@@ -73,18 +95,8 @@ public final class GestureStateMachine: @unchecked Sendable {
             }
             return .idle
 
-        case .fourFingers:
-            // Open palm: check for rapid 4-finger application switch swipe
-            if let swipe = evaluateSwipe(skeleton: skeleton, settings: settings, timestamp: timestamp, fingerCount: 4) {
-                return swipe
-            }
-            return .idle
-
-        case .threeFingers:
-            // 3 fingers: evaluate Spaces navigation and Mission Control flicks
-            if let swipe = evaluateSwipe(skeleton: skeleton, settings: settings, timestamp: timestamp, fingerCount: 3) {
-                return swipe
-            }
+        case .fourFingers, .threeFingers:
+            // Open palm: flicks are handled above; otherwise stay neutral.
             return .idle
 
         case .twoFingers:
@@ -104,40 +116,6 @@ public final class GestureStateMachine: @unchecked Sendable {
             // 1 finger (Index only): precision pointer glide, pinch-to-click, and drag
             return evaluatePinchAndPoint(skeleton: skeleton, indexPt: indexPt, settings: settings, timestamp: timestamp)
         }
-    }
-
-    private func evaluateSwipe(
-        skeleton: HandSkeleton,
-        settings: SwipySettings,
-        timestamp: TimeInterval,
-        fingerCount: Int
-    ) -> RecognizedGestureState? {
-        // Track middleMCP (rigid palm centroid) or wrist for robust motion tracking
-        let joint: HandJointName = skeleton[.middleMCP] != nil ? .middleMCP : .wrist
-
-        guard let disp = history.displacement(for: joint, windowSeconds: 0.22) else { return nil }
-        let distance = (disp.dx * disp.dx + disp.dy * disp.dy).squareRoot()
-        guard distance >= 0.05 else { return nil }
-
-        guard let vel = history.velocity(for: joint, windowSeconds: 0.20) else { return nil }
-        let speed = (vel.dx * vel.dx + vel.dy * vel.dy).squareRoot()
-
-        let requiredSpeed = max(0.40, settings.swipeVelocityThreshold)
-        guard speed >= requiredSpeed,
-              resolver.canExecuteSwipe(timestamp: timestamp, cooldownMs: settings.swipeCooldownMs) else {
-            return nil
-        }
-
-        // Mirror X velocity to account for selfie camera orientation (dx < 0 is user swiping right)
-        let mirroredVx = -vel.dx
-        let direction: SwipeDirection
-        if abs(mirroredVx) > abs(vel.dy) * 1.2 {
-            direction = mirroredVx > 0 ? .right : .left
-        } else {
-            direction = vel.dy > 0 ? .up : .down
-        }
-
-        return .swiping(direction: direction, fingers: fingerCount)
     }
 
     private func evaluateScroll(skeleton: HandSkeleton, currentPt: CGPoint) -> RecognizedGestureState {
@@ -162,10 +140,17 @@ public final class GestureStateMachine: @unchecked Sendable {
         settings: SwipySettings,
         timestamp: TimeInterval
     ) -> RecognizedGestureState {
+        // If index finger is extended, immediately release zoom and hand off to pointing
+        if skeleton.isFingerExtended(.index) {
+            currentState = .pointing
+            let indexPt = skeleton[.indexTip].map { CGPoint(x: $0.x, y: $0.y) } ?? .zero
+            return .pointing(normalizedPoint: indexPt)
+        }
+
         let currentRatio = skeleton.middlePinchRatio
         switch currentState {
         case .zooming(let lastRatio, let anchorPt):
-            if !skeleton.isThumbMiddleZooming && currentRatio > 0.65 {
+            if !skeleton.isThumbMiddleZooming && currentRatio > 0.45 {
                 currentState = .idle
                 return .idle
             }
@@ -264,6 +249,7 @@ public final class GestureStateMachine: @unchecked Sendable {
     }
 
     private func handleTrackingLost() -> RecognizedGestureState {
+        swipeTracker.reset()
         currentState = .idle
         history.clear()
         resolver.reset()

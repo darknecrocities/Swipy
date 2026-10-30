@@ -343,10 +343,10 @@ public struct GestureRecognitionTests {
             // Middle tip at (0.45 + middleDist, 0.45)
             joints[.middleTip] = HandJoint(name: .middleTip, x: 0.45 + middleDist, y: 0.45, confidence: 1.0)
 
-            // Index tip far away so it doesn't trigger index pinch
+            // Index finger curled down so it does not conflict with index pointing
             joints[.indexMCP] = HandJoint(name: .indexMCP, x: 0.35, y: 0.35, confidence: 1.0)
-            joints[.indexPIP] = HandJoint(name: .indexPIP, x: 0.35, y: 0.50, confidence: 1.0)
-            joints[.indexTip] = HandJoint(name: .indexTip, x: 0.35, y: 0.65, confidence: 1.0)
+            joints[.indexPIP] = HandJoint(name: .indexPIP, x: 0.35, y: 0.25, confidence: 1.0)
+            joints[.indexTip] = HandJoint(name: .indexTip, x: 0.35, y: 0.20, confidence: 1.0)
 
             // Ring and little curled
             joints[.ringMCP] = HandJoint(name: .ringMCP, x: 0.55, y: 0.30, confidence: 1.0)

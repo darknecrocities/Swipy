@@ -68,6 +68,7 @@ public final class AppLifecycleManager: ObservableObject {
     private let gestureRecognizer = GestureRecognizer.shared
     private var telemetryTimer: Timer?
     private let settingsHolder: SettingsHolder
+    private var trackingActivityToken: NSObjectProtocol?
 
     public init() {
         let initialSettings = SwipySettings.load()
@@ -185,6 +186,12 @@ public final class AppLifecycleManager: ObservableObject {
     }
 
     public func startTrackingSession() {
+        if trackingActivityToken == nil {
+            trackingActivityToken = ProcessInfo.processInfo.beginActivity(
+                options: [.userInitiated, .latencyCritical],
+                reason: "Swipy Real-time Gesture Tracking"
+            )
+        }
         Task {
             let cameraOk = await CameraPermissionManager.shared.requestAccess()
             self.isCameraAuthorized = cameraOk
@@ -205,6 +212,10 @@ public final class AppLifecycleManager: ObservableObject {
     }
 
     public func stopTrackingSession() {
+        if let token = trackingActivityToken {
+            ProcessInfo.processInfo.endActivity(token)
+            trackingActivityToken = nil
+        }
         cameraManager.stopCapture()
         MouseEventController.shared.safetyReleaseHeldButtons()
         PointerOverlayController.shared.hide()

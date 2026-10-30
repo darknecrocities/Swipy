@@ -31,7 +31,7 @@ public struct GestureProfile: Codable, Identifiable, Equatable, Sendable {
         scrollSpeed: Double,
         pinchThreshold: Double = 0.32,
         dragDelayMs: Int = 260,
-        swipeVelocityThreshold: Double = 0.60
+        swipeVelocityThreshold: Double = 0.55
     ) {
         self.kind = kind
         self.description = description
@@ -54,7 +54,7 @@ public struct GestureProfile: Codable, Identifiable, Equatable, Sendable {
         scrollSpeed: 1.0,
         pinchThreshold: 0.32,
         dragDelayMs: 250,
-        swipeVelocityThreshold: 0.60
+        swipeVelocityThreshold: 0.55
     )
 
     public static let precision = GestureProfile(
@@ -78,7 +78,7 @@ public struct GestureProfile: Codable, Identifiable, Equatable, Sendable {
         scrollSpeed: 1.4,
         pinchThreshold: 0.35,
         dragDelayMs: 200,
-        swipeVelocityThreshold: 0.50
+        swipeVelocityThreshold: 0.45
     )
 
     public static let presentation = GestureProfile(
@@ -90,6 +90,6 @@ public struct GestureProfile: Codable, Identifiable, Equatable, Sendable {
         scrollSpeed: 0.9,
         pinchThreshold: 0.30,
         dragDelayMs: 350,
-        swipeVelocityThreshold: 0.55
+        swipeVelocityThreshold: 0.65
     )
 }

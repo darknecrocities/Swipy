@@ -123,13 +123,14 @@ public struct HandSkeleton: Codable, Equatable, Sendable {
     }
 
     /// Evaluates whether thumb and middle finger are actively engaging in a pinch/spread zoom gesture.
+    /// Crucially requires the index finger to NOT be extended, preventing any pointing interference.
     public var isThumbMiddleZooming: Bool {
+        guard !isFingerExtended(.index) else { return false }
         guard let dist = distance(between: .thumbTip, and: .middleTip) else { return false }
         let ratio = dist / palmScale
         let isRingCurled = !isFingerExtended(.ring)
-        let thumbIndexDist = distance(between: .thumbTip, and: .indexTip) ?? 1.0
-        // Active engagement: middle and thumb closer together than thumb-to-index (or ratio <= 0.40) and ring is curled
-        return ratio <= 0.55 && (dist < thumbIndexDist || ratio <= 0.40) && isRingCurled
+        let isLittleCurled = !isFingerExtended(.little)
+        return ratio <= 0.35 && isRingCurled && isLittleCurled
     }
 
     /// Evaluates whether thumb and index finger are pinching together, tolerant of natural index flexion.
@@ -157,8 +158,12 @@ public struct HandSkeleton: Codable, Equatable, Sendable {
             return .fourFingers
         } else if isIndex && isMiddle && isRing {
             return .threeFingers
-        } else if isIndex && isMiddle && !isRing && !isLittle {
+        } else if isIndex && isMiddle && !isLittle {
             return .twoFingers
+        } else if isIndex && !isMiddle {
+            // Dominant pointing: index extended while middle is curled.
+            // Noise-free: unaffected by natural partial curling of ring/little fingers.
+            return .oneFinger
         } else if isIndex && !isRing && !isLittle {
             return .oneFinger
         } else {
@@ -198,15 +203,17 @@ public struct HandSkeleton: Codable, Equatable, Sendable {
         mcp: HandJointName,
         wrist: HandJoint
     ) -> Bool {
-        guard let tipPt = joints[tip],
-              let pipPt = joints[pip],
-              let mcpPt = joints[mcp] else { return false }
-
+        guard let tipPt = joints[tip] else { return false }
         let tipToWrist = tipPt.distance(to: wrist)
-        let pipToWrist = pipPt.distance(to: wrist)
-        let mcpToWrist = mcpPt.distance(to: wrist)
 
-        // The tip must be further from the wrist than both PIP and MCP
-        return tipToWrist > pipToWrist && pipToWrist > mcpToWrist
+        if let pipPt = joints[pip], let mcpPt = joints[mcp] {
+            let pipToWrist = pipPt.distance(to: wrist)
+            let mcpToWrist = mcpPt.distance(to: wrist)
+            return tipToWrist > pipToWrist && pipToWrist > mcpToWrist
+        } else if let mcpPt = joints[mcp] {
+            return tipToWrist > mcpPt.distance(to: wrist) * 1.12
+        } else {
+            return tipToWrist > palmScale * 1.05
+        }
     }
 }

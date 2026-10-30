@@ -9,41 +9,48 @@ public final class MouseEventController: @unchecked Sendable {
     private let lock = NSLock()
     private var isLeftButtonHeld = false
     private var isRightButtonHeld = false
+    private let queue = DispatchQueue(label: "com.swipy.mouse-events", qos: .userInteractive)
 
     public init() {}
 
-    /// Performs a single left mouse click with realistic tactile duration.
+    /// Performs a single left mouse click with realistic tactile duration off the camera thread.
     public func leftClick(at point: CGPoint? = nil) {
         let target = point ?? CursorController.shared.currentQuartzCursorPosition
-        CGWarpMouseCursorPosition(target)
-        postMouseEvent(type: .leftMouseDown, point: target, button: .left, clickState: 1)
-        usleep(25_000) // 25ms press duration
-        postMouseEvent(type: .leftMouseUp, point: target, button: .left, clickState: 1)
-        DiagnosticsLogger.shared.recordEvent()
+        queue.async { [self] in
+            CGWarpMouseCursorPosition(target)
+            postMouseEvent(type: .leftMouseDown, point: target, button: .left, clickState: 1)
+            usleep(25_000) // 25ms press duration
+            postMouseEvent(type: .leftMouseUp, point: target, button: .left, clickState: 1)
+            DiagnosticsLogger.shared.recordEvent()
+        }
     }
 
-    /// Performs a rapid double click with proper inter-click separation.
+    /// Performs a rapid double click with proper inter-click separation off the camera thread.
     public func doubleClick(at point: CGPoint? = nil) {
         let target = point ?? CursorController.shared.currentQuartzCursorPosition
-        CGWarpMouseCursorPosition(target)
-        postMouseEvent(type: .leftMouseDown, point: target, button: .left, clickState: 1)
-        usleep(20_000)
-        postMouseEvent(type: .leftMouseUp, point: target, button: .left, clickState: 1)
-        usleep(40_000)
-        postMouseEvent(type: .leftMouseDown, point: target, button: .left, clickState: 2)
-        usleep(20_000)
-        postMouseEvent(type: .leftMouseUp, point: target, button: .left, clickState: 2)
-        DiagnosticsLogger.shared.recordEvent()
+        queue.async { [self] in
+            CGWarpMouseCursorPosition(target)
+            postMouseEvent(type: .leftMouseDown, point: target, button: .left, clickState: 1)
+            usleep(20_000)
+            postMouseEvent(type: .leftMouseUp, point: target, button: .left, clickState: 1)
+            usleep(40_000)
+            postMouseEvent(type: .leftMouseDown, point: target, button: .left, clickState: 2)
+            usleep(20_000)
+            postMouseEvent(type: .leftMouseUp, point: target, button: .left, clickState: 2)
+            DiagnosticsLogger.shared.recordEvent()
+        }
     }
 
-    /// Performs a right mouse click with tactile duration.
+    /// Performs a right mouse click with tactile duration off the camera thread.
     public func rightClick(at point: CGPoint? = nil) {
         let target = point ?? CursorController.shared.currentQuartzCursorPosition
-        CGWarpMouseCursorPosition(target)
-        postMouseEvent(type: .rightMouseDown, point: target, button: .right, clickState: 1)
-        usleep(25_000)
-        postMouseEvent(type: .rightMouseUp, point: target, button: .right, clickState: 1)
-        DiagnosticsLogger.shared.recordEvent()
+        queue.async { [self] in
+            CGWarpMouseCursorPosition(target)
+            postMouseEvent(type: .rightMouseDown, point: target, button: .right, clickState: 1)
+            usleep(25_000)
+            postMouseEvent(type: .rightMouseUp, point: target, button: .right, clickState: 1)
+            DiagnosticsLogger.shared.recordEvent()
+        }
     }
 
     /// Initiates a mouse drag operation.
@@ -84,7 +91,7 @@ public final class MouseEventController: @unchecked Sendable {
         isRightButtonHeld = false
         lock.unlock()
 
-        let currentPos = NSEvent.mouseLocation
+        let currentPos = CursorController.shared.currentQuartzCursorPosition
         if releaseLeft {
             postMouseEvent(type: .leftMouseUp, point: currentPos, button: .left, clickState: 1)
         }
@@ -99,15 +106,15 @@ public final class MouseEventController: @unchecked Sendable {
         button: CGMouseButton,
         clickState: Int64
     ) {
+        let source = CGEventSource(stateID: .hidSystemState)
         guard let event = CGEvent(
-            mouseEventSource: nil,
+            mouseEventSource: source,
             mouseType: type,
             mouseCursorPosition: point,
             mouseButton: button
         ) else { return }
 
         event.setIntegerValueField(.mouseEventClickState, value: clickState)
-        event.post(tap: .cgSessionEventTap)
         event.post(tap: .cghidEventTap)
     }
 }

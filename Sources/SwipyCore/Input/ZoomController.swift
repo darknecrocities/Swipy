@@ -25,7 +25,7 @@ public final class ZoomController: @unchecked Sendable {
         let target = point ?? CursorController.shared.currentQuartzCursorPosition
 
         guard let event = CGEvent(
-            scrollWheelEvent2Source: nil,
+            scrollWheelEvent2Source: CGEventSource(stateID: .hidSystemState),
             units: .pixel,
             wheelCount: 1,
             wheel1: scaledDelta,
@@ -35,10 +35,10 @@ public final class ZoomController: @unchecked Sendable {
 
         // Setting location ensures the zoom centers on the target element/window
         event.location = target
-        // Command key modifier triggers native continuous canvas/content zoom across macOS apps
-        event.flags = .maskCommand
+        // Control key modifier with continuous flag maps to native trackpad pinch-to-zoom in macOS browsers & viewers
+        event.flags = .maskControl
+        event.setIntegerValueField(.scrollWheelEventIsContinuous, value: 1)
 
-        event.post(tap: .cgSessionEventTap)
         event.post(tap: .cghidEventTap)
         DiagnosticsLogger.shared.recordEvent()
     }

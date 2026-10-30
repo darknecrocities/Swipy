@@ -14,6 +14,7 @@ public final class GestureRecognizer: @unchecked Sendable {
 
     private let lock = NSLock()
     private var isDraggingActive = false
+    private var isCurrentlyPointing = false
     private var previousScreenPoint: CGPoint?
     private var lastTimestamp: TimeInterval?
     private var _activeState: RecognizedGestureState = .idle
@@ -77,6 +78,11 @@ public final class GestureRecognizer: @unchecked Sendable {
     ) {
         switch state {
         case .pointing(let normalizedPt):
+            let isStateTransition = !isCurrentlyPointing
+            isCurrentlyPointing = true
+            if isStateTransition {
+                trackpadMotion.resetReference(to: normalizedPt)
+            }
             let screenPt = calculateSmoothedPoint(
                 normalizedPt: normalizedPt,
                 displayFrame: displayFrame,
@@ -92,11 +98,13 @@ public final class GestureRecognizer: @unchecked Sendable {
             onCursorUpdate?(screenPt, state)
 
         case .pinchPending:
+            isCurrentlyPointing = false
             // Strict cursor freeze on target: DO NOT move cursor while preparing or holding pinch
             let lockedPt = CursorController.shared.currentQuartzCursorPosition
             onCursorUpdate?(lockedPt, state)
 
         case .dragging(let normalizedPt):
+            isCurrentlyPointing = false
             let screenPt = calculateSmoothedPoint(
                 normalizedPt: normalizedPt,
                 displayFrame: displayFrame,
@@ -113,6 +121,7 @@ public final class GestureRecognizer: @unchecked Sendable {
             onCursorUpdate?(screenPt, state)
 
         case .leftClicked(let normalizedPt):
+            isCurrentlyPointing = false
             let screenPt = settings.trackingMode == .trackpad
                 ? CursorController.shared.currentQuartzCursorPosition
                 : calculateSmoothedPoint(normalizedPt: normalizedPt, displayFrame: displayFrame, settings: settings, timestamp: timestamp, skeleton: skeleton)
@@ -121,6 +130,7 @@ public final class GestureRecognizer: @unchecked Sendable {
             onCursorUpdate?(screenPt, state)
 
         case .doubleClicked(let normalizedPt):
+            isCurrentlyPointing = false
             let screenPt = settings.trackingMode == .trackpad
                 ? CursorController.shared.currentQuartzCursorPosition
                 : calculateSmoothedPoint(normalizedPt: normalizedPt, displayFrame: displayFrame, settings: settings, timestamp: timestamp, skeleton: skeleton)
@@ -129,6 +139,7 @@ public final class GestureRecognizer: @unchecked Sendable {
             onCursorUpdate?(screenPt, state)
 
         case .rightClicked(let normalizedPt):
+            isCurrentlyPointing = false
             let screenPt = settings.trackingMode == .trackpad
                 ? CursorController.shared.currentQuartzCursorPosition
                 : calculateSmoothedPoint(normalizedPt: normalizedPt, displayFrame: displayFrame, settings: settings, timestamp: timestamp, skeleton: skeleton)
@@ -137,6 +148,7 @@ public final class GestureRecognizer: @unchecked Sendable {
             onCursorUpdate?(screenPt, state)
 
         case .scrolling(let dy, let dx):
+            isCurrentlyPointing = false
             if isDraggingActive {
                 MouseEventController.shared.endDrag(at: CursorController.shared.currentQuartzCursorPosition)
                 isDraggingActive = false
@@ -150,9 +162,11 @@ public final class GestureRecognizer: @unchecked Sendable {
             onCursorUpdate?(CursorController.shared.currentQuartzCursorPosition, state)
 
         case .swiping(let direction, let fingers):
+            isCurrentlyPointing = false
             handleSwipeDispatch(direction: direction, fingers: fingers, settings: settings)
 
         case .zooming(let scaleDelta, let anchorPoint):
+            isCurrentlyPointing = false
             if isDraggingActive {
                 MouseEventController.shared.endDrag(at: CursorController.shared.currentQuartzCursorPosition)
                 isDraggingActive = false
@@ -164,22 +178,27 @@ public final class GestureRecognizer: @unchecked Sendable {
             onCursorUpdate?(anchorPoint, state)
 
         case .idle, .twoHandZooming, .paused:
+            isCurrentlyPointing = false
             break
         }
     }
 
     private func handleSwipeDispatch(direction: SwipeDirection, fingers: Int, settings: SwipySettings) {
-        switch direction {
-        case .up:
-            SystemActionController.shared.triggerMissionControl()
-        case .down:
-            SystemActionController.shared.triggerShowDesktop()
-        case .left:
-            // Swiping hand left pulls the adjacent space from the right (like trackpad)
-            SystemActionController.shared.triggerNextSpace()
-        case .right:
-            // Swiping hand right pulls the adjacent space from the left (like trackpad)
-            SystemActionController.shared.triggerPreviousSpace()
+        if let action = SystemActionController.swipeAction(direction: direction, fingers: fingers, bindings: settings.bindings) {
+            SystemActionController.shared.perform(action)
+        } else {
+            switch direction {
+            case .up:
+                SystemActionController.shared.triggerMissionControl()
+            case .down:
+                SystemActionController.shared.triggerShowDesktop()
+            case .left:
+                // Swiping hand left pulls the adjacent space from the right (like trackpad)
+                SystemActionController.shared.triggerNextSpace()
+            case .right:
+                // Swiping hand right pulls the adjacent space from the left (like trackpad)
+                SystemActionController.shared.triggerPreviousSpace()
+            }
         }
     }
 
@@ -224,6 +243,7 @@ public final class GestureRecognizer: @unchecked Sendable {
             isDraggingActive = false
             MouseEventController.shared.safetyReleaseHeldButtons()
         }
+        isCurrentlyPointing = false
         smoother.reset()
         trackpadMotion.reset()
         previousScreenPoint = nil
