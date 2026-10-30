@@ -1,0 +1,118 @@
+// Exact 15-Gesture Library Engine Matching Swipy macOS App & SF Symbols
+(function () {
+  const ICONS = {
+    'hand.point.up.left': '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 11V4a2 2 0 0 1 4 0v7m0-3a2 2 0 0 1 4 0v2m0-1a2 2 0 0 1 4 0v5a6 6 0 0 1-6 6h-3a6 6 0 0 1-5.2-3L5.4 13a1.8 1.8 0 0 1 2.5-2.3L10 12"/></svg>',
+    'hand.pinch': '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 9c2.5 0 4.5 1.5 4.5 3.5S10.5 16 8 16m6-11a4 4 0 0 1 0 8M5 5l3 3m0-3L5 8m12 6c0 3-2.5 5.5-5.5 5.5S6 17 6 14"/></svg>',
+    'hand.draw': '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0-3-3m3 3 3-3M4 19h16M7 15h.01M17 15h.01"/></svg>',
+    'hand.tap.fill': '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="3"/><path d="M10 9a2 2 0 0 1 4 0v5h3a3 3 0 0 1 3 3v3a2 2 0 0 1-2 2H9a4 4 0 0 1-3.5-2l-2-3.5a1.5 1.5 0 0 1 2.2-1.8L10 16V9z"/></svg>',
+    'hand.tap': '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5a4 4 0 0 1 8 0M10 9a2 2 0 0 1 4 0v5h3a3 3 0 0 1 3 3v3a2 2 0 0 1-2 2H9a4 4 0 0 1-3.5-2l-2-3.5a1.5 1.5 0 0 1 2.2-1.8L10 16V9z"/></svg>',
+    'arrow.up.and.down': '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18m0-18-4 4m4-4 4 4m-4 14-4-4m4 4 4-4"/></svg>',
+    'arrow.up': '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5m0 0-6 6m6-6 6 6"/></svg>',
+    'arrow.down': '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14m0 0-6-6m6 6 6-6"/></svg>',
+    'arrow.left': '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5m0 0 6-6m-6 6 6 6"/></svg>',
+    'arrow.right': '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m0 0-6-6m6 6-6 6"/></svg>',
+    'square.grid.2x2': '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>',
+    'square.grid.2x2.fill': '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" fill="currentColor"/><rect x="14" y="3" width="7" height="7" fill="currentColor"/><rect x="3" y="14" width="7" height="7" fill="currentColor"/><rect x="14" y="14" width="7" height="7" fill="currentColor"/></svg>',
+    'plus.magnifyingglass': '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5M11 8v6m-3-3h6"/></svg>',
+    'arrow.up.left.and.arrow.down.right': '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10V4h6M4 4l7 7m9 3v6h-6m6 0-7-7"/></svg>',
+    'hand.raised': '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 13V5a1.5 1.5 0 0 1 3 0v6m0-7a1.5 1.5 0 0 1 3 0v7m0-6a1.5 1.5 0 0 1 3 0v7m0-4.5a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-2a6 6 0 0 1-5-2.7L4.3 14a1.5 1.5 0 0 1 2.4-1.8L8 13z"/></svg>'
+  };
+
+  const GESTURES = [
+    { name: 'Index Pointing', action: 'Point & Glide Cursor', category: 'Cursor & Clicks', symbol: 'hand.point.up.left' },
+    { name: 'Thumb-Index Pinch', action: 'Left Click', category: 'Cursor & Clicks', symbol: 'hand.pinch' },
+    { name: 'Pinch & Drag', action: 'Drag and Drop', category: 'Cursor & Clicks', symbol: 'hand.draw' },
+    { name: 'Double Pinch', action: 'Double Click', category: 'Cursor & Clicks', symbol: 'hand.tap.fill' },
+    { name: 'Thumb-Middle Pinch', action: 'Right Click', category: 'Cursor & Clicks', symbol: 'hand.tap' },
+    { name: 'Two-Finger Scroll', action: 'Scroll', category: 'Scrolling', symbol: 'arrow.up.and.down' },
+    { name: 'Three-Finger Swipe Up', action: 'Mission Control', category: 'Space Navigation', symbol: 'arrow.up' },
+    { name: 'Three-Finger Swipe Down', action: 'Show Desktop', category: 'Space Navigation', symbol: 'arrow.down' },
+    { name: 'Three-Finger Swipe Left', action: 'Next Space', category: 'Space Navigation', symbol: 'arrow.left' },
+    { name: 'Three-Finger Swipe Right', action: 'Previous Space', category: 'Space Navigation', symbol: 'arrow.right' },
+    { name: 'Four-Finger Swipe Left', action: 'Next Space', category: 'App Switching', symbol: 'square.grid.2x2' },
+    { name: 'Four-Finger Swipe Right', action: 'Previous Space', category: 'App Switching', symbol: 'square.grid.2x2.fill' },
+    { name: 'Thumb-Middle Zoom', action: 'Zoom In / Out', category: 'Two-Hand Controls', symbol: 'plus.magnifyingglass' },
+    { name: 'Two-Hand Zoom', action: 'Zoom In / Out', category: 'Two-Hand Controls', symbol: 'arrow.up.left.and.arrow.down.right' },
+    { name: 'Open Palms Hold', action: 'Pause / Resume', category: 'Safety Controls', symbol: 'hand.raised' }
+  ];
+
+  const CATEGORIES = [
+    'All',
+    'Cursor & Clicks',
+    'Scrolling',
+    'Space Navigation',
+    'App Switching',
+    'Two-Hand Controls',
+    'Safety Controls'
+  ];
+
+  function initGestureLibrary() {
+    const filterContainer = document.getElementById('gesture-filter-bar');
+    const cardsContainer = document.getElementById('gesture-cards-grid');
+    if (!filterContainer || !cardsContainer) return;
+
+    let selectedCategory = 'All';
+
+    function updateWithTransition(fn) {
+      if (document.startViewTransition) {
+        document.startViewTransition(fn);
+      } else {
+        fn();
+      }
+    }
+
+    function renderFilters() {
+      filterContainer.innerHTML = '';
+      CATEGORIES.forEach(function (cat) {
+        const count = cat === 'All'
+          ? GESTURES.length
+          : GESTURES.filter(function (g) { return g.category === cat; }).length;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'library-filter-pill';
+        btn.setAttribute('aria-pressed', String(selectedCategory === cat));
+        btn.textContent = cat + ' (' + count + ')';
+        btn.addEventListener('click', function () {
+          selectedCategory = cat;
+          updateWithTransition(function () {
+            renderFilters();
+            renderCards();
+          });
+        });
+        filterContainer.appendChild(btn);
+      });
+    }
+
+    function renderCards() {
+      cardsContainer.innerHTML = '';
+      const filtered = selectedCategory === 'All'
+        ? GESTURES
+        : GESTURES.filter(function (g) { return g.category === selectedCategory; });
+
+      filtered.forEach(function (item) {
+        const card = document.createElement('article');
+        card.className = 'gesture-item-card';
+        const svgMarkup = ICONS[item.symbol] || ICONS['hand.point.up.left'];
+        card.innerHTML =
+          '<div class="gesture-card-top">' +
+            '<div class="gesture-icon-box">' + svgMarkup + '</div>' +
+            '<div class="gesture-toggle-indicator" role="img" aria-label="Active"></div>' +
+          '</div>' +
+          '<div>' +
+            '<h3 class="tetris-block-title" style="font-size: var(--text-base); margin-bottom: 0.25rem;">' + item.name + '</h3>' +
+            '<p style="font-size: var(--text-sm); color: var(--color-ink-secondary); font-weight: 500;">' + item.action + '</p>' +
+          '</div>' +
+          '<div style="display:flex; justify-content:space-between; align-items:center; padding-top: 0.35rem; border-top: 1px solid var(--color-border-hairline);">' +
+            '<span class="mono-caption">' + item.category + '</span>' +
+            '<span class="mono-caption" style="color: var(--color-ink-primary);">ACTIVE</span>' +
+          '</div>';
+        cardsContainer.appendChild(card);
+      });
+    }
+
+    renderFilters();
+    renderCards();
+  }
+
+  document.addEventListener('DOMContentLoaded', initGestureLibrary);
+})();
