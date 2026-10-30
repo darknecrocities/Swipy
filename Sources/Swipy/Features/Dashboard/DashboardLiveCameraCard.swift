@@ -62,7 +62,8 @@ public struct DashboardLiveCameraCard: View {
                 }
                 .padding(10)
             }
-            .frame(height: 220)
+            .aspectRatio(16.0 / 9.0, contentMode: .fit)
+            .frame(maxWidth: .infinity, maxHeight: 320)
             .background(Color.black.opacity(0.04))
             .cornerRadius(12)
             .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color(hex: "EAEAEA"), lineWidth: 1))
@@ -174,7 +175,31 @@ public struct DashboardLiveCameraCard: View {
     }
 
     private func point(for joint: HandJoint, in size: CGSize) -> CGPoint {
-        // Mirrored X for selfie webcam, inverted Y for AppKit to SwiftUI coordinates
-        CGPoint(x: (1.0 - joint.x) * size.width, y: (1.0 - joint.y) * size.height)
+        // Mirrored X for selfie webcam, exact AspectFill scale and crop calculation for 16:9 HD video
+        let camAspect: CGFloat = 16.0 / 9.0
+        let viewAspect: CGFloat = size.width / max(1.0, size.height)
+
+        let renderWidth: CGFloat
+        let renderHeight: CGFloat
+        let offsetX: CGFloat
+        let offsetY: CGFloat
+
+        if viewAspect > camAspect {
+            // Container is wider than 16:9 -> video fills width, cropped top/bottom
+            renderWidth = size.width
+            renderHeight = size.width / camAspect
+            offsetX = 0
+            offsetY = (renderHeight - size.height) / 2.0
+        } else {
+            // Container is taller than 16:9 -> video fills height, cropped left/right
+            renderHeight = size.height
+            renderWidth = size.height * camAspect
+            offsetX = (renderWidth - size.width) / 2.0
+            offsetY = 0
+        }
+
+        let px = (1.0 - CGFloat(joint.x)) * renderWidth - offsetX
+        let py = (1.0 - CGFloat(joint.y)) * renderHeight - offsetY
+        return CGPoint(x: px, y: py)
     }
 }

@@ -29,4 +29,10 @@ public final class AccessibilityPermissionManager: @unchecked Sendable {
             NSWorkspace.shared.open(url)
         }
     }
+
+    /// Triggers fresh system prompt and opens Accessibility preferences pane directly.
+    public func resetAndPromptAccessibility() {
+        promptForAccessibility()
+        openAccessibilitySettings()
+    }
 }

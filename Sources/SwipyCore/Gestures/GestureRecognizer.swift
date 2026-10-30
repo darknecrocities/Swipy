@@ -10,6 +10,7 @@ public final class GestureRecognizer: @unchecked Sendable {
     public lazy var stateMachine = GestureStateMachine(history: history, resolver: resolver)
     public var coordinateMapper = CoordinateMapper()
     public let smoother = MotionSmoother()
+    public let trackpadMotion = TrackpadMotionController()
 
     private let lock = NSLock()
     private var isDraggingActive = false
@@ -149,13 +150,25 @@ public final class GestureRecognizer: @unchecked Sendable {
         settings: SwipySettings,
         timestamp: TimeInterval
     ) -> CGPoint {
-        let mapped = coordinateMapper.mapToScreen(
-            normalizedPoint: normalizedPt,
-            previousPoint: previousScreenPoint,
-            screenFrame: displayFrame,
-            sensitivity: settings.cursorSensitivity
-        )
-        let smoothed = smoother.filter(point: mapped, timestamp: timestamp)
+        let targetPoint: CGPoint
+        switch settings.trackingMode {
+        case .trackpad:
+            targetPoint = trackpadMotion.update(
+                normalizedPoint: normalizedPt,
+                sensitivity: settings.cursorSensitivity,
+                screenFrame: displayFrame,
+                isAdaptive: settings.isAdaptiveAcceleration
+            )
+        case .directPointer:
+            targetPoint = coordinateMapper.mapToScreen(
+                normalizedPoint: normalizedPt,
+                previousPoint: previousScreenPoint,
+                screenFrame: displayFrame,
+                sensitivity: settings.cursorSensitivity
+            )
+        }
+
+        let smoothed = smoother.filter(point: targetPoint, timestamp: timestamp)
         previousScreenPoint = smoothed
         lastTimestamp = timestamp
         return smoothed
@@ -167,6 +180,7 @@ public final class GestureRecognizer: @unchecked Sendable {
             MouseEventController.shared.safetyReleaseHeldButtons()
         }
         smoother.reset()
+        trackpadMotion.reset()
         previousScreenPoint = nil
         lastTimestamp = nil
         lock.lock()

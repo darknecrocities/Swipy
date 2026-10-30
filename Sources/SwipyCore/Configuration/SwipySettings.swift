@@ -1,5 +1,11 @@
 import Foundation
 
+/// Interaction style for mapping hand motion to cursor coordinates.
+public enum TrackingMode: String, Codable, CaseIterable, Sendable {
+    case trackpad = "Virtual Trackpad (Relative)"
+    case directPointer = "Direct Pointer (Absolute)"
+}
+
 /// Core persistent configuration model for Swipy.
 public struct SwipySettings: Codable, Equatable, Sendable {
     // Master State
@@ -8,6 +14,7 @@ public struct SwipySettings: Codable, Equatable, Sendable {
     public var selectedProfileKind: ProfileKind
 
     // Cursor & Motion
+    public var trackingMode: TrackingMode
     public var cursorSensitivity: Double
     public var isAdaptiveAcceleration: Bool
     public var smoothingMinCutoff: Double
@@ -50,6 +57,7 @@ public struct SwipySettings: Codable, Equatable, Sendable {
         isTrackingEnabled: Bool = false,
         isPaused: Bool = false,
         selectedProfileKind: ProfileKind = .balanced,
+        trackingMode: TrackingMode = .trackpad,
         cursorSensitivity: Double = 1.15,
         isAdaptiveAcceleration: Bool = true,
         smoothingMinCutoff: Double = 1.0,
@@ -79,6 +87,7 @@ public struct SwipySettings: Codable, Equatable, Sendable {
         self.isTrackingEnabled = isTrackingEnabled
         self.isPaused = isPaused
         self.selectedProfileKind = selectedProfileKind
+        self.trackingMode = trackingMode
         self.cursorSensitivity = cursorSensitivity
         self.isAdaptiveAcceleration = isAdaptiveAcceleration
         self.smoothingMinCutoff = smoothingMinCutoff

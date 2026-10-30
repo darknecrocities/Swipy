@@ -21,8 +21,11 @@ MotionSmootherTests.run()
 print("\n[5/6] Running SettingsTests...")
 SettingsTests.run()
 
-print("\n[6/6] Running CursorAccelerationTests...")
+print("\n[6/7] Running CursorAccelerationTests...")
 CursorAccelerationTests.run()
+
+print("\n[7/7] Running TrackpadMotionTests...")
+TrackpadMotionTests.run()
 
 let elapsedMs = (CFAbsoluteTimeGetCurrent() - startTime) * 1000.0
 

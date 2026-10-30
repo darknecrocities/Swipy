@@ -15,6 +15,7 @@ public struct CameraVideoFeedView: NSViewRepresentable {
 
     public func updateNSView(_ nsView: CameraVideoPreviewNSView, context: Context) {
         nsView.session = CameraManager.shared.session
+        nsView.applyMirroringIfNeeded()
     }
 }
 
@@ -49,16 +50,21 @@ public final class CameraVideoPreviewNSView: NSView {
     private func setupLayer(with session: AVCaptureSession) {
         let layer = AVCaptureVideoPreviewLayer(session: session)
         layer.videoGravity = .resizeAspectFill
-        if let connection = layer.connection, connection.isVideoMirroringSupported {
+        self.layer = layer
+        self.previewLayer = layer
+        applyMirroringIfNeeded()
+    }
+
+    public func applyMirroringIfNeeded() {
+        if let connection = previewLayer?.connection, connection.isVideoMirroringSupported {
             connection.automaticallyAdjustsVideoMirroring = false
             connection.isVideoMirrored = true
         }
-        self.layer = layer
-        self.previewLayer = layer
     }
 
     public override func layout() {
         super.layout()
         previewLayer?.frame = bounds
+        applyMirroringIfNeeded()
     }
 }

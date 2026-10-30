@@ -48,7 +48,7 @@ public final class SystemActionController: @unchecked Sendable {
     }
 
     private func postKeyCombination(keyCode: CGKeyCode, flags: CGEventFlags) {
-        let source = CGEventSource(stateID: .hidSystemState)
+        let source = CGEventSource(stateID: .combinedSessionState)
         guard let keyDown = CGEvent(keyboardEventSource: source, virtualKey: keyCode, keyDown: true),
               let keyUp = CGEvent(keyboardEventSource: source, virtualKey: keyCode, keyDown: false) else {
             return
@@ -57,8 +57,14 @@ public final class SystemActionController: @unchecked Sendable {
         keyDown.flags = flags
         keyUp.flags = flags
 
+        keyDown.post(tap: .cgSessionEventTap)
         keyDown.post(tap: .cghidEventTap)
+
+        usleep(20_000) // 20ms tactile hold
+
+        keyUp.post(tap: .cgSessionEventTap)
         keyUp.post(tap: .cghidEventTap)
+
         DiagnosticsLogger.shared.recordEvent()
     }
 }

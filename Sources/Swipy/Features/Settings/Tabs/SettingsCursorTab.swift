@@ -11,6 +11,40 @@ public struct SettingsCursorTab: View {
 
     public var body: some View {
         VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 10) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Interaction Navigation Style")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(Color(hex: "171717"))
+                    Text("Virtual Trackpad operates like a physical MacBook mousepad in the air. Direct Pointer maps absolute camera bounds to your screen.")
+                        .font(.system(size: 11))
+                        .foregroundColor(Color(hex: "777777"))
+                }
+
+                HStack(spacing: 8) {
+                    ForEach(TrackingMode.allCases, id: \.self) { mode in
+                        Button(action: {
+                            appState.settings.trackingMode = mode
+                            appState.settings.save()
+                        }) {
+                            Text(mode.rawValue)
+                                .font(.system(size: 11, weight: .medium))
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 7)
+                                .background(appState.settings.trackingMode == mode ? Color(hex: "171717") : Color.white)
+                                .foregroundColor(appState.settings.trackingMode == mode ? .white : Color(hex: "171717"))
+                                .cornerRadius(8)
+                                .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(hex: "EAEAEA"), lineWidth: 1))
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+            .padding(14)
+            .background(Color(hex: "FAFAFA"))
+            .cornerRadius(10)
+            .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color(hex: "EAEAEA"), lineWidth: 1))
+
             SettingsSliderRow(
                 title: "Cursor Sensitivity",
                 subtitle: "Direct multiplier mapping hand movement to cursor travel.",

@@ -11,9 +11,16 @@ public final class CursorController: @unchecked Sendable {
 
     public init() {}
 
-    /// Current cursor location on the primary display.
+    /// Current cursor location on the primary display in Cocoa coordinates (origin bottom-left).
     public var currentCursorPosition: CGPoint {
         NSEvent.mouseLocation
+    }
+
+    /// Current cursor location in Core Graphics Quartz global coordinates (origin top-left).
+    public var currentQuartzCursorPosition: CGPoint {
+        let cocoaPos = NSEvent.mouseLocation
+        let primaryHeight = NSScreen.main?.frame.height ?? 900
+        return CGPoint(x: cocoaPos.x, y: max(0, primaryHeight - cocoaPos.y))
     }
 
     /// Moves the actual macOS cursor to the specified screen coordinate.

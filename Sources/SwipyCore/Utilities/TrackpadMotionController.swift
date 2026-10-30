@@ -1,0 +1,91 @@
+import Foundation
+import CoreGraphics
+import AppKit
+
+/// Translates hand motion into smooth relative cursor navigation mimicking a MacBook trackpad.
+public final class TrackpadMotionController: @unchecked Sendable {
+    private let lock = NSLock()
+    private var previousNormalizedPoint: CGPoint?
+    private var internalScreenPosition: CGPoint?
+    private let deadZoneRadius: Double
+
+    public init(deadZoneRadius: Double = 0.002) {
+        self.deadZoneRadius = deadZoneRadius
+    }
+
+    /// Resets trackpad reference frame when tracking is lost, interrupted, or paused.
+    public func reset() {
+        lock.lock()
+        defer { lock.unlock() }
+        previousNormalizedPoint = nil
+        internalScreenPosition = nil
+    }
+
+    /// Computes relative cursor displacement from hand movement in camera space.
+    /// - Parameters:
+    ///   - normalizedPoint: Hand landmark in Vision coordinates (0..1).
+    ///   - sensitivity: User sensitivity multiplier.
+    ///   - screenFrame: Target display bounds in Quartz coordinates.
+    ///   - isAdaptive: Whether to apply non-linear trackpad acceleration curves.
+    /// - Returns: New target cursor position in Quartz screen coordinates.
+    public func update(
+        normalizedPoint: CGPoint,
+        sensitivity: Double,
+        screenFrame: CGRect,
+        isAdaptive: Bool = true
+    ) -> CGPoint {
+        lock.lock()
+        defer { lock.unlock() }
+
+        // Initialize internal position from current macOS cursor if fresh, clamped to target screen
+        let currentSysPos = CursorController.shared.currentQuartzCursorPosition
+        let initialClamped = CGPoint(
+            x: max(screenFrame.minX, min(screenFrame.maxX - 1, currentSysPos.x)),
+            y: max(screenFrame.minY, min(screenFrame.maxY - 1, currentSysPos.y))
+        )
+        let activePos = internalScreenPosition ?? initialClamped
+
+        guard let prev = previousNormalizedPoint else {
+            previousNormalizedPoint = normalizedPoint
+            internalScreenPosition = activePos
+            return activePos
+        }
+
+        previousNormalizedPoint = normalizedPoint
+
+        // Invert X for selfie camera parity (moving hand right decreases sensor x)
+        let dx = -Double(normalizedPoint.x - prev.x)
+        // Invert Y because Vision is bottom-left (y increases up), Quartz is top-left (y decreases up)
+        let dy = -Double(normalizedPoint.y - prev.y)
+
+        let dist = (dx * dx + dy * dy).squareRoot()
+        if dist < deadZoneRadius {
+            return activePos
+        }
+
+        // Scale normalized displacement to physical screen pixel space
+        let baseTravelMultiplier = 1.8
+        let pixelDx = dx * Double(screenFrame.size.width) * sensitivity * baseTravelMultiplier
+        let pixelDy = dy * Double(screenFrame.size.height) * sensitivity * baseTravelMultiplier
+
+        let moveX: Double
+        let moveY: Double
+        if isAdaptive {
+            let speed = (pixelDx * pixelDx + pixelDy * pixelDy).squareRoot()
+            // Trackpad acceleration: smooth sub-pixel control at low velocity, swift travel at high velocity
+            let accel = min(2.8, max(0.85, 1.0 + (speed / 90.0)))
+            moveX = pixelDx * accel
+            moveY = pixelDy * accel
+        } else {
+            moveX = pixelDx
+            moveY = pixelDy
+        }
+
+        let clampedX = max(Double(screenFrame.minX), min(Double(screenFrame.maxX - 1), Double(activePos.x) + moveX))
+        let clampedY = max(Double(screenFrame.minY), min(Double(screenFrame.maxY - 1), Double(activePos.y) + moveY))
+        let newScreenPos = CGPoint(x: clampedX, y: clampedY)
+
+        internalScreenPosition = newScreenPos
+        return newScreenPos
+    }
+}
