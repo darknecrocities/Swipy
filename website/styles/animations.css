@@ -1,7 +1,7 @@
 /* Circular Dot-Matrix Hand & Tetris Widget */
 .matrix-orb-shell {
-  width: 248px;
-  height: 248px;
+  width: 236px;
+  height: 236px;
   border-radius: 50%;
   background: var(--color-surface-pitch);
   border: 2px solid var(--color-border-strong);
@@ -12,17 +12,65 @@
   justify-content: center;
   box-shadow: 10px 10px 0 oklch(0.82 0 0);
   cursor: pointer;
-  transition: transform 0.35s var(--ease-spring);
+  transition: transform 0.35s var(--ease-spring), border-radius 0.35s var(--ease-spring);
 }
 
 .matrix-orb-shell:hover {
   transform: scale(1.04) rotate(-2deg);
+  border-radius: 42% 58% 48% 52% / 52% 44% 56% 48%;
 }
 
 .matrix-orb-canvas {
-  width: 190px;
-  height: 190px;
+  width: 180px;
+  height: 180px;
   display: block;
+}
+
+/* Interactive Card Morphing & Surface Inversion */
+.morph-surface-card {
+  position: relative;
+  border-radius: 0px;
+  transition:
+    transform 0.45s var(--ease-spring),
+    border-radius 0.45s var(--ease-spring),
+    background-color 0.38s var(--ease-expo),
+    color 0.38s var(--ease-expo),
+    box-shadow 0.45s var(--ease-spring);
+  will-change: transform, border-radius;
+}
+
+.morph-surface-card:hover,
+.keeby-step-card[data-active="true"] {
+  background-color: var(--color-surface-pitch);
+  color: var(--color-ink-inverted);
+  border-radius: 18px 4px 18px 4px;
+  transform: translate3d(-6px, -6px, 0) scale(1.02);
+  box-shadow: 12px 12px 0 oklch(0.75 0 0);
+}
+
+.mech-card-alpha.morph-surface-card:hover {
+  background-color: var(--color-canvas-pure);
+  color: var(--color-ink-primary);
+  border-radius: 4px 20px 4px 20px;
+  box-shadow: 12px 12px 0 var(--color-surface-pitch);
+}
+
+.gesture-item-card.morph-surface-card:hover .gesture-icon-box {
+  background-color: var(--color-surface-pitch);
+  border-color: var(--color-ink-inverted);
+  border-radius: 10px;
+}
+
+.gesture-item-card.morph-surface-card:hover .gesture-icon-box svg {
+  stroke: var(--color-ink-inverted);
+}
+
+.gesture-item-card.morph-surface-card:hover .gesture-toggle-indicator {
+  background-color: var(--color-canvas-pure);
+}
+
+.gesture-item-card.morph-surface-card:hover .gesture-toggle-indicator::after {
+  background-color: var(--color-surface-pitch);
 }
 
 /* Station 02 & 03 Asymmetrical Staggered Layout */
@@ -55,6 +103,7 @@
   grid-column: 2 / 7;
   grid-row: 4 / 7;
   background: var(--color-surface-card);
+  color: var(--color-ink-primary);
   border: 2px solid var(--color-border-strong);
   padding: var(--space-md);
   box-shadow: 8px 8px 0 var(--color-surface-pitch);
@@ -105,7 +154,7 @@
   color: var(--color-ink-primary);
   border: 1.5px solid var(--color-border-strong);
   cursor: pointer;
-  transition: transform 0.2s var(--ease-expo), background 0.2s var(--ease-expo), color 0.2s var(--ease-expo);
+  transition: transform 0.25s var(--ease-expo), background 0.25s var(--ease-expo), color 0.25s var(--ease-expo), border-radius 0.25s var(--ease-expo);
 }
 
 .library-filter-pill[aria-pressed="true"],
@@ -113,6 +162,7 @@
   background: var(--color-surface-pitch);
   color: var(--color-ink-inverted);
   transform: translate(-2px, -2px);
+  border-radius: 8px;
   box-shadow: 4px 4px 0 var(--color-ink-primary);
 }
 
@@ -124,26 +174,13 @@
 
 .gesture-item-card {
   background: var(--color-surface-card);
+  color: var(--color-ink-primary);
   border: 2px solid var(--color-border-strong);
   padding: var(--space-md);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   gap: var(--space-sm);
-  transition: transform 0.28s var(--ease-expo), box-shadow 0.28s var(--ease-expo);
-}
-
-.gesture-item-card:hover {
-  transform: translate(-4px, -4px);
-  box-shadow: 8px 8px 0 var(--color-surface-pitch);
-}
-
-.gesture-item-card:nth-child(even) {
-  transform: translateY(10px);
-}
-
-.gesture-item-card:nth-child(even):hover {
-  transform: translate(-4px, 6px);
 }
 
 .gesture-card-top {
@@ -160,6 +197,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: background-color 0.3s var(--ease-expo), border-radius 0.3s var(--ease-expo);
 }
 
 .gesture-icon-box svg {

@@ -3,7 +3,7 @@
   const GRID_SIZE = 15;
   const POSES = [
     {
-      label: 'OPEN PALM // SPACE SWIPE',
+      label: 'OPEN PALM',
       cells: [
         [3,1],[3,2],[3,3],[3,4],[6,0],[6,1],[6,2],[6,3],[6,4],
         [9,1],[9,2],[9,3],[9,4],[12,2],[12,3],[12,4],
@@ -15,7 +15,7 @@
       ]
     },
     {
-      label: 'INDEX POINT // GLIDE',
+      label: 'INDEX POINT',
       cells: [
         [7,0],[7,1],[7,2],[7,3],[7,4],[7,5],[7,6],
         [5,6],[6,6],[8,6],[9,6],
@@ -26,7 +26,7 @@
       ]
     },
     {
-      label: 'PINCH & DRAG // HOLD',
+      label: 'PINCH & DRAG',
       cells: [
         [5,2],[6,2],[7,3],[8,4],[8,5],
         [4,4],[5,5],[6,5],[7,5],
@@ -36,7 +36,7 @@
       ]
     },
     {
-      label: 'TETRIS BLOCK // MATRIX',
+      label: 'TETRIS MATRIX',
       cells: [
         [2,2],[3,2],[4,2],[3,3],
         [9,2],[10,2],[10,3],[11,3],

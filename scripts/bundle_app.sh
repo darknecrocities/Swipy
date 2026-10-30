@@ -72,4 +72,19 @@ fi
 echo "==> Verifying signature..."
 codesign --verify --deep --strict --verbose=2 "${BUILD_DIR}"
 
-echo "==> Successfully packaged and verified ${BUILD_DIR}!"
+DOWNLOADS_DIR="website/downloads"
+mkdir -p "${DOWNLOADS_DIR}"
+
+echo "==> Creating macOS ZIP archive (${DOWNLOADS_DIR}/Swipy-macOS.zip)..."
+rm -f "${DOWNLOADS_DIR}/Swipy-macOS.zip"
+ditto -c -k --keepParent "${BUILD_DIR}" "${DOWNLOADS_DIR}/Swipy-macOS.zip"
+
+echo "==> Creating macOS Disk Image (${DOWNLOADS_DIR}/Swipy-macOS.dmg)..."
+rm -f "${DOWNLOADS_DIR}/Swipy-macOS.dmg"
+DMG_STAGING=$(mktemp -d)
+cp -R "${BUILD_DIR}" "${DMG_STAGING}/"
+ln -s /Applications "${DMG_STAGING}/Applications"
+hdiutil create -volname "Swipy" -srcfolder "${DMG_STAGING}" -ov -format UDZO "${DOWNLOADS_DIR}/Swipy-macOS.dmg" >/dev/null
+rm -rf "${DMG_STAGING}"
+
+echo "==> Successfully packaged ${BUILD_DIR}, ${DOWNLOADS_DIR}/Swipy-macOS.dmg, and ${DOWNLOADS_DIR}/Swipy-macOS.zip!"

@@ -91,7 +91,7 @@
 
       filtered.forEach(function (item) {
         const card = document.createElement('article');
-        card.className = 'gesture-item-card';
+        card.className = 'gesture-item-card morph-surface-card';
         const svgMarkup = ICONS[item.symbol] || ICONS['hand.point.up.left'];
         card.innerHTML =
           '<div class="gesture-card-top">' +
@@ -99,12 +99,8 @@
             '<div class="gesture-toggle-indicator" role="img" aria-label="Active"></div>' +
           '</div>' +
           '<div>' +
-            '<h3 class="tetris-block-title" style="font-size: var(--text-base); margin-bottom: 0.25rem;">' + item.name + '</h3>' +
-            '<p style="font-size: var(--text-sm); color: var(--color-ink-secondary); font-weight: 500;">' + item.action + '</p>' +
-          '</div>' +
-          '<div style="display:flex; justify-content:space-between; align-items:center; padding-top: 0.35rem; border-top: 1px solid var(--color-border-hairline);">' +
-            '<span class="mono-caption">' + item.category + '</span>' +
-            '<span class="mono-caption" style="color: var(--color-ink-primary);">ACTIVE</span>' +
+            '<h3 class="tetris-block-title" style="font-size: var(--text-base); margin-bottom: 0.25rem; color: inherit;">' + item.name + '</h3>' +
+            '<p style="font-size: var(--text-sm); color: inherit; opacity: 0.85; font-weight: 500;">' + item.action + '</p>' +
           '</div>';
         cardsContainer.appendChild(card);
       });

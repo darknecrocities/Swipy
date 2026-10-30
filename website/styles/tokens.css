@@ -49,8 +49,6 @@ html {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  scroll-behavior: smooth;
-  overflow-x: hidden;
 }
 
 body {
@@ -62,7 +60,7 @@ body {
   background-size: 24px 24px, 120px 120px, 120px 120px;
   color: var(--color-ink-primary);
   min-height: 100vh;
-  overflow-x: hidden;
+  overflow-x: clip;
   selection-background-color: var(--color-ink-primary);
 }
 
