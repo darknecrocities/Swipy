@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Programmatic Master Renderer for Swipy 1080p Landscape Showcase Film.
 
-Pipes 1230 raw RGB24 frames (1920x1080 @ 30 FPS, 41.0s) directly into FFmpeg stdin.
-Choreographs 5 cinematic scenes, real MacBook Pro demo footage, Swiss kinetic
+Pipes 1920 raw RGB24 frames (1920x1080 @ 30 FPS, 64.0s) directly into FFmpeg stdin.
+Choreographs 6 cinematic scenes, real MacBook Pro demo footage, Swiss kinetic
 typography, shape morphing, slice curtain zebra wipes, symmetrical mirror splits,
 and HUD tracking reticles locked to a 120 BPM tempo grid.
 
@@ -20,7 +20,8 @@ from cinematic_effects import (
     apply_slice_curtain, apply_symmetrical_split, apply_iris_wipe
 )
 from cinematic_scenes import (
-    render_scene_1, render_scene_2, render_scene_3, render_scene_4, render_scene_5
+    render_scene_1, render_scene_2, render_scene_3,
+    render_scene_4, render_scene_5, render_scene_6
 )
 
 OUTPUT_DIR = "assets/showcase-video"
@@ -40,8 +41,9 @@ def get_scene_function(scene_idx: int):
         3: render_scene_3,
         4: render_scene_4,
         5: render_scene_5,
+        6: render_scene_6,
     }
-    return funcs.get(scene_idx, render_scene_5)
+    return funcs.get(scene_idx, render_scene_6)
 
 
 def apply_transition(sc_idx: int, cur_img: Image.Image, next_img: Image.Image, p: float) -> Image.Image:
@@ -53,6 +55,8 @@ def apply_transition(sc_idx: int, cur_img: Image.Image, next_img: Image.Image, p
     elif sc_idx == 3:
         return apply_iris_wipe(cur_img, next_img, p)
     elif sc_idx == 4:
+        return apply_symmetrical_split(cur_img, next_img, p)
+    elif sc_idx == 5:
         return apply_slice_curtain(cur_img, next_img, p, num_slices=16)
     return next_img
 
@@ -96,11 +100,12 @@ def main():
     proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stderr=subprocess.DEVNULL)
 
     preview_snapshots = {
-        80: "scene1_hook.png",
-        280: "scene2_reveal.png",
-        560: "scene3_precision.png",
-        840: "scene4_gestures.png",
-        1100: "scene5_cta.png"
+        140: "scene1_hook.png",
+        480: "scene2_reveal.png",
+        870: "scene3_precision.png",
+        1260: "scene4_gestures.png",
+        1560: "scene5_architecture.png",
+        1800: "scene6_cta.png"
     }
 
     t0 = time.time()
@@ -145,7 +150,7 @@ def main():
             final_frame.save(art_snap_path)
             print(f"  📸 Exported Preview Snapshot: {snap_name} (Frame {frame_idx})")
 
-        if frame_idx % 150 == 0 or frame_idx == total_frames - 1:
+        if frame_idx % 200 == 0 or frame_idx == total_frames - 1:
             elapsed = time.time() - t0
             fps_speed = (frame_idx + 1) / max(0.001, elapsed)
             percent = (frame_idx + 1) / total_frames * 100.0

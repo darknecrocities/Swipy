@@ -34,27 +34,38 @@ SCRIPT_LINES = [
     {
         "id": "scene_01_hook",
         "title": "Hook & Touchless Morph",
-        "text": "What if the new M6 MacBook was touchscreen? But wait... what if you didn't even have to touch the screen?",
+        "text": "What if the new M6 MacBook was touchscreen? But wait... what if you didn't even have to reach out and touch the glass?",
+        "target_dur_sec": 10.0,
     },
     {
         "id": "scene_02_reveal",
         "title": "Product Hero Reveal",
-        "text": "Meet Swipy. It turns your built-in MacBook camera into a natural spatial trackpad.",
+        "text": "Meet Swipy. It turns your built-in MacBook camera into a natural spatial trackpad. No sensors. No wearables. Just natural hand movement.",
+        "target_dur_sec": 12.0,
     },
     {
         "id": "scene_03_precision",
         "title": "Vision & Cursor Precision",
-        "text": "Glide your index finger to steer the cursor. Pinch thumb and index to grab and drag windows across displays.",
+        "text": "Point your index finger to glide the cursor across displays. Touch your thumb and index together to grab, lock on, and drag windows effortlessly.",
+        "target_dur_sec": 14.0,
     },
     {
         "id": "scene_04_gestures",
-        "title": "18 Gestures & Security",
-        "text": "Flick four fingers to switch Spaces. 18 native gestures, powered by 21-point Apple Vision entirely on-device.",
+        "title": "18 Gestures Bento",
+        "text": "Flick four fingers to switch Spaces. With 18 native gestures, Swipy synthesizes hardware-level macOS events right from your built-in camera.",
+        "target_dur_sec": 12.0,
     },
     {
-        "id": "scene_05_cta",
+        "id": "scene_05_privacy",
+        "title": "On-Device Privacy",
+        "text": "Everything is computed on-device with Apple Vision. Zero video ever leaves your Mac. Zero cloud lag. Pure privacy.",
+        "target_dur_sec": 8.0,
+    },
+    {
+        "id": "scene_06_cta",
         "title": "Marketable Finale & CTA",
         "text": "Control your Mac with a wave of your hand. Download Swipy today for macOS.",
+        "target_dur_sec": 8.0,
     },
 ]
 
@@ -79,7 +90,7 @@ async def synthesize_and_measure():
         raw_mp3 = os.path.join(SCRATCH_DIR, f"{item['id']}_raw.mp3")
         clean_wav = os.path.join(SCRATCH_DIR, f"{item['id']}_clean.wav")
 
-        communicate = edge_tts.Communicate(item["text"], "en-US-AndrewMultilingualNeural", rate="+3%")
+        communicate = edge_tts.Communicate(item["text"], "en-US-AndrewMultilingualNeural", rate="-3%")
         await communicate.save(raw_mp3)
 
         # Broadcast vocal dynamics filter chain
@@ -105,30 +116,26 @@ async def synthesize_and_measure():
             "id": item["id"],
             "title": item["title"],
             "text": item["text"],
+            "target_dur_sec": item["target_dur_sec"],
             "wav_path": clean_wav,
             "samples": samples,
             "dur": dur,
         })
         print(f"  ✓ Processed: {item['id']} ({dur:.2f}s)")
 
-    # Build Beat-Locked Timeline
+    # Build Beat-Locked Timeline (Total 64.0s = 32 bars @ 120 BPM)
     timeline = {"fps": 30, "bpm": BPM, "scenes": []}
     current_sec = 0.0
 
     for idx, stem in enumerate(stem_data):
         scene_start_sec = current_sec
-        # Voice begins 0.4s (or 0.5s downbeat) after scene opens
-        vo_start_sec = scene_start_sec + 0.45
+        # Voice begins 0.5s (downbeat) after scene opens
+        vo_start_sec = scene_start_sec + 0.50
         vo_end_sec = vo_start_sec + stem["dur"]
         
-        # Enforce >= 0.85s silence cushion after voiceover ends
-        min_scene_end = vo_end_sec + 0.85
-        # Snap scene end to the next musical bar boundary (multiples of 2.0s)
-        bars = int(np.ceil(min_scene_end / BAR_SEC))
-        scene_end_sec = float(bars * BAR_SEC)
-        # Ensure at least 3 bars (6.0s) per scene for visual breathing room
-        if scene_end_sec - scene_start_sec < 6.0:
-            scene_end_sec = scene_start_sec + 6.0
+        # Enforce deliberate scene duration locked to target 120 BPM bars
+        target_dur = stem["target_dur_sec"]
+        scene_end_sec = scene_start_sec + target_dur
 
         scene_start_frame = int(round(scene_start_sec * 30))
         scene_end_frame = int(round(scene_end_sec * 30))
@@ -141,7 +148,7 @@ async def synthesize_and_measure():
             "text": stem["text"],
             "start_sec": scene_start_sec,
             "end_sec": scene_end_sec,
-            "dur_sec": scene_end_sec - scene_start_sec,
+            "dur_sec": target_dur,
             "vo_start_sec": vo_start_sec,
             "vo_end_sec": vo_end_sec,
             "start_frame": scene_start_frame,
@@ -152,8 +159,8 @@ async def synthesize_and_measure():
         timeline["scenes"].append(scene_info)
         current_sec = scene_end_sec
 
-    # Extra 1.0s tail resolving musical cadence
-    total_dur_sec = current_sec + 1.0
+    # Exact 64.0s total duration
+    total_dur_sec = current_sec
     timeline["total_dur_sec"] = total_dur_sec
     timeline["total_frames"] = int(round(total_dur_sec * 30))
 
@@ -263,10 +270,10 @@ def build_sfx(timeline: dict, total_samples: int) -> np.ndarray:
         if sc["scene_idx"] < len(timeline["scenes"]):
             add_whoosh(sc["end_sec"] - 0.48)
 
-    # Tactile pinch clicks in Scene 3
+    # Tactile pinch clicks in Scene 3 (Precision)
     sc3 = timeline["scenes"][2]
-    add_pinch_click(sc3["start_sec"] + 2.2)
-    add_pinch_click(sc3["start_sec"] + 3.8)
+    add_pinch_click(sc3["start_sec"] + 5.2)
+    add_pinch_click(sc3["start_sec"] + 9.8)
 
     return sfx
 

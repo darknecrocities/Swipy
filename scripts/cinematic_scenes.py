@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
-"""Scene Renderers (Scenes 1 through 5) for Swipy 1080p Landscape Showcase Film.
+"""Scene Renderers (Scenes 1 through 6) for Swipy 1080p Landscape Showcase Film.
 
 Palette: Pure Studio White (#FFFFFF) Canvas with Stark Black (#0A0A0C) Accents.
-Choreographed across 5 scenes:
-- Scene 1: The M6 Touchscreen Premise & Touchless Morph
-- Scene 2: Product Hero Reveal with Floating MacBook Pro Video
-- Scene 3: 21-Joint Live Vision Tracking & Cursor Dynamics
-- Scene 4: 18 Native Gestures Bento Grid & On-Device Security
-- Scene 5: Marketable Product Finale & Call To Action
+Choreographed across 6 scenes (64.0s / 1920 frames total @ 30 FPS):
+- Scene 1: The M6 Touchscreen Hook & Word/Shape Morph (Frames 0 - 300)
+- Scene 2: Product Hero Reveal with Floating MacBook Pro Video (Frames 300 - 660)
+- Scene 3: 21-Joint Live Vision Tracking & Cursor Dynamics (Frames 660 - 1080)
+- Scene 4: 18 Native Gestures Bento Grid & On-Device Security (Frames 1080 - 1440)
+- Scene 5: Security Architecture & Settings Deep Dive (Frames 1440 - 1680)
+- Scene 6: Marketable Product Finale & Call To Action (Frames 1680 - 1920)
 
 Complies strictly with SkillBuilder cognitive limits (<500 lines).
 """
@@ -19,7 +20,7 @@ from PIL import Image, ImageDraw, ImageFont
 from cinematic_effects import (
     W, H, FONT_HEADING, FONT_SANS, FONT_MONO,
     draw_swiss_background, draw_hud_brackets, draw_reticle,
-    draw_pill_badge, draw_macbook_bezel, ease_snap
+    draw_pill_badge, draw_macbook_bezel, draw_vector_check, ease_snap
 )
 
 SCRATCH_DIR = "/Users/arronkianparejas/.gemini/antigravity/brain/44f6a692-c641-4a23-bd30-b5abab155805/scratch"
@@ -28,6 +29,7 @@ FRAMES_SANDBOX_DIR = os.path.join(SCRATCH_DIR, "frames_sandbox")
 
 LOGO_PATH = "Resources/AppLogo.png"
 MENUBAR_POPOVER_PATH = "assets/images/swipy-menubar-popover.png"
+CURSOR_SETTINGS_PATH = "assets/images/swipy-cursor-settings.png"
 
 
 def load_cached_frame(folder: str, idx: int) -> Image.Image:
@@ -39,7 +41,7 @@ def load_cached_frame(folder: str, idx: int) -> Image.Image:
 
 
 def render_scene_1(frame_idx: int) -> Image.Image:
-    """Scene 1: The M6 Touchscreen Hook & Word/Shape Morph (Frames 0 - 180)."""
+    """Scene 1: The M6 Touchscreen Hook & Word/Shape Morph (Frames 0 - 300, 10s)."""
     img = Image.new("RGB", (W, H), (255, 255, 255))
     draw = ImageDraw.Draw(img)
     draw_swiss_background(draw, frame_idx)
@@ -49,9 +51,9 @@ def render_scene_1(frame_idx: int) -> Image.Image:
     f_sub = ImageFont.truetype(FONT_SANS, 30)
     f_mono = ImageFont.truetype(FONT_MONO, 22)
 
-    # Part A: The Premise Hook (Frames 0 - 75)
-    if frame_idx < 75:
-        p_intro = ease_snap(min(1.0, frame_idx / 22.0))
+    # Part A: The Premise Hook (Frames 0 - 100)
+    if frame_idx < 100:
+        p_intro = ease_snap(min(1.0, frame_idx / 30.0))
         y_off = int((1.0 - p_intro) * 36)
         draw.text((W // 2, 430 + y_off), "WHAT IF THE NEW M6 MACBOOK", font=f_huge, fill=(10, 10, 12), anchor="mm")
         draw.text((W // 2, 530 + y_off), "WAS TOUCHSCREEN?", font=f_huge, fill=(10, 10, 12), anchor="mm")
@@ -61,17 +63,17 @@ def render_scene_1(frame_idx: int) -> Image.Image:
         draw_reticle(draw, reticle_x, 780, radius=44, pulsing=1.0 + 0.1 * math.sin(frame_idx * 0.25))
         draw_hud_brackets(draw, [W // 2 - 200, 720, W // 2 + 200, 840], color=(140, 140, 150))
 
-    # Part B: The Twist (Frames 75 - 110)
-    elif frame_idx < 110:
+    # Part B: The Twist (Frames 100 - 170)
+    elif frame_idx < 170:
         draw.text((W // 2, 420), "BUT WHAT IF...", font=f_large, fill=(120, 120, 130), anchor="mm")
         draw.text((W // 2, 510), "YOU NEVER HAVE TO", font=f_huge, fill=(10, 10, 12), anchor="mm")
         draw.text((W // 2, 600), "TOUCH THE SCREEN?", font=f_huge, fill=(10, 10, 12), anchor="mm")
         draw_reticle(draw, W // 2, 750, radius=52, pulsing=1.0 + 0.2 * math.sin(frame_idx * 0.35))
         draw.text((W // 2, 830), "[ ZERO CONTACT • MAXIMUM INTUITION ]", font=f_mono, fill=(130, 130, 142), anchor="mm")
 
-    # Part C: The Kinetic Shape Morph (Frames 110 - 180): TOUCHSCREEN -> TOUCHLESS
+    # Part C: The Kinetic Shape Morph (Frames 170 - 300): TOUCHSCREEN -> TOUCHLESS
     else:
-        p_morph = ease_snap((frame_idx - 110) / 28.0)
+        p_morph = ease_snap((frame_idx - 170) / 36.0)
         draw.text((W // 2, 380), "THE TOUCHSCREEN FEEL.", font=f_large, fill=(120, 120, 130), anchor="mm")
 
         # Inverted Pitch Black Pill Badge with Pure White Typography
@@ -92,7 +94,7 @@ def render_scene_1(frame_idx: int) -> Image.Image:
         draw.text((W // 2, 650), "[ ZERO SENSORS • 100% SPATIAL TRACKING • 30 FPS ]", font=f_mono, fill=(80, 80, 92), anchor="mm")
 
         # Concentric Sonar Ripple Rings
-        ripple_r = int(((frame_idx - 110) * 10) % 280)
+        ripple_r = int(((frame_idx - 170) * 8) % 280)
         draw.ellipse([W // 2 - ripple_r, 820 - ripple_r, W // 2 + ripple_r, 820 + ripple_r], outline=(200, 200, 212), width=2)
         draw_reticle(draw, W // 2, 820, radius=38, pulsing=1.0)
         draw.text((W // 2, 890), "STANDBY // READY TO GLIDE", font=f_mono, fill=(120, 120, 130), anchor="mm")
@@ -101,7 +103,7 @@ def render_scene_1(frame_idx: int) -> Image.Image:
 
 
 def render_scene_2(frame_idx: int) -> Image.Image:
-    """Scene 2: Product Hero Reveal with Floating MacBook Pro Video (Frames 180 - 420)."""
+    """Scene 2: Product Hero Reveal with Floating MacBook Pro Video (Frames 300 - 660, 12s)."""
     img = Image.new("RGB", (W, H), (255, 255, 255))
     draw = ImageDraw.Draw(img)
     draw_swiss_background(draw, frame_idx)
@@ -133,14 +135,13 @@ def render_scene_2(frame_idx: int) -> Image.Image:
     draw.text((150, 785), "• Adaptive Power Curve Exponential Acceleration", font=f_mono, fill=(80, 80, 90))
     draw.text((150, 825), "• One-Euro Jitter Filter for Rock-Steady Micro Clicks", font=f_mono, fill=(80, 80, 90))
 
-    # Right Column: Large MacBook Pro with Real Screen Demo (x: 820 to 1800, y: 150 to 930)
-    raw_frame = load_cached_frame(FRAMES_HERO_DIR, frame_idx - 180)
+    # Right Column: Large MacBook Pro with Real Screen Demo (x: 840 to 1780)
+    raw_frame = load_cached_frame(FRAMES_HERO_DIR, frame_idx - 300)
     mb_box = [840, 160, 1780, 890]
     draw_macbook_bezel(img, raw_frame, mb_box)
 
     # Pixel Cursor Orb Floating Badge on Top-Right Corner
-    orb_cx = 1730
-    orb_cy = 210
+    orb_cx, orb_cy = 1730, 210
     draw.ellipse([orb_cx - 44, orb_cy - 44, orb_cx + 44, orb_cy + 44], fill=(10, 10, 12))
     draw.text((orb_cx, orb_cy), "ORB", font=f_badge, fill=(255, 255, 255), anchor="mm")
     draw_reticle(draw, orb_cx, orb_cy, radius=52, pulsing=1.0, color=(10, 10, 12))
@@ -149,7 +150,7 @@ def render_scene_2(frame_idx: int) -> Image.Image:
 
 
 def render_scene_3(frame_idx: int) -> Image.Image:
-    """Scene 3: 21-Joint Live Vision Tracking & Cursor Dynamics (Frames 420 - 720)."""
+    """Scene 3: 21-Joint Live Vision Tracking & Cursor Dynamics (Frames 660 - 1080, 14s)."""
     img = Image.new("RGB", (W, H), (255, 255, 255))
     draw = ImageDraw.Draw(img)
     draw_swiss_background(draw, frame_idx)
@@ -159,11 +160,12 @@ def render_scene_3(frame_idx: int) -> Image.Image:
     f_mono = ImageFont.truetype(FONT_MONO, 20)
     f_badge = ImageFont.truetype(FONT_HEADING, 20)
 
-    # Left Column: Step Instruction & Telemetry (x: 120 to 760)
-    if frame_idx < 520:
+    # Step Progression (3 Sub-Steps across 14 seconds)
+    rel_frame = frame_idx - 660
+    if rel_frame < 140:
         step_num = "01 / POINT & GLIDE"
         step_desc = "Aim with your index finger to steer the macOS cursor."
-    elif frame_idx < 620:
+    elif rel_frame < 280:
         step_num = "02 / PINCH TO GRAB"
         step_desc = "Touch thumb & index together to lock onto window titlebars."
     else:
@@ -176,7 +178,7 @@ def render_scene_3(frame_idx: int) -> Image.Image:
     # Real-Time Telemetry HUD Box
     tx = int(1280 + 160 * math.sin(frame_idx * 0.08))
     ty = int(520 + 90 * math.cos(frame_idx * 0.08))
-    is_pinching = 520 <= frame_idx < 620
+    is_pinching = 140 <= rel_frame < 280
 
     draw_hud_brackets(draw, [120, 370, 740, 740], color=(160, 160, 172))
     status_text = "STATUS: PINCH & DRAG LOCKED" if is_pinching else "STATUS: POINTING INDEX TIP"
@@ -190,8 +192,8 @@ def render_scene_3(frame_idx: int) -> Image.Image:
     pill_fg = (255, 255, 255) if is_pinching else (10, 10, 12)
     draw_pill_badge(draw, "INDEX & THUMB TRACKING", 380, 680, f_badge, bg_color=pill_bg, text_color=pill_fg)
 
-    # Right Column: Real Sandbox Footage with Camera Overlay (x: 800 to 1800)
-    raw_frame = load_cached_frame(FRAMES_SANDBOX_DIR, frame_idx - 420)
+    # Right Column: Real Sandbox Footage with Camera Overlay (x: 820 to 1780)
+    raw_frame = load_cached_frame(FRAMES_SANDBOX_DIR, frame_idx - 660)
     mb_box = [820, 160, 1780, 890]
     draw_macbook_bezel(img, raw_frame, mb_box)
 
@@ -203,23 +205,24 @@ def render_scene_3(frame_idx: int) -> Image.Image:
 
 
 def render_scene_4(frame_idx: int) -> Image.Image:
-    """Scene 4: 18 Native Gestures Bento Grid & On-Device Security (Frames 720 - 1020)."""
+    """Scene 4: 18 Native Gestures Bento Grid & On-Device Security (Frames 1080 - 1440, 12s)."""
     img = Image.new("RGB", (W, H), (255, 255, 255))
     draw = ImageDraw.Draw(img)
     draw_swiss_background(draw, frame_idx)
 
     f_title = ImageFont.truetype(FONT_HEADING, 54)
-    f_sub = ImageFont.truetype(FONT_SANS, 24)
+    f_sub = ImageFont.truetype(FONT_SANS, 22)
     f_mono = ImageFont.truetype(FONT_MONO, 18)
     f_badge = ImageFont.truetype(FONT_HEADING, 18)
+    f_card_title = ImageFont.truetype(FONT_HEADING, 38)
 
-    draw.text((W // 2, 140), "18 NATIVE MACOS GESTURES", font=f_title, fill=(10, 10, 12), anchor="mm")
-    draw.text((W // 2, 190), "Hardware-level input synthesis with zero system extensions.", font=f_sub, fill=(90, 90, 100), anchor="mm")
+    draw.text((W // 2, 130), "18 NATIVE MACOS GESTURES", font=f_title, fill=(10, 10, 12), anchor="mm")
+    draw.text((W // 2, 175), "Hardware-level input synthesis with zero system extensions.", font=f_sub, fill=(90, 90, 100), anchor="mm")
 
-    # Bento Card 1: Gestures Reference Table (Left: x: 120 to 760, y: 240 to 920)
-    draw.rounded_rectangle([120, 240, 760, 920], radius=16, fill=(250, 250, 252), outline=(224, 224, 232), width=1)
-    draw_hud_brackets(draw, [120, 240, 760, 920], color=(180, 180, 190))
-    draw.text((150, 280), "CORE GESTURE CATALOG", font=f_mono, fill=(10, 10, 12))
+    # Bento Card 1: Gestures Reference Table (Left: x: 100 to 670, y: 220 to 920, w: 570)
+    draw.rounded_rectangle([100, 220, 670, 920], radius=16, fill=(250, 250, 252), outline=(224, 224, 232), width=1)
+    draw_hud_brackets(draw, [100, 220, 670, 920], color=(180, 180, 190))
+    draw.text((130, 260), "CORE GESTURE CATALOG", font=f_mono, fill=(10, 10, 12))
 
     gestures = [
         ("4-Finger Horizontal Flick", "Switch Spaces (Mission Control)"),
@@ -231,47 +234,107 @@ def render_scene_4(frame_idx: int) -> Image.Image:
         ("Thumb Tap", "Double Click Selection"),
     ]
     for i, (g_name, g_desc) in enumerate(gestures):
-        gy = 340 + i * 76
-        draw.text((150, gy), f"• {g_name}", font=f_mono, fill=(10, 10, 12))
-        draw.text((170, gy + 28), g_desc, font=f_sub, fill=(100, 100, 112))
+        gy = 315 + i * 80
+        draw.text((130, gy), f"• {g_name}", font=f_mono, fill=(10, 10, 12))
+        draw.text((150, gy + 28), g_desc, font=f_sub, fill=(100, 100, 112))
 
-    # Bento Card 2: macOS Menu Bar Popover Frame (Center: x: 800 to 1260, y: 240 to 920)
-    draw.rounded_rectangle([800, 240, 1260, 920], radius=16, fill=(250, 250, 252), outline=(224, 224, 232), width=1)
-    draw_hud_brackets(draw, [800, 240, 1260, 920], color=(180, 180, 190))
-    draw.text((830, 280), "MENU BAR CONTROLLER", font=f_mono, fill=(10, 10, 12))
+    # Bento Card 2: macOS Menu Bar Popover Frame (Center: x: 700 to 1220, y: 220 to 920, w: 520)
+    draw.rounded_rectangle([700, 220, 1220, 920], radius=16, fill=(250, 250, 252), outline=(224, 224, 232), width=1)
+    draw_hud_brackets(draw, [700, 220, 1220, 920], color=(180, 180, 190))
+    draw.text((730, 260), "MENU BAR CONTROLLER", font=f_mono, fill=(10, 10, 12))
 
     if os.path.exists(MENUBAR_POPOVER_PATH):
         popover_img = Image.open(MENUBAR_POPOVER_PATH).convert("RGB")
-        # Resize popover image to fit neatly
-        pw, ph = 380, int(380 * popover_img.height / popover_img.width)
+        pw = 420
+        ph = int(pw * popover_img.height / popover_img.width)
         popover_resized = popover_img.resize((pw, ph), Image.Resampling.BILINEAR)
-        img.paste(popover_resized, (840, 330))
+        img.paste(popover_resized, (750, 315))
 
-    # Bento Card 3: 100% On-Device Privacy Architecture (Right: x: 1300 to 1800, y: 240 to 920)
-    draw.rounded_rectangle([1300, 240, 1800, 920], radius=16, fill=(10, 10, 12))
-    draw_hud_brackets(draw, [1300, 240, 1800, 920], color=(255, 255, 255))
+    # Bento Card 3: 100% On-Device Privacy Architecture (Right: x: 1250 to 1820, y: 220 to 920, w: 570)
+    draw.rounded_rectangle([1250, 220, 1820, 920], radius=16, fill=(10, 10, 12))
+    draw_hud_brackets(draw, [1250, 220, 1820, 920], color=(255, 255, 255))
 
-    draw.text((1340, 310), "ZERO CLOUD DATA", font=f_title, fill=(255, 255, 255))
-    draw.text((1340, 370), "100% ON-DEVICE PRIVACY", font=f_mono, fill=(180, 180, 190))
+    # Perfectly sized heading & zero clipping:
+    draw.text((1290, 275), "ZERO CLOUD DATA", font=f_card_title, fill=(255, 255, 255))
+    draw.text((1290, 335), "100% ON-DEVICE PRIVACY", font=f_mono, fill=(180, 180, 190))
 
     privacy_points = [
-        "Camera video is processed in memory via Apple Vision.",
-        "Zero images, frames, or biometric data are stored.",
-        "Zero network connections. Operates fully offline.",
+        "In-memory processing via Apple Vision.",
+        "Zero images or biometric data stored.",
+        "Zero network calls. Operates 100% offline.",
         "Sandboxed macOS app architecture.",
-        "Independent 1-click Emergency Pause trigger.",
+        "Instant 1-click Emergency Pause trigger.",
     ]
     for i, pt in enumerate(privacy_points):
-        py = 440 + i * 72
-        draw.text((1340, py), f"✓  {pt}", font=f_sub, fill=(220, 220, 230))
+        py = 410 + i * 78
+        # Native vector checkmark badge (permanently resolves missing glyph square box)
+        draw_vector_check(draw, cx=1310, cy=py + 12, radius=11, badge_color=(255, 255, 255), check_color=(10, 10, 12), width=2)
+        draw.text((1336, py), pt, font=f_sub, fill=(220, 220, 230))
 
-    draw_pill_badge(draw, "VERIFIED SECURE", 1550, 840, f_badge, bg_color=(255, 255, 255), text_color=(10, 10, 12))
+    draw_pill_badge(draw, "VERIFIED SECURE", 1535, 845, f_badge, bg_color=(255, 255, 255), text_color=(10, 10, 12))
 
     return img
 
 
 def render_scene_5(frame_idx: int) -> Image.Image:
-    """Scene 5: Marketable Product Finale & Call To Action (Frames 1020 - 1230)."""
+    """Scene 5: Security Architecture & Settings Deep Dive (Frames 1440 - 1680, 8s)."""
+    img = Image.new("RGB", (W, H), (255, 255, 255))
+    draw = ImageDraw.Draw(img)
+    draw_swiss_background(draw, frame_idx)
+
+    f_title = ImageFont.truetype(FONT_HEADING, 54)
+    f_sub = ImageFont.truetype(FONT_SANS, 22)
+    f_mono = ImageFont.truetype(FONT_MONO, 18)
+    f_badge = ImageFont.truetype(FONT_HEADING, 18)
+
+    draw.text((W // 2, 130), "ENGINEERED FOR MACOS", font=f_title, fill=(10, 10, 12), anchor="mm")
+    draw.text((W // 2, 175), "Zero background daemons. Apple Silicon native neural acceleration.", font=f_sub, fill=(90, 90, 100), anchor="mm")
+
+    # Left Column: Security Architecture Bento (x: 100 to 780, y: 220 to 920, w: 680)
+    draw.rounded_rectangle([100, 220, 780, 920], radius=16, fill=(250, 250, 252), outline=(224, 224, 232), width=1)
+    draw_hud_brackets(draw, [100, 220, 780, 920], color=(180, 180, 190))
+    draw.text((140, 265), "RUNTIME ARCHITECTURE SPECIFICATION", font=f_mono, fill=(10, 10, 12))
+
+    specs = [
+        ("FRAMEWORK PIPELINE", "AVCaptureSession -> VNDetectHumanHandPoseRequest"),
+        ("NEURAL COPILOT", "Apple Neural Engine CoreML Hand Landmark Pipeline"),
+        ("INFERENCE METRICS", "Rock-Solid 30 FPS • Under 3.2% CPU Load on M-Series"),
+        ("MEMORY FOOTPRINT", "Under 45 MB Resident Memory • Zero Disk Cache"),
+        ("INPUT SYNTHESIS", "CoreGraphics CGEventTap Hardware Emulation"),
+        ("SAFETY GUARD", "Instant Fist Clench Emergency Pause Hardware Lock"),
+    ]
+    for i, (spec_title, spec_val) in enumerate(specs):
+        sy = 325 + i * 85
+        draw.text((140, sy), f"• {spec_title}", font=f_mono, fill=(10, 10, 12))
+        draw.text((160, sy + 28), spec_val, font=f_sub, fill=(90, 90, 102))
+
+    draw_pill_badge(draw, "100% OFFLINE ZERO-TELEMETRY", 440, 855, f_badge, bg_color=(10, 10, 12), text_color=(255, 255, 255))
+
+    # Right Column: Sleek Floating Settings Window Frame (x: 820 to 1820, y: 220 to 920)
+    draw.rounded_rectangle([820, 220, 1820, 920], radius=16, fill=(255, 255, 255), outline=(210, 210, 220), width=2)
+    draw_hud_brackets(draw, [820, 220, 1820, 920], color=(180, 180, 190))
+
+    # Window Titlebar with Traffic Lights
+    draw.rounded_rectangle([820, 220, 1820, 275], radius=16, fill=(245, 245, 248))
+    draw.ellipse([845, 242, 859, 256], fill=(255, 95, 87))    # Red
+    draw.ellipse([867, 242, 881, 256], fill=(254, 188, 46))   # Yellow
+    draw.ellipse([889, 242, 903, 256], fill=(40, 201, 64))    # Green
+    draw.text((1320, 248), "Swipy Settings — Motion Dynamics & Smoothing", font=f_mono, fill=(110, 110, 120), anchor="mm")
+
+    # Paste Settings Screenshot inside frame
+    if os.path.exists(CURSOR_SETTINGS_PATH):
+        settings_img = Image.open(CURSOR_SETTINGS_PATH).convert("RGB")
+        target_w = 960
+        target_h = int(target_w * settings_img.height / settings_img.width)
+        target_h = min(620, target_h)
+        settings_resized = settings_img.resize((target_w, target_h), Image.Resampling.BILINEAR)
+        img.paste(settings_resized, (840, 285))
+
+    return img
+
+
+def render_scene_6(frame_idx: int) -> Image.Image:
+    """Scene 6: Marketable Product Finale & Call To Action (Frames 1680 - 1920, 8s)."""
     img = Image.new("RGB", (W, H), (255, 255, 255))
     draw = ImageDraw.Draw(img)
     draw_swiss_background(draw, frame_idx)
@@ -308,9 +371,9 @@ def render_scene_5(frame_idx: int) -> Image.Image:
     draw.text((W // 2, 810), "WEBSITE: GETSWIPY.VERCEL.APP", font=f_mono, fill=(10, 10, 12), anchor="mm")
     draw.text((W // 2, 860), "GITHUB: DARKNECROCITIES / SWIPY", font=f_mono, fill=(110, 110, 120), anchor="mm")
 
-    # Subtle fade to white on the last 15 frames (1215 - 1230)
-    if frame_idx >= 1215:
-        p_fade = (frame_idx - 1215) / 15.0
+    # Subtle fade to white on the last 15 frames (1905 - 1920)
+    if frame_idx >= 1905:
+        p_fade = (frame_idx - 1905) / 15.0
         overlay = Image.new("RGB", (W, H), (255, 255, 255))
         img = Image.blend(img, overlay, p_fade)
 
