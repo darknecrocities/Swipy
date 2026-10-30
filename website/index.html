@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Swipy — Touchless Spatial Hand Control for macOS</title>
+  <link rel="icon" type="image/png" href="../Resources/AppLogo.png" />
+  <link rel="apple-touch-icon" href="../Resources/AppLogo.png" />
+  <link rel="stylesheet" href="styles/tokens.css" />
+  <link rel="stylesheet" href="styles/layout.css" />
+  <link rel="stylesheet" href="styles/animations.css" />
+  <link rel="stylesheet" href="styles/tetris-sections.css" />
+  <link rel="stylesheet" href="styles/sandbox.css" />
+</head>
+<body>
+  <header class="spatial-nav" role="banner">
+    <a href="#horizontal-stage" class="brand-mark" data-nav-target="station-01" aria-label="Swipy Home">
+      <img src="../Resources/AppLogo.png" alt="Swipy Icon" />
+      <span>Swipy</span>
+    </a>
+
+    <nav class="nav-links" aria-label="Quick Section Navigation">
+      <button type="button" class="nav-pill-btn" data-nav-target="station-01" aria-current="true">Overview</button>
+      <button type="button" class="nav-pill-btn" data-nav-target="station-02">Live Tracking</button>
+      <button type="button" class="nav-pill-btn" data-nav-target="station-03">Precision</button>
+      <button type="button" class="nav-pill-btn" data-nav-target="tetris-architecture">Blocks</button>
+      <button type="button" class="nav-pill-btn" data-nav-target="test-it-out">Test It Out</button>
+      <button type="button" class="nav-pill-btn" data-nav-target="vertical-stage">Workstation</button>
+      <button type="button" class="nav-pill-btn" data-nav-target="gesture-library">Gestures</button>
+    </nav>
+
+    <div class="nav-download-group">
+      <a href="downloads/Swipy-macOS.dmg" download="Swipy-macOS.dmg" class="nav-download-btn" aria-label="Download Swipy for macOS DMG">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" />
+        </svg>
+        <span>Download for Mac</span>
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <!-- PHASE A: COLLISION-FREE MINIMALIST HORIZONTAL CAROUSEL -->
+    <section id="horizontal-stage" class="horizontal-scroll-stage" aria-label="Swipy Horizontal Feature Carousel">
+      <div class="horizontal-sticky-viewport">
+        <div id="horizontal-track" class="horizontal-track">
+
+          <!-- SLIDE 01: TOUCHLESS HERO + PIXEL CURSOR ORB + VIDEO MACBOOK -->
+          <div id="station-01" class="spatial-station station-hero">
+            <div class="slide-two-col crosshair-marker">
+              <div class="slide-left-stack">
+                <div class="reveal-block">
+                  <h1 class="tetris-block-title hero-main-heading">
+                    Control your Mac<br />
+                    with a <span class="tetris-invert-chip">wave of your hand</span>
+                  </h1>
+                  <p class="slide-lead-copy">
+                    Swipy turns your built-in MacBook camera into a natural spatial trackpad. Glide the cursor with your index finger, pinch thumb and index to click or drag windows, and flick four fingers to switch Spaces.
+                  </p>
+                  <div class="hero-cta-row">
+                    <a href="downloads/Swipy-macOS.dmg" download="Swipy-macOS.dmg" class="nav-download-btn">
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" />
+                      </svg>
+                      <span>Download macOS DMG</span>
+                    </a>
+                    <button type="button" class="nav-pill-btn" data-nav-target="test-it-out">Try Web Camera Demo</button>
+                  </div>
+                </div>
+
+                <div class="tetris-notched-card morph-surface-card tilt-card reveal-block">
+                  <h2 class="tetris-block-title" style="font-size: var(--text-lg); margin-bottom: 0.4rem; color: inherit;">
+                    Pinch to Grab &amp; Drag
+                  </h2>
+                  <p style="font-size: var(--text-sm); color: inherit; opacity: 0.86; line-height: 1.58;">
+                    Touch your thumb and index finger together to lock onto any window title bar, file, or text selection—then glide your hand to drag 1:1 across displays.
+                  </p>
+                </div>
+              </div>
+
+              <div class="slide-right-showcase reveal-block">
+                <div class="macbook-pro-frame">
+                  <div class="orb-floating-badge">
+                    <div id="dot-matrix-orb" class="matrix-orb-shell" role="button" tabindex="0" aria-label="Cycle Pixel Cursor Matrix">
+                      <canvas id="dot-matrix-canvas" class="matrix-orb-canvas" width="170" height="170"></canvas>
+                    </div>
+                  </div>
+                  <div class="macbook-lid">
+                    <div class="macbook-notch"></div>
+                    <div class="macbook-screen">
+                      <video src="../assets/video-demo/Screen%20Recording%202026-10-30%20at%204.28.09%E2%80%AFPM.mov" autoplay muted loop playsinline aria-label="Swipy Live Hand Tracking and Space Switching Demo"></video>
+                    </div>
+                  </div>
+                  <div class="macbook-base"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SLIDE 02: LIVE 21-JOINT CAMERA SKELETON & MENU BAR POPOVER -->
+          <div id="station-02" class="spatial-station station-mechanics">
+            <div class="slide-two-col crosshair-marker">
+              <div class="slide-left-stack">
+                <div class="mech-card-alpha morph-surface-card tilt-card reveal-block">
+                  <h2 class="tetris-block-title" style="color: inherit; font-size: var(--text-xl); margin-bottom: 0.5rem;">
+                    21-Point Live Hand Skeleton
+                  </h2>
+                  <p style="font-size: var(--text-sm); color: inherit; opacity: 0.86; line-height: 1.58;">
+                    Powered by Apple Vision at 30 FPS entirely on-device. Watch your live 21 hand landmarks lock in real time while controlling any macOS application—with zero video ever leaving your Mac.
+                  </p>
+                </div>
+
+                <div class="mech-card-gamma morph-surface-card tilt-card reveal-block">
+                  <h3 class="tetris-block-title" style="font-size: var(--text-lg); margin-bottom: 0.4rem; color: inherit;">
+                    Instant Menu Bar Command
+                  </h3>
+                  <p style="font-size: var(--text-sm); color: inherit; opacity: 0.86; line-height: 1.58;">
+                    Toggle hand tracking, inspect live 30 FPS inference speed, adjust cursor sensitivity on the fly, calibrate camera bounds, or trigger Emergency Pause directly from the menu bar.
+                  </p>
+                </div>
+              </div>
+
+              <div class="slide-right-dual reveal-block">
+                <div class="macbook-pro-frame">
+                  <div class="macbook-lid">
+                    <div class="macbook-notch"></div>
+                    <div class="macbook-screen">
+                      <img src="../assets/images/swipy-overview-camera-feed.png" alt="Swipy Live Camera Feed with 21-Point Hand Landmark Skeleton" />
+                    </div>
+                  </div>
+                  <div class="macbook-base"></div>
+                </div>
+
+                <div class="macos-popover-frame tilt-card">
+                  <img src="../assets/images/swipy-menubar-popover.png" alt="Swipy macOS Menu Bar Quick Control Popover" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SLIDE 03: PRECISION CURSOR TUNING & NATIVE GESTURE TOGGLES -->
+          <div id="station-03" class="spatial-station station-pivot">
+            <div class="slide-two-col crosshair-marker">
+              <div class="slide-left-stack">
+                <div class="pivot-twist-banner reveal-block">
+                  <h2 class="tetris-block-title" style="font-size: var(--text-2xl); margin-bottom: var(--space-xs);">
+                    Tailored to <span class="tetris-invert-chip">your hand</span>
+                  </h2>
+                  <p class="slide-lead-copy" style="margin-bottom: var(--space-sm);">
+                    Dial in Cursor Sensitivity, Adaptive Power Curve Acceleration, One-Euro Jitter Cutoff, and Dead Zone Margin so micro-movements stay rock-steady and fast sweeps cross your display effortlessly.
+                  </p>
+                </div>
+
+                <div class="macos-window-card morph-surface-card tilt-card reveal-block" style="max-width: 460px;">
+                  <img src="../assets/images/swipy-gesture-cards-native.png" alt="Swipy Native Gesture Toggles Preview" style="width: 100%; border-radius: 12px; display: block;" />
+                </div>
+              </div>
+
+              <div class="slide-right-showcase reveal-block">
+                <div class="macbook-pro-frame">
+                  <div class="macbook-lid">
+                    <div class="macbook-notch"></div>
+                    <div class="macbook-screen">
+                      <img src="../assets/images/swipy-cursor-settings.png" alt="Swipy Cursor Sensitivity and One-Euro Smoothing Settings" />
+                    </div>
+                  </div>
+                  <div class="macbook-base"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- MINIMALIST HORIZONTAL CAROUSEL CONTROLS -->
+        <div class="carousel-dock" role="region" aria-label="Horizontal Carousel Controls">
+          <button type="button" id="carousel-prev-btn" class="carousel-arrow-btn" aria-label="Previous Slide">&larr;</button>
+          <div class="carousel-dots">
+            <button type="button" class="carousel-dot-pill" data-nav-target="station-01" aria-current="true">01 Overview</button>
+            <button type="button" class="carousel-dot-pill" data-nav-target="station-02">02 Live Camera &amp; Menu Bar</button>
+            <button type="button" class="carousel-dot-pill" data-nav-target="station-03">03 Precision Tuning</button>
+          </div>
+          <button type="button" id="carousel-next-btn" class="carousel-arrow-btn" aria-label="Next Slide">&rarr;</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="tetris-pixel-divider" aria-hidden="true"></div>
+
+    <!-- PHASE B: MODULAR SPATIAL BLOCKS BENTO SECTION -->
+    <section id="tetris-architecture" class="tetris-arch-section section-morph-reveal" aria-label="Swipy Modular Spatial Block Architecture">
+      <div class="tetris-arch-container">
+        <div class="tetris-arch-header reveal-block">
+          <div>
+            <h2 class="tetris-block-title" style="font-size: var(--text-2xl); margin-bottom: 0.45rem;">
+              Snap-together <span class="tetris-invert-chip">spatial blocks</span>
+            </h2>
+            <p style="font-size: var(--text-base); color: var(--color-ink-secondary); max-width: 56ch; line-height: 1.6;">
+              Every Swipy capability interlocks seamlessly—combining camera capture, 21-joint hand pose recognition, tremor smoothing, and hardware-level macOS events.
+            </p>
+          </div>
+          <div class="tetromino-Cluster-badge" aria-hidden="true">
+            <div class="tetromino-shape shape-t"><span></span><span></span><span></span><span></span></div>
+            <div class="tetromino-shape shape-l"><span></span><span></span><span></span><span></span></div>
+            <div class="tetromino-shape shape-z"><span></span><span></span><span></span><span></span></div>
+          </div>
+        </div>
+
+        <div class="tetris-bento-matrix">
+          <article class="tetris-bento-card tetris-block-dark morph-surface-card tilt-card reveal-block">
+            <div class="tetromino-mini-icon"><span></span><span></span><span></span><span></span></div>
+            <h3 class="tetris-block-title" style="font-size: var(--text-lg); color: inherit; margin-bottom: 0.4rem;">Built-In FaceTime Camera</h3>
+            <p style="font-size: var(--text-sm); color: inherit; opacity: 0.86; line-height: 1.58;">
+              Works immediately with your MacBook's built-in camera or external Continuity Camera. Zero wearable rings, gloves, or desk mats required.
+            </p>
+          </article>
+
+          <article class="tetris-bento-card tetris-block-wide morph-surface-card tilt-card reveal-block">
+            <div class="tetris-combo-header">
+              <div>
+                <h3 class="tetris-block-title" style="font-size: var(--text-lg); color: inherit; margin-bottom: 0.35rem;">Interactive Gesture Combo Builder</h3>
+                <p style="font-size: var(--text-sm); color: inherit; opacity: 0.85;">Select any gesture block below to chain a live macOS touchless workflow:</p>
+              </div>
+              <span id="tetris-combo-status" class="mono-caption" style="padding: 5px 12px; border-radius: 999px; background: var(--color-surface-subtle);">2 Blocks Active</span>
+            </div>
+
+            <div class="tetris-combo-blocks" role="group" aria-label="Interactive Gesture Blocks">
+              <button type="button" class="tetris-snap-piece is-snapped" data-combo-step="Point Index &rarr; Aim Cursor">
+                <span class="piece-glyph">&#9638;</span><span>01 Point</span>
+              </button>
+              <button type="button" class="tetris-snap-piece is-snapped" data-combo-step="Thumb-Index Pinch &rarr; Grab Window">
+                <span class="piece-glyph">&#9641;</span><span>02 Pinch</span>
+              </button>
+              <button type="button" class="tetris-snap-piece" data-combo-step="Glide Hand &rarr; Drag Across Display">
+                <span class="piece-glyph">&#9642;</span><span>03 Drag</span>
+              </button>
+              <button type="button" class="tetris-snap-piece" data-combo-step="4-Finger Swipe &rarr; Switch macOS Space">
+                <span class="piece-glyph">&#9635;</span><span>04 Swipe</span>
+              </button>
+            </div>
+            <p id="tetris-combo-output" class="tetris-combo-readout">
+              Active Chain: Point Index &rarr; Aim Cursor &bull; Thumb-Index Pinch &rarr; Grab Window
+            </p>
+          </article>
+
+          <article class="tetris-bento-card morph-surface-card tilt-card reveal-block">
+            <div class="tetromino-mini-icon"><span></span><span></span><span></span><span></span></div>
+            <h3 class="tetris-block-title" style="font-size: var(--text-lg); color: inherit; margin-bottom: 0.4rem;">Cross-App HID Engine</h3>
+            <p style="font-size: var(--text-sm); color: inherit; opacity: 0.86; line-height: 1.58;">
+              Dispatches Space switches and clicks directly to the macOS hardware event stream so full-screen browsers, terminals, and games respond every time.
+            </p>
+          </article>
+
+          <article class="tetris-bento-card morph-surface-card tilt-card reveal-block">
+            <div class="tetromino-mini-icon"><span></span><span></span><span></span><span></span></div>
+            <h3 class="tetris-block-title" style="font-size: var(--text-lg); color: inherit; margin-bottom: 0.4rem;">One-Euro Tremor Lock</h3>
+            <p style="font-size: var(--text-sm); color: inherit; opacity: 0.86; line-height: 1.58;">
+              Freezes involuntary hand micro-jitters when pinching small buttons while instantly unlocking 1:1 motion the moment you drag a window.
+            </p>
+          </article>
+
+          <article class="tetris-bento-card tetris-block-dark morph-surface-card tilt-card reveal-block">
+            <div class="tetromino-mini-icon"><span></span><span></span><span></span><span></span></div>
+            <h3 class="tetris-block-title" style="font-size: var(--text-lg); color: inherit; margin-bottom: 0.4rem;">100% On-Device Privacy</h3>
+            <p style="font-size: var(--text-sm); color: inherit; opacity: 0.86; line-height: 1.58;">
+              Every camera frame is analyzed in memory by Apple Vision and discarded in under 6 milliseconds. Zero recording, zero network requests.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <div class="tetris-pixel-divider" aria-hidden="true"></div>
+
+    <!-- PHASE C: INTERACTIVE "TEST IT OUT?" LIVE WEBCAM HAND VISION SANDBOX -->
+    <section id="test-it-out" class="sandbox-section section-morph-reveal" aria-label="Interactive Swipy Live Camera Vision Playground">
+      <div class="sandbox-container">
+        <div class="sandbox-header reveal-block">
+          <div>
+            <h2 class="tetris-block-title" style="font-size: var(--text-2xl); margin-bottom: 0.45rem;">
+              Test it <span class="tetris-invert-chip">out?</span>
+            </h2>
+            <p style="font-size: var(--text-base); color: var(--color-ink-secondary); max-width: 58ch; line-height: 1.6;">
+              Turn on your webcam right in the browser to control this sample Mac desktop with <strong>real-time 21-point Hand Vision</strong>—point your index finger to glide the cursor, pinch thumb &amp; index to grab and drag windows, or flick 4 fingers to switch Spaces.
+            </p>
+          </div>
+
+          <div class="sandbox-gesture-bar" role="toolbar" aria-label="Webcam Vision and Gesture Controls">
+            <button type="button" id="sandbox-camera-toggle" class="nav-download-btn" aria-pressed="false">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              <span id="sandbox-camera-btn-text">Turn On Camera (Web Vision)</span>
+            </button>
+            <button type="button" class="sandbox-action-btn" data-sandbox-action="prev-space">&larr; 4-Finger Swipe Right</button>
+            <button type="button" class="sandbox-action-btn" data-sandbox-action="next-space">4-Finger Swipe Left &rarr;</button>
+            <button type="button" class="sandbox-action-btn" data-sandbox-action="mission-control">3-Finger Swipe Up</button>
+            <button type="button" class="sandbox-action-btn" data-sandbox-action="reset-cards">Reset Screen</button>
+          </div>
+        </div>
+
+        <div class="sandbox-macbook-wrap reveal-block">
+          <div class="macbook-pro-frame sandbox-macbook-large">
+            <div class="macbook-lid">
+              <div class="macbook-notch"></div>
+              <div id="sandbox-screen" class="macbook-screen sandbox-desktop-screen">
+                <div class="sandbox-menubar">
+                  <div class="sandbox-menubar-left">
+                    <span style="font-weight: 700;">&#63743; Swipy</span>
+                    <span>Finder</span><span>File</span><span>Edit</span><span>View</span><span>Spaces</span>
+                  </div>
+                </div>
+
+                <div id="sandbox-stage-canvas" class="sandbox-stage-canvas">
+                  <div class="sandbox-draggable-card" data-card-id="camera" style="left: 4%; top: 10%;">
+                    <div class="sandbox-card-bar">
+                      <span class="traffic-dots"><i></i><i></i><i></i></span><span>Swipy — Overview</span>
+                    </div>
+                    <img src="../assets/images/swipy-overview-camera-feed.png" alt="Swipy Hand Feed Preview" draggable="false" />
+                    <p>Pinch thumb &amp; index to grab and move this window</p>
+                  </div>
+
+                  <div class="sandbox-draggable-card" data-card-id="menubar" style="left: 36%; top: 14%;">
+                    <div class="sandbox-card-bar">
+                      <span class="traffic-dots"><i></i><i></i><i></i></span><span>Swipy — Menu Bar Control</span>
+                    </div>
+                    <img src="../assets/images/swipy-menubar-popover.png" alt="Swipy Menu Bar Popover" draggable="false" />
+                    <p>30 FPS On-Device Vision Tracking</p>
+                  </div>
+
+                  <div class="sandbox-draggable-card" data-card-id="gestures" style="left: 65%; top: 10%;">
+                    <div class="sandbox-card-bar">
+                      <span class="traffic-dots"><i></i><i></i><i></i></span><span>Swipy — Gesture Library</span>
+                    </div>
+                    <img src="../assets/images/swipy-gesture-cards-native.png" alt="Swipy Gesture Cards" draggable="false" />
+                    <p>15 Native macOS Hand Actions</p>
+                  </div>
+
+                  <div id="sandbox-webcam-pip" class="sandbox-webcam-pip" hidden>
+                    <div class="sandbox-pip-video-wrap">
+                      <video id="sandbox-webcam-video" autoplay playsinline muted></video>
+                      <canvas id="sandbox-webcam-canvas" width="280" height="210"></canvas>
+                    </div>
+                  </div>
+
+                  <div id="sandbox-drop-dock" class="sandbox-macos-dock">
+                    <img src="../Resources/AppLogo.png" alt="Swipy App" class="dock-app-icon" />
+                    <span class="dock-divider"></span>
+                    <span id="sandbox-dock-hint">Turn on camera to control this Mac screen with your hand, or drag windows with your cursor</span>
+                  </div>
+
+                  <div id="sandbox-reticle" class="sandbox-reticle" aria-hidden="true">
+                    <div class="sandbox-reticle-ring"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="macbook-base"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="tetris-pixel-divider" aria-hidden="true"></div>
+
+    <!-- PHASE D: VERTICAL KEEBY-STYLE HARDWARE SHOWCASE -->
+    <section id="vertical-stage" class="vertical-scroll-stage section-morph-reveal" aria-label="Complete Swipy Application Walkthrough">
+      <div class="keeby-sticky-grid">
+        <div class="keeby-sticky-hardware">
+          <div class="macbook-pro-frame">
+            <div class="macbook-lid">
+              <div class="macbook-notch"></div>
+              <div class="macbook-screen">
+                <img id="keeby-active-screen" src="../assets/images/swipy-overview-camera-feed.png" alt="Swipy Live Hand Landmark Tracking Overview" />
+              </div>
+            </div>
+            <div class="macbook-base"></div>
+          </div>
+        </div>
+
+        <div class="keeby-steps-column">
+          <article class="keeby-step-card morph-surface-card tilt-card reveal-block" data-active="true" data-screen-src="../assets/images/swipy-overview-camera-feed.png" data-screen-alt="Swipy Overview Dashboard and Live 21-Point Hand Skeleton">
+            <h3 class="tetris-block-title" style="font-size: var(--text-xl); margin-bottom: 0.5rem; color: inherit;">Real-Time Camera &amp; Skeleton Feed</h3>
+            <p style="font-size: var(--text-base); color: inherit; opacity: 0.86; line-height: 1.6;">
+              See exactly what Swipy sees. The Overview dashboard renders your live 21-point hand skeleton overlay, frame latency, active gesture badge, and tracking status at 30 FPS.
+            </p>
+          </article>
+
+          <article class="keeby-step-card morph-surface-card tilt-card reveal-block" data-screen-src="../assets/images/Screenshot%202026-10-30%20at%204.07.16%E2%80%AFPM.png" data-screen-alt="Swipy Menu Bar Popover and Gesture Library">
+            <h3 class="tetris-block-title" style="font-size: var(--text-xl); margin-bottom: 0.5rem; color: inherit;">One-Click Menu Bar Control</h3>
+            <p style="font-size: var(--text-base); color: inherit; opacity: 0.86; line-height: 1.6;">
+              Swipy lives quietly in your macOS menu bar. Pause or resume tracking, slide your sensitivity multiplier, or launch camera bounds calibration without leaving your current app.
+            </p>
+          </article>
+
+          <article class="keeby-step-card morph-surface-card tilt-card reveal-block" data-screen-src="../assets/images/Screenshot%202026-10-30%20at%204.07.34%E2%80%AFPM.png" data-screen-alt="Swipy Space Navigation and App Switching Gestures">
+            <h3 class="tetris-block-title" style="font-size: var(--text-xl); margin-bottom: 0.5rem; color: inherit;">Cross-App Space Navigation</h3>
+            <p style="font-size: var(--text-base); color: inherit; opacity: 0.86; line-height: 1.6;">
+              Swipe three or four fingers left, right, up, or down to switch full-screen apps, open Mission Control, or reveal your Desktop—working seamlessly across browsers, terminals, and editors.
+            </p>
+          </article>
+
+          <article class="keeby-step-card morph-surface-card tilt-card reveal-block" data-screen-src="../assets/images/swipy-cursor-settings.png" data-screen-alt="Swipy Cursor Sensitivity and One-Euro Filter Settings">
+            <h3 class="tetris-block-title" style="font-size: var(--text-xl); margin-bottom: 0.5rem; color: inherit;">Surgical Cursor Smoothing</h3>
+            <p style="font-size: var(--text-base); color: inherit; opacity: 0.86; line-height: 1.6;">
+              Customize Cursor Sensitivity, Adaptive Power Curve Acceleration, One-Euro Jitter Cutoff, and Dead Zone Margin to eliminate hand tremor while keeping fast sweeps responsive.
+            </p>
+          </article>
+
+          <article class="keeby-step-card morph-surface-card tilt-card reveal-block" data-screen-src="../assets/images/Screenshot%202026-10-30%20at%204.07.50%E2%80%AFPM.png" data-screen-alt="Swipy Floating Pointer HUD Studio">
+            <h3 class="tetris-block-title" style="font-size: var(--text-xl); margin-bottom: 0.5rem; color: inherit;">Floating Pointer HUD Studio</h3>
+            <p style="font-size: var(--text-base); color: inherit; opacity: 0.86; line-height: 1.6;">
+              Project a non-activating spatial reticle across every display. Choose between Vision Pro Ring, Glow Halo, Laser Dot, or Precision Crosshair with live pinch feedback.
+            </p>
+          </article>
+        </div>
+      </div>
+
+      <!-- PHASE E: EXACT NATIVE APP-PARITY 15-GESTURE LIBRARY -->
+      <div id="gesture-library" class="gesture-library-section section-morph-reveal">
+        <div class="library-header-asym reveal-block">
+          <div>
+            <h2 class="tetris-block-title" style="font-size: var(--text-2xl);">Gesture <span class="tetris-invert-chip">Library</span></h2>
+          </div>
+          <p style="font-size: var(--text-base); color: var(--color-ink-secondary); line-height: 1.6;">
+            All 15 hand gestures built into Swipy, rendered with the exact native macOS cards and icons from the app. Hover to tilt &amp; morph, or click any toggle switch to test it live.
+          </p>
+        </div>
+
+        <div id="gesture-filter-bar" class="library-filter-bar" role="toolbar" aria-label="Filter Gestures by Category"></div>
+        <div id="gesture-cards-grid" class="gesture-cards-matrix"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer style="border-top: 1px solid var(--color-border-hairline); background: var(--color-surface-card); color: var(--color-ink-primary); padding: var(--space-xl) var(--space-lg);">
+    <div style="max-width: 1440px; margin: 0 auto; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--space-md);">
+      <div style="display: flex; align-items: center; gap: 0.85rem;">
+        <img src="../Resources/AppLogo.png" alt="Swipy Icon" style="width: 36px; height: 36px; border-radius: 9px;" />
+        <div>
+          <h2 class="tetris-block-title" style="color: var(--color-ink-primary); font-size: var(--text-lg);">Swipy for macOS</h2>
+          <p style="font-size: var(--text-xs); color: var(--color-ink-secondary);">100% On-Device Apple Vision Hand Tracking &bull; macOS 14.0+</p>
+        </div>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; gap: 0.65rem;">
+        <a href="downloads/Swipy-macOS.dmg" download="Swipy-macOS.dmg" class="nav-download-btn">Download macOS DMG</a>
+        <a href="downloads/Swipy-macOS.zip" download="Swipy-macOS.zip" class="nav-pill-btn">Download .app ZIP</a>
+        <button type="button" class="nav-pill-btn" data-nav-target="station-01">Back to Top</button>
+      </div>
+    </div>
+  </footer>
+
+  <script src="scripts/tetris-matrix.js"></script>
+  <script src="scripts/web-vision-sandbox.js"></script>
+  <script src="scripts/gesture-library.js"></script>
+  <script src="scripts/scroll-engine.js"></script>
+</body>
+</html>

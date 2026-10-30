@@ -5,6 +5,7 @@ import SwipyCore
 /// Pure white, minimal, premium glassmorphism overview dashboard.
 public struct DashboardView: View {
     @ObservedObject var appState: AppLifecycleManager
+    @ObservedObject private var updater = AppUpdateManager.shared
 
     public init(appState: AppLifecycleManager) {
         self.appState = appState
@@ -14,6 +15,7 @@ public struct DashboardView: View {
         ScrollView {
             VStack(spacing: 20) {
                 headerBar
+                updateAvailableBanner
                 permissionAlerts
                 masterHeroCard
                 DashboardLiveCameraCard(appState: appState)
@@ -83,6 +85,39 @@ public struct DashboardView: View {
         case .paused: return Color.orange
         case .permissionRequired, .accessibilityRequired, .error: return Color.red
         default: return Color(hex: "777777")
+        }
+    }
+
+    @ViewBuilder
+    private var updateAvailableBanner: some View {
+        if case .updateAvailable(let manifest) = updater.status {
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("New Swipy Update Ready (v\(manifest.version) • \(manifest.commitSHA))")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(Color(hex: "171717"))
+                    Text("A newer macOS build was pushed to the repository. Click to install and relaunch automatically.")
+                        .font(.system(size: 11))
+                        .foregroundColor(Color(hex: "777777"))
+                }
+                Spacer()
+                Button(action: {
+                    Task { await updater.downloadAndInstallUpdate(from: manifest) }
+                }) {
+                    Text("Update & Relaunch Now")
+                        .font(.system(size: 11, weight: .semibold))
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(Color(hex: "171717"))
+                        .foregroundColor(.white)
+                        .cornerRadius(6)
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(14)
+            .background(Color(hex: "FAFAFA"))
+            .cornerRadius(10)
+            .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color(hex: "EAEAEA"), lineWidth: 1))
         }
     }
 

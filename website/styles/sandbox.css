@@ -1,0 +1,302 @@
+/* Phase C: Interactive "Test It Out?" Live Webcam Hand Vision Sandbox */
+.sandbox-section {
+  width: 100%;
+  padding: var(--space-xl) var(--space-lg);
+  background: var(--color-canvas-paper);
+}
+
+.sandbox-container {
+  max-width: 1380px;
+  margin: 0 auto;
+}
+
+.sandbox-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.sandbox-gesture-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sandbox-action-btn {
+  min-height: 42px;
+  padding: 0 1.05rem;
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  background: var(--color-surface-card);
+  color: var(--color-ink-primary);
+  border: 1px solid var(--color-border-hairline);
+  border-radius: 999px;
+  box-shadow: var(--shadow-xs);
+  cursor: pointer;
+  transition: transform 0.2s var(--ease-spring), background-color 0.2s var(--ease-expo), color 0.2s var(--ease-expo), box-shadow 0.2s var(--ease-expo);
+}
+
+.sandbox-action-btn:hover {
+  background: var(--color-surface-pitch);
+  color: var(--color-ink-inverted);
+  border-color: var(--color-surface-pitch);
+  transform: translateY(-1.5px);
+  box-shadow: var(--shadow-card);
+}
+
+.sandbox-macbook-large {
+  max-width: 1140px;
+}
+
+.sandbox-desktop-screen {
+  background-image:
+    linear-gradient(135deg, oklch(0.97 0 0 / 0.92), oklch(0.92 0 0 / 0.96)),
+    radial-gradient(var(--color-grid-dot) 1px, transparent 1px);
+  background-size: cover, 22px 22px;
+  position: relative;
+  cursor: grab;
+  overflow: hidden;
+}
+
+.sandbox-desktop-screen:active {
+  cursor: grabbing;
+}
+
+.sandbox-menubar {
+  height: 32px;
+  padding: 0 16px;
+  background: oklch(1.0 0 0 / 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--color-border-hairline);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.76rem;
+  font-weight: 500;
+  z-index: 10;
+}
+
+.sandbox-menubar-left {
+  display: flex;
+  gap: 14px;
+}
+
+.sandbox-space-pill,
+.sandbox-live-badge {
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--color-surface-pitch);
+  color: var(--color-ink-inverted);
+}
+
+.sandbox-stage-canvas {
+  position: relative;
+  width: 100%;
+  height: calc(100% - 32px);
+  transition: transform 0.45s var(--ease-spring);
+}
+
+.sandbox-stage-canvas.is-mission-control .sandbox-draggable-card {
+  transform: scale(0.85) translateY(-12px) !important;
+  box-shadow: 0 18px 34px oklch(0.1 0 0 / 0.18);
+}
+
+.sandbox-draggable-card {
+  position: absolute;
+  width: 26%;
+  min-width: 195px;
+  background: var(--color-surface-card);
+  border: 1px solid var(--color-border-hairline);
+  border-radius: 16px;
+  box-shadow: 0 12px 30px -4px oklch(0.12 0 0 / 0.1), 0 2px 6px oklch(0.12 0 0 / 0.04);
+  overflow: hidden;
+  user-select: none;
+  touch-action: none;
+  cursor: grab;
+  transition: transform 0.22s var(--ease-spring), box-shadow 0.22s var(--ease-spring), border-color 0.22s var(--ease-expo);
+  z-index: 5;
+}
+
+.sandbox-draggable-card.is-hovered {
+  border-color: var(--color-border-strong);
+  box-shadow: 0 16px 36px -4px oklch(0.12 0 0 / 0.14);
+}
+
+.sandbox-draggable-card.is-pinched {
+  cursor: grabbing;
+  transform: scale(1.05) rotate(-1deg);
+  box-shadow: 0 24px 48px -6px oklch(0.12 0 0 / 0.22);
+  z-index: 20;
+}
+
+.sandbox-card-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: oklch(0.975 0 0);
+  border-bottom: 1px solid var(--color-border-hairline);
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--color-ink-secondary);
+}
+
+.traffic-dots {
+  display: inline-flex;
+  gap: 5px;
+}
+
+.traffic-dots i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: oklch(0.80 0 0);
+  display: inline-block;
+}
+
+.sandbox-draggable-card img {
+  width: 100%;
+  height: 132px;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.sandbox-draggable-card p {
+  padding: 10px 12px;
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: var(--color-ink-secondary);
+}
+
+/* Live Browser Webcam PiP Hand Skeleton HUD */
+.sandbox-webcam-pip {
+  position: absolute;
+  right: 16px;
+  bottom: 64px;
+  width: 248px;
+  background: var(--color-surface-pitch);
+  color: var(--color-ink-inverted);
+  border: 1px solid oklch(1.0 0 0 / 0.14);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 18px 40px oklch(0.12 0 0 / 0.28);
+  z-index: 25;
+}
+
+.sandbox-pip-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  font-family: var(--font-sans);
+  font-size: 0.68rem;
+  font-weight: 600;
+  border-bottom: 1px solid oklch(0.28 0 0);
+}
+
+.sandbox-pip-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-ink-inverted);
+}
+
+.sandbox-pip-video-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: var(--color-surface-pitch);
+}
+
+.sandbox-pip-video-wrap video,
+.sandbox-pip-video-wrap canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1);
+}
+
+/* Sample macOS Bottom Dock */
+.sandbox-macos-dock {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 7px 16px;
+  border-radius: 999px;
+  background: oklch(1.0 0 0 / 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--color-border-hairline);
+  box-shadow: var(--shadow-floating);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--color-ink-secondary);
+  z-index: 15;
+}
+
+.dock-app-icon {
+  width: 26px !important;
+  height: 26px !important;
+  border-radius: 6px;
+}
+
+.dock-divider {
+  width: 1px;
+  height: 18px;
+  background: var(--color-border-hairline);
+}
+
+.sandbox-reticle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 35;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sandbox-reticle-ring {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid var(--color-surface-pitch);
+  background: oklch(1 0 0 / 0.45);
+  box-shadow: 0 4px 12px oklch(0.12 0 0 / 0.15);
+  transition: transform 0.14s var(--ease-spring), background-color 0.14s var(--ease-expo);
+}
+
+.sandbox-reticle.is-pinching .sandbox-reticle-ring {
+  transform: scale(0.7);
+  background: var(--color-surface-pitch);
+}
+
+.sandbox-reticle-tag {
+  font-family: var(--font-sans);
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--color-surface-pitch);
+  color: var(--color-ink-inverted);
+}

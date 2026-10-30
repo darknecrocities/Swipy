@@ -1,0 +1,87 @@
+name: Swipy macOS CI/CD & Release
+
+on:
+  push:
+    branches:
+      - main
+      - "feat/**"
+      - "fix/**"
+    tags:
+      - "v*"
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-test:
+    name: Build, Test & Package macOS App
+    runs-on: macos-15
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Select Xcode Toolchain
+        run: |
+          swift --version
+          xcodebuild -version
+
+      - name: Run Swipy Unit & Regression Suite
+        run: swift run SwipyTestRunner
+
+      - name: Package Signed Swipy.app, DMG & ZIP
+        run: ./scripts/bundle_app.sh
+
+      - name: Verify Distribution Artifacts
+        run: |
+          ls -lh website/downloads/Swipy-macOS.dmg website/downloads/Swipy-macOS.zip website/downloads/release-manifest.json
+          test -f website/downloads/Swipy-macOS.dmg
+          test -f website/downloads/Swipy-macOS.zip
+          test -f website/downloads/release-manifest.json
+
+      - name: Upload macOS Installer Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Swipy-macOS-Installer
+          path: |
+            website/downloads/Swipy-macOS.dmg
+            website/downloads/Swipy-macOS.zip
+            website/downloads/release-manifest.json
+          retention-days: 30
+
+  publish-release:
+    name: Publish macOS Release Assets
+    needs: build-and-test
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/feat/') || startsWith(github.ref, 'refs/tags/v'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Download macOS Installer Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: Swipy-macOS-Installer
+          path: dist
+
+      - name: Create or Update GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || 'latest' }}
+          name: "Swipy for macOS (${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || 'Latest Build' }})"
+          body: |
+            ## Swipy — Touchless Spatial Hand Control for macOS
+            - **Commit**: `${{ github.sha }}`
+            - **Branch**: `${{ github.ref_name }}`
+            - **Swipy-macOS.dmg**: Drag-and-drop macOS Disk Image installer (macOS 14.0+ Sonoma / Sequoia, Apple Silicon & Intel).
+            - **Swipy-macOS.zip**: Portable compressed `Swipy.app` bundle used by the in-app OTA Auto-Updater.
+          files: |
+            dist/Swipy-macOS.dmg
+            dist/Swipy-macOS.zip
+            dist/release-manifest.json
+          prerelease: false
+          generate_release_notes: true

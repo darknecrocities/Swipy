@@ -1,0 +1,477 @@
+/* Top Fixed Minimalist Glass Header */
+.spatial-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  padding: 0.7rem var(--space-lg);
+  background: oklch(1.0 0 0 / 0.82);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--color-border-hairline);
+}
+
+.brand-mark {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  text-decoration: none;
+  color: var(--color-ink-primary);
+  cursor: pointer;
+}
+
+.brand-mark img {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  box-shadow: var(--shadow-xs);
+}
+
+.brand-mark span {
+  font-family: var(--font-sans);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+.nav-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 4px;
+  background: oklch(0.96 0 0 / 0.9);
+  border: 1px solid var(--color-border-hairline);
+  border-radius: 999px;
+}
+
+.nav-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 0 0.95rem;
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  color: var(--color-ink-secondary);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  cursor: pointer;
+  transition:
+    transform 0.22s var(--ease-expo),
+    background-color 0.22s var(--ease-expo),
+    color 0.22s var(--ease-expo),
+    box-shadow 0.22s var(--ease-expo),
+    border-color 0.22s var(--ease-expo);
+}
+
+.nav-pill-btn:hover,
+.nav-pill-btn:focus-visible {
+  color: var(--color-ink-primary);
+  background: oklch(1.0 0 0 / 0.7);
+  outline: none;
+}
+
+.nav-pill-btn[aria-current="true"] {
+  background: var(--color-surface-pitch);
+  color: var(--color-ink-inverted);
+  box-shadow: 0 2px 10px oklch(0.12 0 0 / 0.14);
+  outline: none;
+}
+
+.hero-cta-row .nav-pill-btn,
+footer .nav-pill-btn {
+  min-height: 44px;
+  padding: 0 1.25rem;
+  font-size: var(--text-xs);
+  background: var(--color-surface-card);
+  color: var(--color-ink-primary);
+  border: 1px solid var(--color-border-strong);
+  box-shadow: var(--shadow-xs);
+}
+
+.hero-cta-row .nav-pill-btn:hover,
+footer .nav-pill-btn:hover {
+  background: var(--color-surface-subtle);
+  transform: translateY(-1.5px);
+  box-shadow: var(--shadow-card);
+}
+
+.nav-download-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.nav-download-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 42px;
+  padding: 0 1.2rem;
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  color: var(--color-ink-inverted);
+  background: var(--color-surface-pitch);
+  border: 1px solid var(--color-surface-pitch);
+  border-radius: 999px;
+  box-shadow: 0 4px 14px oklch(0.12 0 0 / 0.14);
+  cursor: pointer;
+  transition:
+    transform 0.25s var(--ease-expo),
+    background-color 0.25s var(--ease-expo),
+    color 0.25s var(--ease-expo),
+    box-shadow 0.25s var(--ease-expo);
+}
+
+.nav-download-btn svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.nav-download-btn:hover,
+.nav-download-btn:focus-visible {
+  background: oklch(0.22 0 0);
+  color: var(--color-ink-inverted);
+  transform: translateY(-1.5px);
+  box-shadow: 0 8px 22px oklch(0.12 0 0 / 0.2);
+  outline: none;
+}
+
+/* Phase A: Collision-Free Horizontal Scroll Carousel */
+.horizontal-scroll-stage {
+  position: relative;
+  height: 340vh;
+  width: 100%;
+}
+
+.horizontal-sticky-viewport {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+
+.horizontal-track {
+  display: flex;
+  flex-wrap: nowrap;
+  height: 100vh;
+  width: 300vw;
+  will-change: transform;
+  padding-top: 66px;
+  padding-bottom: 64px;
+}
+
+.spatial-station {
+  position: relative;
+  height: calc(100vh - 130px);
+  width: 100vw;
+  flex-shrink: 0;
+  padding: var(--space-sm) var(--space-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  container-type: inline-size;
+  container-name: station-box;
+}
+
+/* Collision-Free 2-Column Slide Architecture */
+.slide-two-col {
+  width: 100%;
+  max-width: 1420px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(340px, 0.9fr) minmax(420px, 1.1fr);
+  gap: var(--space-lg);
+  align-items: center;
+}
+
+.slide-left-stack {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-md);
+  z-index: 4;
+}
+
+.hero-main-heading {
+  font-size: clamp(2.1rem, 1.65rem + 2.2vw, 3.55rem);
+  letter-spacing: -0.04em;
+  line-height: 1.08;
+  margin-bottom: var(--space-sm);
+}
+
+.slide-lead-copy {
+  font-size: var(--text-base);
+  color: var(--color-ink-secondary);
+  max-width: 48ch;
+  line-height: 1.6;
+  margin-bottom: var(--space-sm);
+}
+
+.hero-cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.slide-right-showcase {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.orb-floating-badge {
+  position: absolute;
+  top: -34px;
+  right: -24px;
+  z-index: 18;
+}
+
+.slide-right-dual {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+}
+
+/* Floating Minimalist Carousel Dock */
+.carousel-dock {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 5px 8px;
+  background: oklch(1.0 0 0 / 0.86);
+  backdrop-filter: blur(18px) saturate(180%);
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  border: 1px solid var(--color-border-hairline);
+  border-radius: 999px;
+  box-shadow: var(--shadow-floating);
+}
+
+.carousel-arrow-btn {
+  min-width: 38px;
+  min-height: 38px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border-hairline);
+  background: var(--color-surface-card);
+  color: var(--color-ink-primary);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s var(--ease-spring), background-color 0.2s var(--ease-expo), color 0.2s var(--ease-expo);
+}
+
+.carousel-arrow-btn:hover {
+  background: var(--color-surface-pitch);
+  color: var(--color-ink-inverted);
+  transform: scale(1.06);
+}
+
+.carousel-dots {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.carousel-dot-pill {
+  min-height: 38px;
+  padding: 0 0.95rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--color-ink-secondary);
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  transition: background-color 0.25s var(--ease-expo), color 0.25s var(--ease-expo);
+}
+
+.carousel-dot-pill[aria-current="true"],
+.carousel-dot-pill:hover {
+  background: var(--color-surface-pitch);
+  color: var(--color-ink-inverted);
+}
+
+/* Full-Color MacBook Pro & macOS Window Hardware Frames */
+.macbook-pro-frame {
+  position: relative;
+  width: 100%;
+  max-width: 680px;
+  margin: 0 auto;
+  user-select: none;
+}
+
+.macbook-lid {
+  position: relative;
+  background: var(--color-surface-pitch);
+  border: 1px solid oklch(0.26 0 0);
+  border-radius: 20px 20px 4px 4px;
+  padding: 12px 12px 10px 12px;
+  box-shadow: 0 24px 54px -12px oklch(0.12 0 0 / 0.18), 0 4px 16px oklch(0.12 0 0 / 0.06);
+}
+
+.macbook-notch {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 96px;
+  height: 14px;
+  background: var(--color-surface-pitch);
+  border-radius: 0 0 8px 8px;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.macbook-notch::after {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: oklch(0.35 0 0);
+}
+
+.macbook-screen {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  background: var(--color-canvas-pure);
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid oklch(0.24 0 0);
+}
+
+.macbook-screen img,
+.macbook-screen video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: opacity 0.35s var(--ease-expo), transform 0.45s var(--ease-spring);
+}
+
+.macbook-screen img.is-morphing {
+  opacity: 0.25;
+  transform: scale(0.96);
+}
+
+.macbook-base {
+  position: relative;
+  width: 108%;
+  left: -4%;
+  height: 13px;
+  background: linear-gradient(180deg, oklch(0.92 0 0), oklch(0.84 0 0));
+  border: 1px solid oklch(0.76 0 0);
+  border-radius: 2px 2px 12px 12px;
+  box-shadow: 0 10px 24px oklch(0.12 0 0 / 0.1);
+}
+
+.macbook-base::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 84px;
+  height: 4px;
+  background: oklch(0.68 0 0);
+  border-radius: 0 0 6px 6px;
+}
+
+.macos-popover-frame {
+  width: 215px;
+  flex-shrink: 0;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid var(--color-border-hairline);
+  background: var(--color-canvas-pure);
+  box-shadow: var(--shadow-floating);
+}
+
+.macos-popover-frame img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.macos-window-card {
+  border-radius: 20px;
+  border: 1px solid var(--color-border-hairline);
+  background: var(--color-canvas-pure);
+  padding: 10px;
+  box-shadow: var(--shadow-card);
+}
+
+/* Phase D: Vertical Keeby-Style Showcase */
+.vertical-scroll-stage {
+  position: relative;
+  width: 100%;
+  padding: var(--space-xl) var(--space-lg);
+  background: var(--color-canvas-pure);
+}
+
+.keeby-sticky-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: var(--space-xl);
+  align-items: start;
+  max-width: 1440px;
+  margin: 0 auto var(--space-xl) auto;
+}
+
+.keeby-sticky-hardware {
+  position: sticky;
+  top: 110px;
+}
+
+.keeby-steps-column {
+  display: flex;
+  flex-direction: column;
+  gap: 16vh;
+  padding: 4vh 0 12vh 0;
+}
+
+.keeby-step-card {
+  background: var(--color-surface-card);
+  color: var(--color-ink-primary);
+  border: 1px solid var(--color-border-hairline);
+  border-radius: 22px;
+  padding: var(--space-md);
+  box-shadow: var(--shadow-card);
+  cursor: pointer;
+}

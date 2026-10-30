@@ -57,7 +57,7 @@ public struct SwipySettings: Codable, Equatable, Sendable {
     public var schemaVersion: Int?
 
     /// Bumped whenever previously saved values must be re-derived from current defaults.
-    public static let currentSchemaVersion = 3
+    public static let currentSchemaVersion = 4
 
     public init(
         isTrackingEnabled: Bool = false,
@@ -123,11 +123,12 @@ public struct SwipySettings: Codable, Equatable, Sendable {
         self.schemaVersion = schemaVersion
     }
 
-    /// Default bindings matching product identity specification.
+    /// Default bindings matching product identity specification (all 15 gestures across all 6 categories).
     public static var defaultBindings: [GestureBinding] {
         [
-            GestureBinding(gestureType: .indexPointing, category: .cursorAndClick, action: .none),
+            GestureBinding(gestureType: .indexPointing, category: .cursorAndClick, action: .moveCursor),
             GestureBinding(gestureType: .thumbIndexPinch, category: .cursorAndClick, action: .leftClick),
+            GestureBinding(gestureType: .pinchAndDrag, category: .cursorAndClick, action: .startOrUpdateDrag),
             GestureBinding(gestureType: .doublePinch, category: .cursorAndClick, action: .doubleClick),
             GestureBinding(gestureType: .thumbMiddlePinch, category: .cursorAndClick, action: .rightClick),
             GestureBinding(gestureType: .twoFingerScroll, category: .scrolling, action: .scroll),
@@ -137,6 +138,8 @@ public struct SwipySettings: Codable, Equatable, Sendable {
             GestureBinding(gestureType: .threeFingerSwipeRight, category: .spaceNavigation, action: .previousSpace),
             GestureBinding(gestureType: .fourFingerSwipeLeft, category: .appSwitching, action: .nextSpace),
             GestureBinding(gestureType: .fourFingerSwipeRight, category: .appSwitching, action: .previousSpace),
+            GestureBinding(gestureType: .thumbMiddleZoom, category: .twoHand, action: .zoom),
+            GestureBinding(gestureType: .twoHandZoom, category: .twoHand, action: .zoom),
             GestureBinding(gestureType: .openPalmsPause, category: .safety, action: .toggleTrackingPause)
         ]
     }
@@ -180,7 +183,8 @@ public struct SwipySettings: Codable, Equatable, Sendable {
     /// clamped to an unintended 0.15, and the 3/4-finger left/right bindings advertised actions the engine
     /// never performed. Defaults only apply to fresh installs, so existing users must be migrated explicitly.
     public mutating func migrateIfNeeded() {
-        guard (schemaVersion ?? 1) < Self.currentSchemaVersion || swipeVelocityThreshold > 0.8 else { return }
+        let missingBindings = bindings.count < Self.defaultBindings.count
+        guard (schemaVersion ?? 1) < Self.currentSchemaVersion || swipeVelocityThreshold > 0.8 || missingBindings else { return }
 
         if let preset = Self.preset(for: selectedProfileKind) {
             swipeVelocityThreshold = preset.swipeVelocityThreshold
@@ -198,6 +202,25 @@ public struct SwipySettings: Codable, Equatable, Sendable {
                 bindings[index].action = action
             }
         }
+
+        // Backfill any newly added gestures (e.g. Pinch & Drag, Thumb-Middle Zoom, Two-Hand Zoom) in canonical order
+        var existingByType: [GestureType: GestureBinding] = [:]
+        for item in bindings {
+            existingByType[item.gestureType] = item
+        }
+        var merged: [GestureBinding] = []
+        for def in Self.defaultBindings {
+            if var existing = existingByType[def.gestureType] {
+                if existing.gestureType == .indexPointing && existing.action == .none {
+                    existing.action = .moveCursor
+                }
+                existing.category = def.category
+                merged.append(existing)
+            } else {
+                merged.append(def)
+            }
+        }
+        bindings = merged
         schemaVersion = Self.currentSchemaVersion
     }
 

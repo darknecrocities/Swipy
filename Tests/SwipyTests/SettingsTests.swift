@@ -9,6 +9,8 @@ public struct SettingsTests {
         testSanitizationBounds()
         testCodableSerialization()
         testPointerSettingsSerialization()
+        testAllGestureCategoriesPopulatedAndMigrated()
+        testAppUpdateManifestComparisonAndParsing()
     }
 
     private static func testDefaultSettingsIntegrity() {
@@ -79,5 +81,70 @@ public struct SettingsTests {
         } catch {
             TestHarness.fail("Failed to serialize pointer settings: \(error)")
         }
+    }
+
+    private static func testAllGestureCategoriesPopulatedAndMigrated() {
+        let settings = SwipySettings()
+        TestHarness.assertEqual(settings.bindings.count, 15, "All 15 gestures present in defaultBindings")
+
+        for category in GestureCategory.allCases {
+            let count = settings.bindings.filter { $0.category == category }.count
+            TestHarness.assertTrue(count > 0, "Category \(category.rawValue) has at least 1 binding (got \(count))")
+        }
+
+        // Simulate migrating an older v3 configuration missing Two-Hand Controls and Pinch & Drag
+        let legacyBindings = [
+            GestureBinding(gestureType: .indexPointing, category: .cursorAndClick, action: .none),
+            GestureBinding(gestureType: .thumbIndexPinch, category: .cursorAndClick, action: .leftClick)
+        ]
+        var legacySettings = SwipySettings(bindings: legacyBindings, schemaVersion: 3)
+        legacySettings.migrateIfNeeded()
+
+        TestHarness.assertEqual(legacySettings.bindings.count, 15, "Schema v4 migration backfills all 15 gestures")
+        let twoHandCount = legacySettings.bindings.filter { $0.category == .twoHand }.count
+        TestHarness.assertEqual(twoHandCount, 2, "Two-Hand Controls category populated with 2 zoom bindings")
+        let indexBinding = legacySettings.bindings.first { $0.gestureType == .indexPointing }
+        TestHarness.assertEqual(indexBinding?.action, .moveCursor, "Index Pointing migrated from .none to .moveCursor")
+    }
+
+    private static func testAppUpdateManifestComparisonAndParsing() {
+        let sampleJSON = """
+        {
+          "tag_name": "latest",
+          "target_commitish": "a1b2c3d4e5f60718293a",
+          "published_at": "2026-10-30T12:00:00Z",
+          "body": "## Swipy Build\\n- Commit: `9f8e7d6`\\n- Automated macOS release",
+          "assets": [
+            {
+              "name": "Swipy-macOS.zip",
+              "browser_download_url": "https://github.com/darknecrocities/Swipy/releases/download/latest/Swipy-macOS.zip"
+            }
+          ]
+        }
+        """.data(using: .utf8)!
+
+        guard let manifest = AppUpdateManager.parseGitHubReleasePayload(sampleJSON, defaultVersion: "1.0.0") else {
+            TestHarness.fail("Expected valid ReleaseManifest from GitHub release payload")
+            return
+        }
+
+        TestHarness.assertEqual(manifest.commitSHA, "9f8e7d6", "Extracted 7-char commit SHA from release body")
+        TestHarness.assertTrue(manifest.downloadURL.hasSuffix("Swipy-macOS.zip"), "Extracted Swipy-macOS.zip asset URL")
+
+        // Same commit SHA -> should NOT offer update
+        let sameUpdate = AppUpdateManager.shouldOfferUpdate(
+            localVersion: "1.0.0",
+            localCommitSHA: "9f8e7d6",
+            remote: manifest
+        )
+        TestHarness.assertFalse(sameUpdate, "Identical commit SHA does not trigger redundant update")
+
+        // Newer commit SHA on main -> SHOULD offer update immediately even if semantic version is still 1.0.0
+        let newerCommitUpdate = AppUpdateManager.shouldOfferUpdate(
+            localVersion: "1.0.0",
+            localCommitSHA: "14af833",
+            remote: manifest
+        )
+        TestHarness.assertTrue(newerCommitUpdate, "Different commit SHA on latest release triggers OTA update")
     }
 }
