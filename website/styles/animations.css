@@ -1,0 +1,225 @@
+/* Circular Dot-Matrix Hand & Tetris Widget */
+.matrix-orb-shell {
+  width: 248px;
+  height: 248px;
+  border-radius: 50%;
+  background: var(--color-surface-pitch);
+  border: 2px solid var(--color-border-strong);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 10px 10px 0 oklch(0.82 0 0);
+  cursor: pointer;
+  transition: transform 0.35s var(--ease-spring);
+}
+
+.matrix-orb-shell:hover {
+  transform: scale(1.04) rotate(-2deg);
+}
+
+.matrix-orb-canvas {
+  width: 190px;
+  height: 190px;
+  display: block;
+}
+
+/* Station 02 & 03 Asymmetrical Staggered Layout */
+.mechanics-stagger-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-template-rows: repeat(6, 1fr);
+  gap: var(--space-md);
+  height: 100%;
+  width: 100%;
+}
+
+.mech-card-alpha {
+  grid-column: 1 / 6;
+  grid-row: 1 / 4;
+  background: var(--color-surface-pitch);
+  color: var(--color-ink-inverted);
+  padding: var(--space-md);
+  border: 2px solid var(--color-border-strong);
+  box-shadow: 8px 8px 0 oklch(0.76 0 0);
+}
+
+.mech-card-beta {
+  grid-column: 7 / 13;
+  grid-row: 1 / 5;
+  align-self: start;
+}
+
+.mech-card-gamma {
+  grid-column: 2 / 7;
+  grid-row: 4 / 7;
+  background: var(--color-surface-card);
+  border: 2px solid var(--color-border-strong);
+  padding: var(--space-md);
+  box-shadow: 8px 8px 0 var(--color-surface-pitch);
+}
+
+.pivot-twist-banner {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding-left: var(--space-lg);
+  border-left: 3px dashed var(--color-border-strong);
+}
+
+/* Exact 15-Gesture Library Section */
+.gesture-library-section {
+  max-width: 1440px;
+  margin: var(--space-xl) auto 0 auto;
+  padding-top: var(--space-xl);
+  border-top: 2px solid var(--color-border-strong);
+  container-type: inline-size;
+  container-name: library-box;
+}
+
+.library-header-asym {
+  display: grid;
+  grid-template-columns: 1.3fr 0.7fr;
+  gap: var(--space-md);
+  align-items: end;
+  margin-bottom: var(--space-lg);
+}
+
+.library-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-bottom: var(--space-lg);
+}
+
+.library-filter-pill {
+  min-height: 44px;
+  padding: 0 1.15rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  background: var(--color-canvas-paper);
+  color: var(--color-ink-primary);
+  border: 1.5px solid var(--color-border-strong);
+  cursor: pointer;
+  transition: transform 0.2s var(--ease-expo), background 0.2s var(--ease-expo), color 0.2s var(--ease-expo);
+}
+
+.library-filter-pill[aria-pressed="true"],
+.library-filter-pill:hover {
+  background: var(--color-surface-pitch);
+  color: var(--color-ink-inverted);
+  transform: translate(-2px, -2px);
+  box-shadow: 4px 4px 0 var(--color-ink-primary);
+}
+
+.gesture-cards-matrix {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: var(--space-md);
+}
+
+.gesture-item-card {
+  background: var(--color-surface-card);
+  border: 2px solid var(--color-border-strong);
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  transition: transform 0.28s var(--ease-expo), box-shadow 0.28s var(--ease-expo);
+}
+
+.gesture-item-card:hover {
+  transform: translate(-4px, -4px);
+  box-shadow: 8px 8px 0 var(--color-surface-pitch);
+}
+
+.gesture-item-card:nth-child(even) {
+  transform: translateY(10px);
+}
+
+.gesture-item-card:nth-child(even):hover {
+  transform: translate(-4px, 6px);
+}
+
+.gesture-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.gesture-icon-box {
+  width: 44px;
+  height: 44px;
+  background: var(--color-canvas-paper);
+  border: 1.5px solid var(--color-border-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gesture-icon-box svg {
+  width: 22px;
+  height: 22px;
+  stroke: var(--color-ink-primary);
+  fill: none;
+  stroke-width: 1.85;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.gesture-toggle-indicator {
+  width: 38px;
+  height: 22px;
+  background: var(--color-surface-pitch);
+  border-radius: 999px;
+  position: relative;
+}
+
+.gesture-toggle-indicator::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 16px;
+  height: 16px;
+  background: var(--color-canvas-pure);
+  border-radius: 50%;
+}
+
+/* Kinetic Word & Section Reveal */
+.reveal-block {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 0.6s var(--ease-expo), transform 0.6s var(--ease-expo);
+}
+
+.reveal-block.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Container & Responsive Breakpoints */
+@container library-box (max-width: 760px) {
+  .library-header-asym {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 960px) {
+  .horizontal-scroll-stage { height: auto; }
+  .horizontal-sticky-viewport { position: relative; height: auto; overflow: visible; }
+  .horizontal-track { flex-direction: column; width: 100%; height: auto; transform: none !important; }
+  .spatial-station { width: 100% !important; height: auto; padding: var(--space-lg) var(--space-md); }
+  .asym-canvas, .mechanics-stagger-grid, .keeby-sticky-grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+  .keeby-sticky-hardware { position: relative; top: 0; }
+  .keeby-steps-column { gap: var(--space-lg); padding: var(--space-md) 0; }
+}

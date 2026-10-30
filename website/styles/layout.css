@@ -1,0 +1,280 @@
+/* Top Fixed Spatial Header */
+.spatial-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-sm) var(--space-md);
+  background: oklch(0.985 0 0 / 0.86);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--color-border-hairline);
+}
+
+.brand-mark {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  text-decoration: none;
+  color: var(--color-ink-primary);
+}
+
+.brand-mark img {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  filter: grayscale(100%) contrast(115%);
+}
+
+.brand-mark span {
+  font-family: var(--font-tetris);
+  font-size: var(--text-base);
+  letter-spacing: 0.04em;
+}
+
+.nav-axis-telemetry {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-ink-secondary);
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.nav-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 1.1rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--color-ink-primary);
+  background: var(--color-surface-card);
+  border: 1px solid var(--color-border-strong);
+  transition: transform 0.2s var(--ease-expo), background 0.2s var(--ease-expo), color 0.2s var(--ease-expo);
+}
+
+.nav-pill-btn:hover,
+.nav-pill-btn:focus-visible {
+  background: var(--color-surface-pitch);
+  color: var(--color-ink-inverted);
+  transform: translate(-2px, -2px);
+  box-shadow: 4px 4px 0 var(--color-ink-primary);
+  outline: none;
+}
+
+/* Phase A: Horizontal Scroll Track Container */
+.horizontal-scroll-stage {
+  position: relative;
+  height: 320vh;
+  width: 100%;
+}
+
+.horizontal-sticky-viewport {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+
+.horizontal-track {
+  display: flex;
+  flex-wrap: nowrap;
+  height: 100vh;
+  width: 280vw;
+  will-change: transform;
+  padding-top: 68px;
+}
+
+.spatial-station {
+  position: relative;
+  height: calc(100vh - 68px);
+  flex-shrink: 0;
+  padding: var(--space-md) var(--space-lg);
+  container-type: inline-size;
+  container-name: station-box;
+}
+
+.station-hero { width: 105vw; }
+.station-mechanics { width: 95vw; }
+.station-pivot { width: 80vw; }
+
+/* Asymmetrical Playground Canvas */
+.asym-canvas {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-template-rows: repeat(6, 1fr);
+  gap: var(--space-sm);
+}
+
+.asym-hero-copy {
+  grid-column: 1 / 7;
+  grid-row: 1 / 4;
+  align-self: start;
+  padding-top: var(--space-sm);
+  z-index: 4;
+}
+
+.asym-matrix-orb {
+  grid-column: 10 / 13;
+  grid-row: 1 / 4;
+  justify-self: end;
+  align-self: center;
+  z-index: 5;
+}
+
+.asym-hero-macbook {
+  grid-column: 5 / 12;
+  grid-row: 3 / 7;
+  align-self: end;
+  z-index: 3;
+}
+
+.asym-floating-tetris-card {
+  grid-column: 1 / 5;
+  grid-row: 4 / 7;
+  align-self: center;
+  background: var(--color-surface-card);
+  border: 2px solid var(--color-border-strong);
+  padding: var(--space-md);
+  box-shadow: 8px 8px 0 var(--color-surface-pitch);
+  z-index: 4;
+}
+
+/* Monochrome MacBook Pro Hardware Frame */
+.macbook-pro-frame {
+  position: relative;
+  width: 100%;
+  max-width: 780px;
+  margin: 0 auto;
+  user-select: none;
+}
+
+.macbook-lid {
+  position: relative;
+  background: var(--color-surface-pitch);
+  border: 2px solid var(--color-border-strong);
+  border-radius: 18px 18px 4px 4px;
+  padding: 12px 12px 10px 12px;
+  box-shadow: 12px 14px 0 oklch(0.12 0 0 / 0.14);
+}
+
+.macbook-notch {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 96px;
+  height: 14px;
+  background: var(--color-surface-pitch);
+  border-radius: 0 0 8px 8px;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.macbook-notch::after {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: oklch(0.35 0 0);
+}
+
+.macbook-screen {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  background: var(--color-canvas-pure);
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid oklch(0.28 0 0);
+}
+
+.macbook-screen img,
+.macbook-screen video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: grayscale(100%) contrast(106%);
+}
+
+.macbook-base {
+  position: relative;
+  width: 108%;
+  left: -4%;
+  height: 14px;
+  background: var(--color-surface-subtle);
+  border: 2px solid var(--color-border-strong);
+  border-radius: 2px 2px 12px 12px;
+}
+
+.macbook-base::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 84px;
+  height: 5px;
+  background: var(--color-surface-pitch);
+  border-radius: 0 0 6px 6px;
+}
+
+/* Phase B: Vertical Keeby-Style Showcase & Gesture Library */
+.vertical-scroll-stage {
+  position: relative;
+  width: 100%;
+  padding: var(--space-xl) var(--space-lg);
+  border-top: 2px solid var(--color-border-strong);
+  background: var(--color-canvas-pure);
+}
+
+.keeby-sticky-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: var(--space-xl);
+  align-items: start;
+  max-width: 1440px;
+  margin: 0 auto var(--space-xl) auto;
+}
+
+.keeby-sticky-hardware {
+  position: sticky;
+  top: 110px;
+}
+
+.keeby-steps-column {
+  display: flex;
+  flex-direction: column;
+  gap: 24vh;
+  padding: 6vh 0 14vh 0;
+}
+
+.keeby-step-card {
+  background: var(--color-canvas-paper);
+  border: 2px solid var(--color-border-strong);
+  padding: var(--space-md);
+  box-shadow: 8px 8px 0 var(--color-surface-pitch);
+  transition: transform 0.35s var(--ease-expo);
+}

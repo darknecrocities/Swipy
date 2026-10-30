@@ -1,0 +1,122 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Silkscreen:wght@400;700&display=swap');
+
+:root {
+  --color-canvas-pure: oklch(1.0 0 0);
+  --color-canvas-paper: oklch(0.975 0 0);
+  --color-surface-card: oklch(1.0 0 0);
+  --color-surface-subtle: oklch(0.95 0 0);
+  --color-surface-obsidian: oklch(0.14 0 0);
+  --color-surface-pitch: oklch(0.08 0 0);
+  --color-ink-primary: oklch(0.12 0 0);
+  --color-ink-secondary: oklch(0.38 0 0);
+  --color-ink-muted: oklch(0.56 0 0);
+  --color-ink-inverted: oklch(0.99 0 0);
+  --color-border-hairline: oklch(0.89 0 0);
+  --color-border-strong: oklch(0.16 0 0);
+  --color-grid-dot: oklch(0.84 0 0);
+
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-tetris: 'Silkscreen', monospace;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --text-xs: clamp(0.7rem, 0.65rem + 0.2vw, 0.78rem);
+  --text-sm: clamp(0.82rem, 0.78rem + 0.25vw, 0.92rem);
+  --text-base: clamp(0.95rem, 0.9rem + 0.3vw, 1.08rem);
+  --text-lg: clamp(1.15rem, 1.05rem + 0.5vw, 1.4rem);
+  --text-xl: clamp(1.5rem, 1.25rem + 1.1vw, 2.25rem);
+  --text-2xl: clamp(2.1rem, 1.65rem + 2.2vw, 3.6rem);
+  --text-display: clamp(2.5rem, 1.9rem + 3.4vw, 5.1rem);
+
+  --space-xs: clamp(0.4rem, 0.35rem + 0.25vw, 0.6rem);
+  --space-sm: clamp(0.75rem, 0.65rem + 0.4vw, 1.1rem);
+  --space-md: clamp(1.25rem, 1.05rem + 0.8vw, 1.85rem);
+  --space-lg: clamp(2rem, 1.6rem + 1.6vw, 3.25rem);
+  --space-xl: clamp(3.25rem, 2.4rem + 3vw, 5.5rem);
+
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  background-color: var(--color-canvas-paper);
+  color: var(--color-ink-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+body {
+  background-color: var(--color-canvas-paper);
+  background-image:
+    radial-gradient(var(--color-grid-dot) 1px, transparent 1px),
+    linear-gradient(to right, oklch(0.93 0 0 / 0.55) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(0.93 0 0 / 0.55) 1px, transparent 1px);
+  background-size: 24px 24px, 120px 120px, 120px 120px;
+  color: var(--color-ink-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+  selection-background-color: var(--color-ink-primary);
+}
+
+::selection {
+  background: var(--color-ink-primary);
+  color: var(--color-ink-inverted);
+}
+
+.tetris-block-title {
+  font-family: var(--font-tetris);
+  letter-spacing: -0.03em;
+  line-height: 1.06;
+  text-transform: uppercase;
+  color: var(--color-ink-primary);
+}
+
+.tetris-invert-chip {
+  display: inline-block;
+  background: var(--color-surface-pitch);
+  color: var(--color-ink-inverted);
+  padding: 0.06em 0.28em;
+  margin: 0 0.06em;
+  box-shadow: 4px 4px 0 oklch(0.75 0 0);
+}
+
+.editorial-serif-display {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  line-height: 1.04;
+}
+
+.mono-caption {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-ink-secondary);
+}
+
+.crosshair-marker {
+  position: relative;
+}
+
+.crosshair-marker::before,
+.crosshair-marker::after {
+  content: '+';
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--color-ink-muted);
+  position: absolute;
+  top: -0.65rem;
+  pointer-events: none;
+}
+
+.crosshair-marker::before { left: 0; }
+.crosshair-marker::after { right: 0; }
