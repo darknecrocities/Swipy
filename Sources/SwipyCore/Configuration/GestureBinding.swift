@@ -2,6 +2,7 @@ import Foundation
 
 /// Action that can be executed when a gesture is triggered.
 public enum GestureAction: String, Codable, CaseIterable, Sendable {
+    case moveCursor = "Point & Glide Cursor"
     case leftClick = "Left Click"
     case doubleClick = "Double Click"
     case rightClick = "Right Click"
@@ -23,6 +24,7 @@ public enum GestureAction: String, Codable, CaseIterable, Sendable {
 public enum GestureType: String, Codable, CaseIterable, Sendable {
     case indexPointing = "Index Pointing"
     case thumbIndexPinch = "Thumb-Index Pinch"
+    case pinchAndDrag = "Pinch & Drag"
     case thumbMiddlePinch = "Thumb-Middle Pinch"
     case thumbMiddleZoom = "Thumb-Middle Zoom"
     case doublePinch = "Double Pinch"

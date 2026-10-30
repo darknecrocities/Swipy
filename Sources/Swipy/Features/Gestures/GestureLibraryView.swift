@@ -30,28 +30,58 @@ public struct GestureLibraryView: View {
     }
 
     private var headerView: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text("Gesture Library")
-                .font(.system(size: 26, weight: .semibold))
+        HStack(alignment: .bottom) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Gesture Library")
+                    .font(.system(size: 26, weight: .semibold))
+                    .foregroundColor(Color(hex: "171717"))
+                Text("Configure hand poses, assigned system actions, and individual gesture toggles.")
+                    .font(.system(size: 13))
+                    .foregroundColor(Color(hex: "777777"))
+            }
+            Spacer()
+            Button(action: {
+                appState.settings.bindings = SwipySettings.defaultBindings
+                appState.settings.save()
+            }) {
+                HStack(spacing: 6) {
+                    Image(systemName: "arrow.counterclockwise")
+                        .font(.system(size: 11, weight: .semibold))
+                    Text("Reset Defaults")
+                        .font(.system(size: 12, weight: .medium))
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(Color(hex: "FAFAFA"))
                 .foregroundColor(Color(hex: "171717"))
-            Text("Configure hand poses, assigned system actions, and individual gesture toggles.")
-                .font(.system(size: 13))
-                .foregroundColor(Color(hex: "777777"))
+                .cornerRadius(8)
+                .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(hex: "EAEAEA"), lineWidth: 1))
+            }
+            .buttonStyle(.plain)
         }
     }
 
     private var categoryFilterBar: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
-                filterPill(title: "All", isSelected: viewModel.selectedCategory == nil) {
+                filterPill(
+                    title: "All (\(appState.settings.bindings.count))",
+                    isSelected: viewModel.selectedCategory == nil
+                ) {
                     viewModel.selectedCategory = nil
                 }
                 ForEach(GestureCategory.allCases, id: \.self) { cat in
-                    filterPill(title: cat.rawValue, isSelected: viewModel.selectedCategory == cat) {
+                    let count = appState.settings.bindings.filter { $0.category == cat }.count
+                    filterPill(
+                        title: "\(cat.rawValue) (\(count))",
+                        isSelected: viewModel.selectedCategory == cat
+                    ) {
                         viewModel.selectedCategory = cat
                     }
                 }
             }
+            .padding(.trailing, 16)
+            .padding(.vertical, 2)
         }
     }
 
@@ -83,25 +113,37 @@ public struct GestureLibraryView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 gestureIcon(for: binding.wrappedValue.gestureType)
-                    .frame(width: 32, height: 32)
-                    .background(Color(hex: "FAFAFA"))
+                    .frame(width: 34, height: 34)
+                    .background(Color(hex: "F5F5F5"))
                     .cornerRadius(8)
+                    .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(hex: "E8E8E8"), lineWidth: 1))
                 Spacer()
-                Toggle("", isOn: binding.isEnabled)
-                    .toggleStyle(.switch)
-                    .labelsHidden()
-                    .onChange(of: binding.wrappedValue.isEnabled) {
-                        appState.settings.save()
-                    }
+                monochromePillSwitch(isOn: binding.isEnabled)
             }
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(binding.wrappedValue.gestureType.rawValue)
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundColor(Color(hex: "171717"))
-                Text(binding.wrappedValue.action.rawValue)
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(Color(hex: "777777"))
+                Menu {
+                    ForEach(GestureAction.allCases, id: \.self) { act in
+                        Button(act.rawValue) {
+                            binding.wrappedValue.action = act
+                            appState.settings.save()
+                        }
+                    }
+                } label: {
+                    HStack(spacing: 4) {
+                        Text(binding.wrappedValue.action.rawValue)
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(Color(hex: "555555"))
+                        Image(systemName: "chevron.up.chevron.down")
+                            .font(.system(size: 9, weight: .semibold))
+                            .foregroundColor(Color(hex: "888888"))
+                    }
+                }
+                .menuStyle(.borderlessButton)
+                .fixedSize()
             }
 
             HStack {
@@ -110,9 +152,12 @@ public struct GestureLibraryView: View {
                     .padding(.horizontal, 8)
                     .padding(.vertical, 3)
                     .background(Color(hex: "F3F3F3"))
-                    .foregroundColor(Color(hex: "777777"))
+                    .foregroundColor(Color(hex: "666666"))
                     .cornerRadius(4)
                 Spacer()
+                Text(binding.wrappedValue.isEnabled ? "Active" : "Disabled")
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundColor(binding.wrappedValue.isEnabled ? Color(hex: "171717") : Color(hex: "999999"))
             }
         }
         .padding(16)
@@ -121,12 +166,33 @@ public struct GestureLibraryView: View {
         .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color(hex: "EAEAEA"), lineWidth: 1))
     }
 
+    private func monochromePillSwitch(isOn: Binding<Bool>) -> some View {
+        Button(action: {
+            isOn.wrappedValue.toggle()
+            appState.settings.save()
+        }) {
+            ZStack(alignment: isOn.wrappedValue ? .trailing : .leading) {
+                Capsule()
+                    .fill(isOn.wrappedValue ? Color(hex: "171717") : Color(hex: "E5E5E5"))
+                    .frame(width: 38, height: 22)
+                Circle()
+                    .fill(Color.white)
+                    .frame(width: 18, height: 18)
+                    .padding(.horizontal, 2)
+                    .shadow(color: Color.black.opacity(0.15), radius: 1, x: 0, y: 1)
+            }
+            .animation(.easeOut(duration: 0.15), value: isOn.wrappedValue)
+        }
+        .buttonStyle(.plain)
+    }
+
     @ViewBuilder
     private func gestureIcon(for type: GestureType) -> some View {
         let name: String = {
             switch type {
             case .indexPointing: return "hand.point.up.left"
             case .thumbIndexPinch: return "hand.pinch"
+            case .pinchAndDrag: return "hand.draw"
             case .thumbMiddlePinch: return "hand.tap"
             case .thumbMiddleZoom: return "plus.magnifyingglass"
             case .doublePinch: return "hand.tap.fill"
@@ -142,7 +208,7 @@ public struct GestureLibraryView: View {
             }
         }()
         Image(systemName: name)
-            .font(.system(size: 14))
+            .font(.system(size: 14, weight: .semibold))
             .foregroundColor(Color(hex: "171717"))
     }
 }

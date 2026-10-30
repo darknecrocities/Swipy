@@ -10,3 +10,5 @@ DerivedData/
 .DS_Store
 *.swp
 *~
+assets/video-demo/*.mov
+
