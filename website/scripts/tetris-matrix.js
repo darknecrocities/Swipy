@@ -133,11 +133,11 @@
         }
       });
       if (activeSteps.length === 0) {
-        outputEl.innerHTML = 'CLICK ANY TETRIS BLOCK ABOVE TO ASSEMBLE A TOUCHLESS MACOS WORKFLOW';
-        if (statusEl) statusEl.textContent = '0 BLOCKS SNAPPED';
+        outputEl.innerHTML = 'Select any gesture block above to assemble a touchless macOS workflow';
+        if (statusEl) statusEl.textContent = '0 Blocks Active';
       } else {
-        outputEl.innerHTML = 'ACTIVE CHAIN: ' + activeSteps.join(' &bull; ');
-        if (statusEl) statusEl.textContent = activeSteps.length + ' BLOCKS SNAPPED';
+        outputEl.innerHTML = 'Active Chain: ' + activeSteps.join(' &bull; ');
+        if (statusEl) statusEl.textContent = activeSteps.length + ' Blocks Active';
       }
     }
 

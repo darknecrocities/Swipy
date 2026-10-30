@@ -206,13 +206,13 @@
         }
         if (pipBox) pipBox.hidden = true;
         if (camToggleBtn) camToggleBtn.setAttribute('aria-pressed', 'false');
-        if (camBtnText) camBtnText.textContent = 'TURN ON CAMERA (WEB VISION)';
-        if (dockHint) dockHint.textContent = 'TURN ON CAMERA TO CONTROL THIS MAC SCREEN WITH YOUR HAND, OR DRAG WITH CURSOR';
+        if (camBtnText) camBtnText.textContent = 'Turn On Camera (Web Vision)';
+        if (dockHint) dockHint.textContent = 'Turn on camera to control this Mac screen with your hand, or drag windows with your cursor';
         return;
       }
 
       try {
-        if (camBtnText) camBtnText.textContent = 'STARTING WEB VISION...';
+        if (camBtnText) camBtnText.textContent = 'Starting Web Vision...';
         mediaStream = await navigator.mediaDevices.getUserMedia({
           video: { width: 640, height: 480, facingMode: 'user' },
           audio: false
@@ -242,8 +242,8 @@
         isCameraActive = true;
         if (pipBox) pipBox.hidden = false;
         if (camToggleBtn) camToggleBtn.setAttribute('aria-pressed', 'true');
-        if (camBtnText) camBtnText.textContent = 'STOP CAMERA (WEB VISION ACTIVE)';
-        if (dockHint) dockHint.textContent = 'POINT INDEX FINGER TO MOVE CURSOR • PINCH THUMB + INDEX TO GRAB & DRAG WINDOWS • FLICK 4 FINGERS TO SWITCH SPACES';
+        if (camBtnText) camBtnText.textContent = 'Stop Camera (Web Vision Active)';
+        if (dockHint) dockHint.textContent = 'Point index finger to move cursor • Pinch thumb & index to grab and drag windows • Flick 4 fingers to switch Spaces';
 
         const pumpFrame = async function () {
           if (!isCameraActive) return;
@@ -255,7 +255,7 @@
         pumpFrame();
       } catch (err) {
         isCameraActive = false;
-        if (camBtnText) camBtnText.textContent = 'CAMERA BLOCKED — TRY AGAIN';
+        if (camBtnText) camBtnText.textContent = 'Camera Blocked — Try Again';
       }
     }
 
