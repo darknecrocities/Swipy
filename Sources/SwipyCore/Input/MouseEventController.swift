@@ -2,7 +2,7 @@ import Foundation
 import CoreGraphics
 import AppKit
 
-/// Dispatches mouse clicks, double clicks, right clicks, and drag-and-drop operations.
+/// Dispatches mouse clicks, double clicks, right clicks, and drag-and-drop operations with tactile timing.
 public final class MouseEventController: @unchecked Sendable {
     public static let shared = MouseEventController()
 
@@ -12,25 +12,33 @@ public final class MouseEventController: @unchecked Sendable {
 
     public init() {}
 
-    /// Performs a single left mouse click.
+    /// Performs a single left mouse click with realistic tactile duration.
     public func leftClick(at point: CGPoint) {
+        CGWarpMouseCursorPosition(point)
         postMouseEvent(type: .leftMouseDown, point: point, button: .left, clickState: 1)
+        usleep(25_000) // 25ms press duration
         postMouseEvent(type: .leftMouseUp, point: point, button: .left, clickState: 1)
         DiagnosticsLogger.shared.recordEvent()
     }
 
-    /// Performs a rapid double click.
+    /// Performs a rapid double click with proper inter-click separation.
     public func doubleClick(at point: CGPoint) {
+        CGWarpMouseCursorPosition(point)
         postMouseEvent(type: .leftMouseDown, point: point, button: .left, clickState: 1)
+        usleep(20_000)
         postMouseEvent(type: .leftMouseUp, point: point, button: .left, clickState: 1)
+        usleep(40_000)
         postMouseEvent(type: .leftMouseDown, point: point, button: .left, clickState: 2)
+        usleep(20_000)
         postMouseEvent(type: .leftMouseUp, point: point, button: .left, clickState: 2)
         DiagnosticsLogger.shared.recordEvent()
     }
 
-    /// Performs a right mouse click.
+    /// Performs a right mouse click with tactile duration.
     public func rightClick(at point: CGPoint) {
+        CGWarpMouseCursorPosition(point)
         postMouseEvent(type: .rightMouseDown, point: point, button: .right, clickState: 1)
+        usleep(25_000)
         postMouseEvent(type: .rightMouseUp, point: point, button: .right, clickState: 1)
         DiagnosticsLogger.shared.recordEvent()
     }
@@ -41,6 +49,7 @@ public final class MouseEventController: @unchecked Sendable {
         isLeftButtonHeld = true
         lock.unlock()
 
+        CGWarpMouseCursorPosition(point)
         postMouseEvent(type: .leftMouseDown, point: point, button: .left, clickState: 1)
         DiagnosticsLogger.shared.recordEvent()
     }
@@ -54,6 +63,7 @@ public final class MouseEventController: @unchecked Sendable {
 
     /// Completes and releases a mouse drag operation.
     public func endDrag(at point: CGPoint) {
+        CGWarpMouseCursorPosition(point)
         postMouseEvent(type: .leftMouseUp, point: point, button: .left, clickState: 1)
         lock.lock()
         isLeftButtonHeld = false
@@ -94,6 +104,7 @@ public final class MouseEventController: @unchecked Sendable {
         ) else { return }
 
         event.setIntegerValueField(.mouseEventClickState, value: clickState)
+        event.post(tap: .cgSessionEventTap)
         event.post(tap: .cghidEventTap)
     }
 }

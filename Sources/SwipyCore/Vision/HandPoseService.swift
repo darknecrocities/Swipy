@@ -79,8 +79,8 @@ public final class HandPoseService: @unchecked Sendable {
                 continue
             }
 
-            // Normalization & horizontal mirroring for natural front-camera parity
-            let xCoord = configuration.mirrorHorizontally ? (1.0 - Double(point.x)) : Double(point.x)
+            // Canonical Vision coordinates (0..1)
+            let xCoord = Double(point.x)
             let yCoord = Double(point.y)
 
             let joint = HandJoint(

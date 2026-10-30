@@ -60,8 +60,14 @@ cat << 'EOF' > "${CONTENTS_DIR}/Info.plist"
 </plist>
 EOF
 
-echo "==> Signing ${APP_NAME}.app with camera entitlements..."
-codesign --force --deep --sign - --entitlements Swipy.entitlements "${BUILD_DIR}"
+SIGN_IDENTITY=$(security find-identity -v -p codesigning 2>/dev/null | grep "Apple Development" | head -n 1 | awk -F '"' '{print $2}' || true)
+if [ -n "${SIGN_IDENTITY}" ]; then
+    echo "==> Signing ${APP_NAME}.app with Apple Development identity: ${SIGN_IDENTITY}..."
+    codesign --force --deep --sign "${SIGN_IDENTITY}" --entitlements Swipy.entitlements "${BUILD_DIR}"
+else
+    echo "==> Signing ${APP_NAME}.app with ad-hoc signature..."
+    codesign --force --deep --sign - --entitlements Swipy.entitlements "${BUILD_DIR}"
+fi
 
 echo "==> Verifying signature..."
 codesign --verify --deep --strict --verbose=2 "${BUILD_DIR}"

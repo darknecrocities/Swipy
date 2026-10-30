@@ -25,13 +25,14 @@ public final class CursorController: @unchecked Sendable {
         // Warp hardware cursor position
         CGWarpMouseCursorPosition(point)
 
-        // Post mouse moved event to update window focus and hover states
+        // Post mouse moved event to update window focus and hover states in active GUI session
         if let event = CGEvent(
             mouseEventSource: nil,
             mouseType: .mouseMoved,
             mouseCursorPosition: point,
             mouseButton: .left
         ) {
+            event.post(tap: .cgSessionEventTap)
             event.post(tap: .cghidEventTap)
             DiagnosticsLogger.shared.recordEvent()
         }

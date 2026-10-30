@@ -34,6 +34,7 @@ public final class ScrollController: @unchecked Sendable {
             wheel3: 0
         ) else { return }
 
+        event.post(tap: .cgSessionEventTap)
         event.post(tap: .cghidEventTap)
         DiagnosticsLogger.shared.recordEvent()
     }
