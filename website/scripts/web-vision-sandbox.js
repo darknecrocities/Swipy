@@ -1,14 +1,5 @@
 // Browser-Only Web Hand Vision Engine for "Test It Out?" Sample Computer Screen
 (function () {
-  const HAND_CONNECTIONS = [
-    [0,1],[1,2],[2,3],[3,4],
-    [0,5],[5,6],[6,7],[7,8],
-    [5,9],[9,10],[10,11],[11,12],
-    [9,13],[13,14],[14,15],[15,16],
-    [13,17],[17,18],[18,19],[19,20],
-    [0,17]
-  ];
-
   function loadScript(src) {
     return new Promise(function (resolve, reject) {
       const s = document.createElement('script');
@@ -24,26 +15,16 @@
     const screen = document.getElementById('sandbox-screen');
     const stageCanvas = document.getElementById('sandbox-stage-canvas');
     const reticle = document.getElementById('sandbox-reticle');
-    const reticleLabel = document.getElementById('sandbox-reticle-label');
-    const gestureBadge = document.getElementById('sandbox-gesture-badge');
-    const spaceIndicator = document.getElementById('sandbox-space-indicator');
     const dockHint = document.getElementById('sandbox-dock-hint');
     const camToggleBtn = document.getElementById('sandbox-camera-toggle');
     const camBtnText = document.getElementById('sandbox-camera-btn-text');
     const pipBox = document.getElementById('sandbox-webcam-pip');
-    const pipStatus = document.getElementById('sandbox-pip-status');
     const videoEl = document.getElementById('sandbox-webcam-video');
     const canvasEl = document.getElementById('sandbox-webcam-canvas');
     const cards = Array.from(document.querySelectorAll('.sandbox-draggable-card'));
     const actionBtns = document.querySelectorAll('[data-sandbox-action]');
     if (!screen || !stageCanvas) return;
 
-    const SPACES = [
-      'SPACE 01 // MACOS WORKSPACE',
-      'SPACE 02 // CODE & TERMINAL',
-      'SPACE 03 // POINTER STUDIO'
-    ];
-    let currentSpaceIndex = 0;
     let activeCard = null;
     let offsetX = 0;
     let offsetY = 0;
@@ -62,15 +43,6 @@
 
     function switchSpace(delta) {
       stageCanvas.classList.remove('is-mission-control');
-      currentSpaceIndex = (currentSpaceIndex + delta + SPACES.length) % SPACES.length;
-      if (spaceIndicator) spaceIndicator.textContent = SPACES[currentSpaceIndex];
-      if (gestureBadge) {
-        gestureBadge.textContent = delta > 0
-          ? '4-FINGER SWIPE LEFT // NEXT SPACE'
-          : '4-FINGER SWIPE RIGHT // PREVIOUS SPACE';
-      }
-      if (reticleLabel) reticleLabel.textContent = '4-FINGER SWIPE';
-
       const slideDir = delta > 0 ? -42 : 42;
       stageCanvas.style.transform = 'translateX(' + slideDir + 'px)';
       setTimeout(function () {
@@ -120,19 +92,12 @@
           const nextTop = Math.max(8, Math.min(rect.height - activeCard.offsetHeight - 8, clampedY - offsetY));
           activeCard.style.left = nextLeft + 'px';
           activeCard.style.top = nextTop + 'px';
-          if (reticleLabel) reticleLabel.textContent = 'PINCH & DRAG';
-          if (gestureBadge) gestureBadge.textContent = 'PINCH & DRAG // MOVING WINDOW';
-        } else {
-          if (reticleLabel) reticleLabel.textContent = 'PINCH CLICK';
-          if (gestureBadge) gestureBadge.textContent = 'THUMB-INDEX PINCH // CLICK';
         }
       } else {
         if (activeCard) {
           activeCard.classList.remove('is-pinched');
           activeCard = null;
         }
-        if (reticleLabel) reticleLabel.textContent = 'INDEX POINT';
-        if (gestureBadge) gestureBadge.textContent = 'INDEX POINT // GLIDING CURSOR';
       }
     }
 
@@ -144,8 +109,6 @@
         activeCard = card;
         card.classList.add('is-pinched');
         if (reticle) reticle.classList.add('is-pinching');
-        if (reticleLabel) reticleLabel.textContent = 'PINCH & DRAG';
-        if (gestureBadge) gestureBadge.textContent = 'PINCH & DRAG // LOCKED ON WINDOW';
         const cRect = card.getBoundingClientRect();
         offsetX = e.clientX - cRect.left;
         offsetY = e.clientY - cRect.top;
@@ -175,11 +138,9 @@
         activeCard = null;
       }
       if (reticle) reticle.classList.remove('is-pinching');
-      if (reticleLabel) reticleLabel.textContent = 'POINT';
-      if (gestureBadge) gestureBadge.textContent = 'INDEX POINT // GLIDING';
     });
 
-    // Live Web Camera + 21-Point Hand Vision Processing
+    // Live Web Camera Processing (Tetris-Pixel Cursor Block Overlay, No Stick-Line Joints)
     function onHandResults(results) {
       if (!canvasEl) return;
       const ctx = canvasEl.getContext('2d');
@@ -188,45 +149,33 @@
       ctx.clearRect(0, 0, w, h);
 
       if (!results.multiHandLandmarks || results.multiHandLandmarks.length === 0) {
-        if (pipStatus) pipStatus.textContent = 'LOOKING FOR HAND...';
         return;
       }
 
       const lm = results.multiHandLandmarks[0];
-      if (pipStatus) pipStatus.textContent = 'HAND LOCKED // 21 JOINTS';
 
-      // Draw 21-Point Skeleton Overlay in PiP
-      ctx.strokeStyle = '#FFFFFF';
+      // Draw crisp monochrome Tetris pixel-block cursor at index tip (8) and thumb tip (4)
+      const ix = lm[8].x * w;
+      const iy = lm[8].y * h;
+      const tx = lm[4].x * w;
+      const ty = lm[4].y * h;
+
+      ctx.fillStyle = '#FFFFFF';
+      ctx.strokeStyle = '#111111';
       ctx.lineWidth = 2;
-      HAND_CONNECTIONS.forEach(function (pair) {
-        const a = lm[pair[0]];
-        const b = lm[pair[1]];
-        ctx.beginPath();
-        ctx.moveTo(a.x * w, a.y * h);
-        ctx.lineTo(b.x * w, b.y * h);
-        ctx.stroke();
-      });
-
-      lm.forEach(function (pt, idx) {
-        ctx.fillStyle = (idx === 4 || idx === 8) ? '#FFFFFF' : '#111111';
-        ctx.strokeStyle = '#FFFFFF';
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.arc(pt.x * w, pt.y * h, idx === 8 ? 5 : 3.2, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-      });
+      ctx.fillRect(ix - 7, iy - 7, 14, 14);
+      ctx.strokeRect(ix - 7, iy - 7, 14, 14);
+      ctx.fillRect(tx - 5, ty - 5, 10, 10);
+      ctx.strokeRect(tx - 5, ty - 5, 10, 10);
 
       // Map mirrored index fingertip (landmark 8) to Sample Mac Screen coordinates
       const rect = stageCanvas.getBoundingClientRect();
       const mirroredX = (1 - lm[8].x) * rect.width;
       const mappedY = lm[8].y * rect.height;
 
-      // Thumb tip (4) to Index tip (8) distance for Pinch & Drag
       const pinchDist = Math.hypot(lm[4].x - lm[8].x, lm[4].y - lm[8].y);
       const isPinching = pinchDist < 0.065;
 
-      // Detect 4-Finger Open Palm Horizontal Swipe
       const fingersExtended =
         lm[8].y < lm[6].y &&
         lm[12].y < lm[10].y &&
@@ -307,7 +256,6 @@
       } catch (err) {
         isCameraActive = false;
         if (camBtnText) camBtnText.textContent = 'CAMERA BLOCKED — TRY AGAIN';
-        if (gestureBadge) gestureBadge.textContent = 'ALLOW CAMERA PERMISSION IN BROWSER';
       }
     }
 
@@ -322,8 +270,6 @@
         if (action === 'prev-space') switchSpace(-1);
         if (action === 'mission-control') {
           stageCanvas.classList.toggle('is-mission-control');
-          if (gestureBadge) gestureBadge.textContent = '3-FINGER SWIPE UP // MISSION CONTROL';
-          if (reticleLabel) reticleLabel.textContent = 'MISSION CONTROL';
         }
         if (action === 'reset-cards') {
           stageCanvas.classList.remove('is-mission-control');
@@ -331,7 +277,6 @@
             item.el.style.left = item.left;
             item.el.style.top = item.top;
           });
-          if (gestureBadge) gestureBadge.textContent = 'WORKSPACE RESET // READY';
         }
       });
     });
