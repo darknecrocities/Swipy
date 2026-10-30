@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "cleanUrls": true,
   "headers": [
     {
       "source": "/(.*)",
@@ -32,6 +31,10 @@
   "rewrites": [
     {
       "source": "/",
+      "destination": "/website/index.html"
+    },
+    {
+      "source": "/index.html",
       "destination": "/website/index.html"
     },
     {
