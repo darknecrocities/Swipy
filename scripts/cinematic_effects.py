@@ -83,6 +83,16 @@ def draw_reticle(draw: ImageDraw.ImageDraw, cx: int, cy: int, radius: int = 40, 
     draw.line([(cx, cy - r - 16), (cx, cy + r + 16)], fill=color, width=1)
 
 
+def draw_vector_check(draw: ImageDraw.ImageDraw, cx: int, cy: int, radius: int = 10,
+                      badge_color=(255, 255, 255), check_color=(10, 10, 12), width: int = 2):
+    """Render a crisp vector checkmark badge (zero font symbol dependencies)."""
+    draw.ellipse([cx - radius, cy - radius, cx + radius, cy + radius], fill=badge_color)
+    p0 = (cx - int(radius * 0.45), cy)
+    p1 = (cx - int(radius * 0.1), cy + int(radius * 0.35))
+    p2 = (cx + int(radius * 0.45), cy - int(radius * 0.35))
+    draw.line([p0, p1, p2], fill=check_color, width=width)
+
+
 def draw_pill_badge(draw: ImageDraw.ImageDraw, text: str, cx: int, cy: int, font,
                     bg_color=(12, 12, 14), text_color=(255, 255, 255), pad_x=24, pad_y=10):
     """Render a solid rounded pill badge with centered typography."""
