@@ -1,0 +1,83 @@
+{
+  "fps": 30,
+  "bpm": 120.0,
+  "scenes": [
+    {
+      "scene_idx": 1,
+      "id": "scene_01_hook",
+      "title": "Hook & Touchless Morph",
+      "text": "What if the new M6 MacBook was touchscreen? But wait... what if you didn't even have to touch the screen?",
+      "start_sec": 0.0,
+      "end_sec": 6.0,
+      "dur_sec": 6.0,
+      "vo_start_sec": 0.45,
+      "vo_end_sec": 5.11075,
+      "start_frame": 0,
+      "end_frame": 180,
+      "trans_start_frame": 165,
+      "wav_path": "/Users/arronkianparejas/.gemini/antigravity/brain/44f6a692-c641-4a23-bd30-b5abab155805/scratch/scene_01_hook_clean.wav"
+    },
+    {
+      "scene_idx": 2,
+      "id": "scene_02_reveal",
+      "title": "Product Hero Reveal",
+      "text": "Meet Swipy. It turns your built-in MacBook camera into a natural spatial trackpad.",
+      "start_sec": 6.0,
+      "end_sec": 14.0,
+      "dur_sec": 8.0,
+      "vo_start_sec": 6.45,
+      "vo_end_sec": 11.586458333333333,
+      "start_frame": 180,
+      "end_frame": 420,
+      "trans_start_frame": 405,
+      "wav_path": "/Users/arronkianparejas/.gemini/antigravity/brain/44f6a692-c641-4a23-bd30-b5abab155805/scratch/scene_02_reveal_clean.wav"
+    },
+    {
+      "scene_idx": 3,
+      "id": "scene_03_precision",
+      "title": "Vision & Cursor Precision",
+      "text": "Glide your index finger to steer the cursor. Pinch thumb and index to grab and drag windows across displays.",
+      "start_sec": 14.0,
+      "end_sec": 24.0,
+      "dur_sec": 10.0,
+      "vo_start_sec": 14.45,
+      "vo_end_sec": 21.33625,
+      "start_frame": 420,
+      "end_frame": 720,
+      "trans_start_frame": 705,
+      "wav_path": "/Users/arronkianparejas/.gemini/antigravity/brain/44f6a692-c641-4a23-bd30-b5abab155805/scratch/scene_03_precision_clean.wav"
+    },
+    {
+      "scene_idx": 4,
+      "id": "scene_04_gestures",
+      "title": "18 Gestures & Security",
+      "text": "Flick four fingers to switch Spaces. 18 native gestures, powered by 21-point Apple Vision entirely on-device.",
+      "start_sec": 24.0,
+      "end_sec": 34.0,
+      "dur_sec": 10.0,
+      "vo_start_sec": 24.45,
+      "vo_end_sec": 32.002208333333336,
+      "start_frame": 720,
+      "end_frame": 1020,
+      "trans_start_frame": 1005,
+      "wav_path": "/Users/arronkianparejas/.gemini/antigravity/brain/44f6a692-c641-4a23-bd30-b5abab155805/scratch/scene_04_gestures_clean.wav"
+    },
+    {
+      "scene_idx": 5,
+      "id": "scene_05_cta",
+      "title": "Marketable Finale & CTA",
+      "text": "Control your Mac with a wave of your hand. Download Swipy today for macOS.",
+      "start_sec": 34.0,
+      "end_sec": 40.0,
+      "dur_sec": 6.0,
+      "vo_start_sec": 34.45,
+      "vo_end_sec": 39.046875,
+      "start_frame": 1020,
+      "end_frame": 1200,
+      "trans_start_frame": 1185,
+      "wav_path": "/Users/arronkianparejas/.gemini/antigravity/brain/44f6a692-c641-4a23-bd30-b5abab155805/scratch/scene_05_cta_clean.wav"
+    }
+  ],
+  "total_dur_sec": 41.0,
+  "total_frames": 1230
+}
