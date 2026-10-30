@@ -172,6 +172,20 @@ def draw_pill_badge(draw: ImageDraw.ImageDraw, text: str, cx: int, cy: int, font
     return [x0, y0, x1, y1]
 
 
+def draw_pill_badge_left(draw: ImageDraw.ImageDraw, text: str, x0: int, cy: int, font,
+                         bg_color=(12, 12, 14), text_color=(255, 255, 255), pad_x=20, pad_y=9):
+    """Render a rounded pill badge anchored at left x0."""
+    bbox = draw.textbbox((0, 0), text, font=font)
+    tw = bbox[2] - bbox[0]
+    th = bbox[3] - bbox[1]
+    w = tw + pad_x * 2
+    h = th + pad_y * 2
+    box = [x0, cy - h // 2, x0 + w, cy + h // 2]
+    draw.rounded_rectangle(box, radius=h // 2, fill=bg_color)
+    draw.text((x0 + pad_x, cy), text, font=font, fill=text_color, anchor="lm")
+    return box
+
+
 def draw_macbook_bezel(canvas_img: Image.Image, screen_content: Image.Image, box):
     """Render photorealistic 16:10 MacBook Pro aluminum bezel with notch and drop shadow."""
     draw = ImageDraw.Draw(canvas_img)
