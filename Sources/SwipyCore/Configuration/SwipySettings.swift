@@ -57,7 +57,7 @@ public struct SwipySettings: Codable, Equatable, Sendable {
     public var schemaVersion: Int?
 
     /// Bumped whenever previously saved values must be re-derived from current defaults.
-    public static let currentSchemaVersion = 4
+    public static let currentSchemaVersion = 5
 
     public init(
         isTrackingEnabled: Bool = false,
@@ -123,7 +123,7 @@ public struct SwipySettings: Codable, Equatable, Sendable {
         self.schemaVersion = schemaVersion
     }
 
-    /// Default bindings matching product identity specification (all 15 gestures across all 6 categories).
+    /// Default bindings matching product identity specification (all 18 gestures across all 6 categories).
     public static var defaultBindings: [GestureBinding] {
         [
             GestureBinding(gestureType: .indexPointing, category: .cursorAndClick, action: .moveCursor),
@@ -131,6 +131,7 @@ public struct SwipySettings: Codable, Equatable, Sendable {
             GestureBinding(gestureType: .pinchAndDrag, category: .cursorAndClick, action: .startOrUpdateDrag),
             GestureBinding(gestureType: .doublePinch, category: .cursorAndClick, action: .doubleClick),
             GestureBinding(gestureType: .thumbMiddlePinch, category: .cursorAndClick, action: .rightClick),
+            GestureBinding(gestureType: .twoFingerTap, category: .cursorAndClick, action: .rightClick),
             GestureBinding(gestureType: .twoFingerScroll, category: .scrolling, action: .scroll),
             GestureBinding(gestureType: .threeFingerSwipeUp, category: .spaceNavigation, action: .missionControl),
             GestureBinding(gestureType: .threeFingerSwipeDown, category: .spaceNavigation, action: .showDesktop),
@@ -138,9 +139,11 @@ public struct SwipySettings: Codable, Equatable, Sendable {
             GestureBinding(gestureType: .threeFingerSwipeRight, category: .spaceNavigation, action: .previousSpace),
             GestureBinding(gestureType: .fourFingerSwipeLeft, category: .appSwitching, action: .nextSpace),
             GestureBinding(gestureType: .fourFingerSwipeRight, category: .appSwitching, action: .previousSpace),
+            GestureBinding(gestureType: .victorySign, category: .appSwitching, action: .toggleAppSwitcher),
             GestureBinding(gestureType: .thumbMiddleZoom, category: .twoHand, action: .zoom),
             GestureBinding(gestureType: .twoHandZoom, category: .twoHand, action: .zoom),
-            GestureBinding(gestureType: .openPalmsPause, category: .safety, action: .toggleTrackingPause)
+            GestureBinding(gestureType: .openPalmsPause, category: .safety, action: .toggleTrackingPause),
+            GestureBinding(gestureType: .fistHold, category: .safety, action: .toggleTrackingPause)
         ]
     }
 

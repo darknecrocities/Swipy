@@ -7,6 +7,7 @@
     const testItOutStage = document.getElementById('test-it-out');
     const verticalStage = document.getElementById('vertical-stage');
     const gestureLibrary = document.getElementById('gesture-library');
+    const faqSection = document.getElementById('faq-section');
     const keebyScreenImg = document.getElementById('keeby-active-screen');
     const keebySteps = document.querySelectorAll('.keeby-step-card[data-screen-src]');
     const revealBlocks = document.querySelectorAll('.reveal-block');
@@ -179,7 +180,9 @@
         else if (clamped >= 0.32) activeStationIdx = 1;
         else activeStationIdx = 0;
 
-        if (gestureLibrary && gestureLibrary.getBoundingClientRect().top <= vh * 0.45) {
+        if (faqSection && faqSection.getBoundingClientRect().top <= vh * 0.45) {
+          setActiveNav('faq-section');
+        } else if (gestureLibrary && gestureLibrary.getBoundingClientRect().top <= vh * 0.45) {
           setActiveNav('gesture-library');
         } else if (verticalStage && verticalStage.getBoundingClientRect().top <= vh * 0.45) {
           setActiveNav('vertical-stage');
@@ -193,7 +196,9 @@
       } else {
         const st3 = document.getElementById('station-03');
         const st2 = document.getElementById('station-02');
-        if (gestureLibrary && gestureLibrary.getBoundingClientRect().top <= vh * 0.45) {
+        if (faqSection && faqSection.getBoundingClientRect().top <= vh * 0.45) {
+          setActiveNav('faq-section');
+        } else if (gestureLibrary && gestureLibrary.getBoundingClientRect().top <= vh * 0.45) {
           setActiveNav('gesture-library');
         } else if (verticalStage && verticalStage.getBoundingClientRect().top <= vh * 0.45) {
           setActiveNav('vertical-stage');

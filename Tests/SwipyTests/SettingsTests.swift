@@ -85,14 +85,14 @@ public struct SettingsTests {
 
     private static func testAllGestureCategoriesPopulatedAndMigrated() {
         let settings = SwipySettings()
-        TestHarness.assertEqual(settings.bindings.count, 15, "All 15 gestures present in defaultBindings")
+        TestHarness.assertEqual(settings.bindings.count, 18, "All 18 gestures present in defaultBindings")
 
         for category in GestureCategory.allCases {
             let count = settings.bindings.filter { $0.category == category }.count
             TestHarness.assertTrue(count > 0, "Category \(category.rawValue) has at least 1 binding (got \(count))")
         }
 
-        // Simulate migrating an older v3 configuration missing Two-Hand Controls and Pinch & Drag
+        // Simulate migrating an older configuration missing newly added gestures
         let legacyBindings = [
             GestureBinding(gestureType: .indexPointing, category: .cursorAndClick, action: .none),
             GestureBinding(gestureType: .thumbIndexPinch, category: .cursorAndClick, action: .leftClick)
@@ -100,7 +100,7 @@ public struct SettingsTests {
         var legacySettings = SwipySettings(bindings: legacyBindings, schemaVersion: 3)
         legacySettings.migrateIfNeeded()
 
-        TestHarness.assertEqual(legacySettings.bindings.count, 15, "Schema v4 migration backfills all 15 gestures")
+        TestHarness.assertEqual(legacySettings.bindings.count, 18, "Schema v5 migration backfills all 18 gestures")
         let twoHandCount = legacySettings.bindings.filter { $0.category == .twoHand }.count
         TestHarness.assertEqual(twoHandCount, 2, "Two-Hand Controls category populated with 2 zoom bindings")
         let indexBinding = legacySettings.bindings.first { $0.gestureType == .indexPointing }

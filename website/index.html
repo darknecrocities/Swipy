@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="styles/animations.css" />
   <link rel="stylesheet" href="styles/tetris-sections.css" />
   <link rel="stylesheet" href="styles/sandbox.css" />
+  <link rel="stylesheet" href="styles/faq.css" />
 </head>
 <body>
   <header class="spatial-nav" role="banner">
@@ -28,6 +29,7 @@
       <button type="button" class="nav-pill-btn" data-nav-target="test-it-out">Test It Out</button>
       <button type="button" class="nav-pill-btn" data-nav-target="vertical-stage">Workstation</button>
       <button type="button" class="nav-pill-btn" data-nav-target="gesture-library">Gestures</button>
+      <button type="button" class="nav-pill-btn" data-nav-target="faq-section">FAQ</button>
     </nav>
 
     <div class="nav-download-group">
@@ -423,20 +425,136 @@
         </div>
       </div>
 
-      <!-- PHASE E: EXACT NATIVE APP-PARITY 15-GESTURE LIBRARY -->
+      <!-- PHASE E: EXACT NATIVE APP-PARITY 18-GESTURE LIBRARY -->
       <div id="gesture-library" class="gesture-library-section section-morph-reveal">
         <div class="library-header-asym reveal-block">
           <div>
             <h2 class="tetris-block-title" style="font-size: var(--text-2xl);">Gesture <span class="tetris-invert-chip">Library</span></h2>
           </div>
           <p style="font-size: var(--text-base); color: var(--color-ink-secondary); line-height: 1.6;">
-            All 15 hand gestures built into Swipy, rendered with the exact native macOS cards and icons from the app. Hover to tilt &amp; morph, or click any toggle switch to test it live.
+            All 18 hand gestures built into Swipy, rendered with the exact native macOS cards and icons from the app. Hover to tilt &amp; morph, or click any toggle switch to test it live.
           </p>
         </div>
 
         <div id="gesture-filter-bar" class="library-filter-bar" role="toolbar" aria-label="Filter Gestures by Category"></div>
         <div id="gesture-cards-grid" class="gesture-cards-matrix"></div>
       </div>
+
+      <!-- PHASE F: MINIMALIST FAQ & GATEKEEPER OPEN ANYWAY GUIDE -->
+      <section id="faq-section" class="faq-section section-morph-reveal" aria-label="Frequently Asked Questions & macOS Installation Guide">
+        <div class="faq-header reveal-block">
+          <h2 class="faq-title">Frequently Asked <span class="tetris-invert-chip">Questions</span></h2>
+          <p class="faq-subtitle">Everything you need to know about setting up Swipy, macOS security, and spatial gestures.</p>
+        </div>
+
+        <div class="faq-accordion-group">
+          <!-- Item 1: Gatekeeper / Unsigned App Guide (Open by Default) -->
+          <details class="faq-card" open>
+            <summary class="faq-summary">
+              <span>How do I open Swipy on macOS? (Unsigned App / Gatekeeper Guide)</span>
+              <svg class="faq-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+            </summary>
+            <div class="faq-content">
+              <p>
+                Swipy is free and open-source software distributed directly via DMG without paid Apple Developer notarization certificates. When launching Swipy for the first time, macOS Gatekeeper may display a security alert stating that <em>"Swipy cannot be opened because Apple cannot check it for malicious software"</em> or <em>"it may harm your computer"</em>.
+              </p>
+              <p>To authorize and open Swipy safely, follow these quick steps:</p>
+              <div class="gatekeeper-steps">
+                <div class="gatekeeper-step-item">
+                  <span class="step-number-badge">1</span>
+                  <div class="step-details">
+                    <strong>Click the ? icon or Done / Cancel</strong>
+                    <p style="margin-top: 2px;">When the macOS security dialog appears, click the <strong>?</strong> (Question Mark) icon at the bottom-left to view macOS help, or click <strong>Done / Cancel</strong> to dismiss the prompt.</p>
+                  </div>
+                </div>
+                <div class="gatekeeper-step-item">
+                  <span class="step-number-badge">2</span>
+                  <div class="step-details">
+                    <strong>Open Privacy &amp; Security in System Settings</strong>
+                    <p style="margin-top: 2px;">Click the <strong> Apple menu</strong> in the top-left corner of your Mac, choose <strong>System Settings</strong>, and select <strong>Privacy &amp; Security</strong> in the left sidebar.</p>
+                  </div>
+                </div>
+                <div class="gatekeeper-step-item">
+                  <span class="step-number-badge">3</span>
+                  <div class="step-details">
+                    <strong>Scroll down to the Security section</strong>
+                    <p style="margin-top: 2px;">Scroll down past FileVault to the <strong>Security</strong> section of the settings page.</p>
+                  </div>
+                </div>
+                <div class="gatekeeper-step-item">
+                  <span class="step-number-badge">4</span>
+                  <div class="step-details">
+                    <strong>Click "Open Anyway"</strong>
+                    <p style="margin-top: 2px;">You will see a notification stating: <em>"Swipy was blocked from use because it is not from an identified developer"</em>. Click the <strong>Open Anyway</strong> button next to it.</p>
+                  </div>
+                </div>
+                <div class="gatekeeper-step-item">
+                  <span class="step-number-badge">5</span>
+                  <div class="step-details">
+                    <strong>Authenticate &amp; Confirm</strong>
+                    <p style="margin-top: 2px;">Use Touch ID or enter your Mac administrator password, then click <strong>Open</strong> on the confirmation pop-up. Swipy will launch and macOS will permanently remember your authorization—you won't need to repeat this step again.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="terminal-callout">
+                <span>Terminal alternative: <code>xattr -cr /Applications/Swipy.app</code></span>
+              </div>
+            </div>
+          </details>
+
+          <!-- Item 2: Privacy -->
+          <details class="faq-card">
+            <summary class="faq-summary">
+              <span>Is my camera video private and secure?</span>
+              <svg class="faq-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+            </summary>
+            <div class="faq-content">
+              <p>
+                <strong>100% on-device and completely private.</strong> Swipy processes every camera frame in memory using Apple's native Vision framework on your Mac's Neural Engine. No video streams, photos, or 21-joint skeleton coordinates are ever saved to disk or transmitted over the network. Swipy works 100% offline without requiring any internet connection.
+              </p>
+            </div>
+          </details>
+
+          <!-- Item 3: Hardware Compatibility -->
+          <details class="faq-card">
+            <summary class="faq-summary">
+              <span>Which Macs and cameras are supported?</span>
+              <svg class="faq-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+            </summary>
+            <div class="faq-content">
+              <p>
+                Swipy supports macOS 14.0 (Sonoma) and macOS 15.0 (Sequoia) or newer. It runs on any Mac with a camera—including MacBook Air, MacBook Pro, iMac, Mac mini, Mac Studio, and Mac Pro. You can use your Mac's built-in FaceTime HD camera, external USB webcams, or your iPhone wirelessly using Apple Continuity Camera.
+              </p>
+            </div>
+          </details>
+
+          <!-- Item 4: Performance & Battery -->
+          <details class="faq-card">
+            <summary class="faq-summary">
+              <span>How does Swipy affect battery life and CPU usage?</span>
+              <svg class="faq-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+            </summary>
+            <div class="faq-content">
+              <p>
+                Swipy is architected in native Swift using Apple's Vision framework, consuming less than 3% CPU on Apple Silicon (M1–M6 chips). With sub-7ms tracking latency and 120Hz ProMotion display synchronization, Swipy runs silently in your menu bar with negligible impact on your battery.
+              </p>
+            </div>
+          </details>
+
+          <!-- Item 5: Customization -->
+          <details class="faq-card">
+            <summary class="faq-summary">
+              <span>Can I customize gestures or rebind shortcuts?</span>
+              <svg class="faq-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+            </summary>
+            <div class="faq-content">
+              <p>
+                Yes! Every one of Swipy's 18 gestures can be individually enabled or disabled, and remapped to any system action—such as Mission Control, Show Desktop, Previous/Next Space, Floating App Switcher, or Left/Right/Double Click—directly from the Gesture Library in Swipy Settings.
+              </p>
+            </div>
+          </details>
+        </div>
+      </section>
     </section>
   </main>
 

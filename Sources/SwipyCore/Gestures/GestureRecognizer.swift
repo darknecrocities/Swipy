@@ -180,7 +180,21 @@ public final class GestureRecognizer: @unchecked Sendable {
             }
             onCursorUpdate?(anchorPoint, state)
 
-        case .idle, .twoHandZooming, .paused:
+        case .actionTriggered(let action):
+            isCurrentlyPointing = false
+            SystemActionController.shared.perform(action)
+            onCursorUpdate?(CursorController.shared.currentQuartzCursorPosition, state)
+
+        case .paused:
+            isCurrentlyPointing = false
+            if isDraggingActive {
+                MouseEventController.shared.endDrag(at: CursorController.shared.currentQuartzCursorPosition)
+                isDraggingActive = false
+            }
+            SystemActionController.shared.perform(.toggleTrackingPause)
+            onCursorUpdate?(CursorController.shared.currentQuartzCursorPosition, state)
+
+        case .idle, .twoHandZooming:
             isCurrentlyPointing = false
             break
         }

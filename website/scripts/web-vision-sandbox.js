@@ -36,6 +36,7 @@
     let rafId = null;
     let lastSwipeTime = 0;
     let prevPalmX = null;
+    let webPinchActive = false;
 
     const initialPositions = cards.map(function (card) {
       return { el: card, left: card.style.left, top: card.style.top };
@@ -194,8 +195,22 @@
       const mirroredX = (1 - lm[8].x) * rect.width;
       const mappedY = lm[8].y * rect.height;
 
+      // Scale-invariant pinch ratio using rigid anatomical palm length (wrist 0 to middle MCP 9)
+      const palmScale = Math.max(0.08, Math.hypot(lm[0].x - lm[9].x, lm[0].y - lm[9].y));
       const pinchDist = Math.hypot(lm[4].x - lm[8].x, lm[4].y - lm[8].y);
-      const isPinching = pinchDist < 0.065;
+      const pinchRatio = pinchDist / palmScale;
+
+      // Hysteresis gating: robust activation and clean release without jitter
+      if (webPinchActive) {
+        if (pinchRatio > 0.46) {
+          webPinchActive = false;
+        }
+      } else {
+        if (pinchRatio <= 0.35) {
+          webPinchActive = true;
+        }
+      }
+      const isPinching = webPinchActive;
 
       const fingersExtended =
         lm[8].y < lm[6].y &&
