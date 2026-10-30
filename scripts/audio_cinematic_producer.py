@@ -213,69 +213,129 @@ def synth_music_bed(total_samples: int) -> np.ndarray:
             if h_start < total_samples:
                 music[h_start:end] += h_val[:end - h_start]
 
-    # 4. Melodic 808 Sub-Bass Pulse (Key of A minor: A, G, E, F)
-    bass_notes = [55.0, 48.99, 41.20, 43.65]
+    # 4. Cinematic Analog Reese Sub-Bass & 808 Braams (Key of A minor)
+    bass_notes = [55.0, 48.99, 41.20, 43.65]  # A1, G1, E1, F1
     total_bars = int(total_samples / (BAR_SEC * SR))
     for bar in range(total_bars):
         bar_start = int(bar * BAR_SEC * SR)
         b_freq = bass_notes[bar % len(bass_notes)]
-        b_len = int(1.8 * SR)
+        b_len = int(1.85 * SR)
         b_t = np.arange(b_len) / SR
-        b_pulse = 0.24 * np.sin(2.0 * np.pi * b_freq * b_t) * np.exp(-b_t * 1.6)
-        b_pulse += 0.07 * np.sin(2.0 * np.pi * (b_freq * 2) * b_t) * np.exp(-b_t * 2.8)
+
+        # Fundamental warm sub
+        b_sub = 0.28 * np.sin(2.0 * np.pi * b_freq * b_t) * np.exp(-b_t * 1.5)
+        # Detuned Reese harmonic richness
+        b_detune1 = 0.10 * np.sin(2.0 * np.pi * (b_freq * 1.006) * b_t) * np.exp(-b_t * 1.8)
+        b_detune2 = 0.10 * np.sin(2.0 * np.pi * (b_freq * 0.994) * b_t) * np.exp(-b_t * 1.8)
+        b_oct = 0.08 * np.sin(2.0 * np.pi * (b_freq * 2.0) * b_t) * np.exp(-b_t * 2.4)
+        reese = b_sub + b_detune1 + b_detune2 + b_oct
+
         end = min(total_samples, bar_start + b_len)
         if bar_start < total_samples:
-            music[bar_start:end] += b_pulse[:end - bar_start]
+            music[bar_start:end] += reese[:end - bar_start]
 
     return music
 
 
 def build_sfx(timeline: dict, total_samples: int) -> np.ndarray:
-    """Synthesize synchronized whoosh sweeps, sub impacts, and tactile clicks."""
-    sfx = np.zeros(total_samples, dtype=np.float32)
+    """Synthesize synchronized cinematic braams, risers, Taptic clicks, and camera shutter."""
+    sfx_l = np.zeros(total_samples, dtype=np.float32)
+    sfx_r = np.zeros(total_samples, dtype=np.float32)
 
-    def add_sub_impact(sec: float):
+    def add_sub_braam(sec: float):
         start = int(sec * SR)
-        dur = int(1.2 * SR)
+        dur = int(1.5 * SR)
         t = np.arange(dur) / SR
-        wave_sub = 0.44 * np.sin(2.0 * np.pi * 54.0 * np.exp(-t * 2.8) * t) * np.exp(-t * 2.6)
+        # Cinematic brass-sub braam pitch slide
+        freq = 68.0 * np.exp(-t * 1.8) + 38.0
+        phase = 2.0 * np.pi * np.cumsum(freq) / SR
+        braam = 0.48 * np.sin(phase) * np.exp(-t * 2.2)
+        braam += 0.16 * np.sin(phase * 2.0) * np.exp(-t * 3.0)
         end = min(total_samples, start + dur)
         if start < total_samples:
-            sfx[start:end] += wave_sub[:end - start]
+            chunk = braam[:end - start]
+            sfx_l[start:end] += chunk
+            sfx_r[start:end] += chunk
 
-    def add_whoosh(sec: float):
+    def add_tension_riser(end_sec: float, dur_sec: float = 0.75):
+        start_sec = max(0.0, end_sec - dur_sec)
+        start = int(start_sec * SR)
+        dur = int(dur_sec * SR)
+        t = np.arange(dur) / SR
+        # Pitch ascends exponentially into transition
+        f_rise = 90.0 * np.exp(t * 2.4)
+        phase = 2.0 * np.pi * np.cumsum(f_rise) / SR
+        rise_wave = np.sin(phase)
+        noise = (np.random.rand(dur) * 2.0 - 1.0)
+        env = (t / dur_sec) ** 2.2
+        riser = 0.22 * (rise_wave * 0.6 + noise * 0.4) * env
+        end = min(total_samples, start + dur)
+        if start < total_samples:
+            chunk = riser[:end - start]
+            sfx_l[start:end] += chunk
+            sfx_r[start:end] += chunk
+
+    def add_taptic_click(sec: float):
+        """Authentic Apple Taptic Engine trackpad haptic click."""
         start = int(sec * SR)
-        dur = int(0.50 * SR)
+        dur = int(0.045 * SR)
+        t = np.arange(dur) / SR
+        # Low 170Hz body thump + high 2.8kHz micro transient
+        thump = 0.35 * np.sin(2.0 * np.pi * 170.0 * t) * np.exp(-t * 110.0)
+        click = 0.28 * np.sin(2.0 * np.pi * 2800.0 * t) * np.exp(-t * 160.0)
+        haptic = thump + click
+        end = min(total_samples, start + dur)
+        if start < total_samples:
+            chunk = haptic[:end - start]
+            sfx_l[start:end] += chunk
+            sfx_r[start:end] += chunk
+
+    def add_camera_shutter(sec: float):
+        """FaceTime HD optical lens activation click."""
+        start = int(sec * SR)
+        dur = int(0.06 * SR)
+        t = np.arange(dur) / SR
+        snap = 0.25 * (np.random.rand(dur) * 2.0 - 1.0) * np.exp(-t * 90.0)
+        snap += 0.20 * np.sin(2.0 * np.pi * 1800.0 * t) * np.exp(-t * 120.0)
+        end = min(total_samples, start + dur)
+        if start < total_samples:
+            chunk = snap[:end - start]
+            sfx_l[start:end] += chunk
+            sfx_r[start:end] += chunk
+
+    def add_stereo_whoosh(sec: float):
+        start = int(sec * SR)
+        dur = int(0.55 * SR)
         t = np.arange(dur) / SR
         noise = (np.random.rand(dur) * 2.0 - 1.0)
         env = np.sin(np.pi * t / (dur / SR)) ** 2
-        whoosh = 0.20 * noise * env
+        # Panned left to right across stereo channels
+        pan_l = (1.0 - t / (dur / SR))
+        pan_r = (t / (dur / SR))
+        whoosh_l = 0.22 * noise * env * pan_l
+        whoosh_r = 0.22 * noise * env * pan_r
         end = min(total_samples, start + dur)
         if start < total_samples:
-            sfx[start:end] += whoosh[:end - start]
+            sfx_l[start:end] += whoosh_l[:end - start]
+            sfx_r[start:end] += whoosh_r[:end - start]
 
-    def add_pinch_click(sec: float):
-        start = int(sec * SR)
-        dur = int(0.04 * SR)
-        t = np.arange(dur) / SR
-        click = 0.26 * np.sin(2.0 * np.pi * 2400.0 * t) * np.exp(-t * 80.0)
-        end = min(total_samples, start + dur)
-        if start < total_samples:
-            sfx[start:end] += click[:end - start]
-
-    # Impacts at start of every scene downbeat
+    # Impacts & risers on scene boundaries
     for sc in timeline["scenes"]:
-        add_sub_impact(sc["start_sec"])
-        # Whoosh sweep 0.5s before transition
+        add_sub_braam(sc["start_sec"])
         if sc["scene_idx"] < len(timeline["scenes"]):
-            add_whoosh(sc["end_sec"] - 0.48)
+            add_tension_riser(sc["end_sec"], dur_sec=0.65)
+            add_stereo_whoosh(sc["end_sec"] - 0.45)
 
-    # Tactile pinch clicks in Scene 3 (Precision)
+    # Scene 2 (Hardware Reveal): Camera Shutter activation
+    sc2 = timeline["scenes"][1]
+    add_camera_shutter(sc2["start_sec"] + 1.2)
+
+    # Scene 3 (Vision Precision): Synchronized Apple Taptic Clicks on pinch events
     sc3 = timeline["scenes"][2]
-    add_pinch_click(sc3["start_sec"] + 5.2)
-    add_pinch_click(sc3["start_sec"] + 9.8)
+    add_taptic_click(sc3["start_sec"] + 5.2)
+    add_taptic_click(sc3["start_sec"] + 9.8)
 
-    return sfx
+    return sfx_l, sfx_r
 
 
 def produce_master_audio(timeline: dict, stem_data: list):
@@ -305,11 +365,11 @@ def produce_master_audio(timeline: dict, stem_data: list):
     ducking_gain = 1.0 - 0.53 * smoothed_env
 
     music = synth_music_bed(total_samples) * ducking_gain
-    sfx = build_sfx(timeline, total_samples)
+    sfx_l, sfx_r = build_sfx(timeline, total_samples)
 
-    # Final stereo mix
-    master_l = voice_track * 1.15 + music * 0.70 + sfx * 0.85
-    master_r = voice_track * 1.15 + music * 0.70 + sfx * 0.85
+    # Final stereo mix with spatial separation
+    master_l = voice_track * 1.15 + music * 0.70 + sfx_l * 0.88
+    master_r = voice_track * 1.15 + music * 0.70 + sfx_r * 0.88
 
     # Peak normalization to -0.5 dBFS
     max_val = max(np.max(np.abs(master_l)), np.max(np.abs(master_r)), 1e-4)

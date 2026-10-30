@@ -172,6 +172,145 @@ def draw_macbook_bezel(canvas_img: Image.Image, screen_content: Image.Image, box
     draw.rounded_rectangle([nbx0, by0, nbx1, by0 + 5], radius=3, fill=(168, 170, 178))
 
 
+def draw_specular_sheen(canvas_img: Image.Image, box, progress: float):
+    """Render a dynamic 45-degree anamorphic specular light sheen sweeping across box."""
+    if not (0.0 <= progress <= 1.0):
+        return
+    x0, y0, x1, y1 = box
+    w, h = x1 - x0, y1 - y0
+    sheen_w = int(w * 0.28)
+    sweep_start = -sheen_w - int(h * 0.5)
+    sweep_end = w + int(h * 0.5)
+    sweep_x = x0 + int(sweep_start + progress * (sweep_end - sweep_start))
+
+    overlay = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    o_draw = ImageDraw.Draw(overlay)
+
+    # 45-degree angled light band with soft feathered borders
+    slant = int(h * 0.55)
+    poly = [
+        (sweep_x, y1),
+        (sweep_x + sheen_w, y1),
+        (sweep_x + sheen_w + slant, y0),
+        (sweep_x + slant, y0)
+    ]
+    o_draw.polygon(poly, fill=(255, 255, 255, 75))
+    # Bright specular core ray
+    core_w = sheen_w // 4
+    core_poly = [
+        (sweep_x + core_w, y1),
+        (sweep_x + core_w * 2, y1),
+        (sweep_x + core_w * 2 + slant, y0),
+        (sweep_x + core_w + slant, y0)
+    ]
+    o_draw.polygon(core_poly, fill=(255, 255, 255, 140))
+
+    # Mask within the bounding box
+    mask = Image.new("L", (W, H), 0)
+    m_draw = ImageDraw.Draw(mask)
+    m_draw.rounded_rectangle(box, radius=16, fill=255)
+    overlay.putalpha(Image.composite(overlay.getchannel("A"), mask, mask))
+    canvas_img.paste(overlay, (0, 0), overlay)
+
+
+def draw_skeletal_hand_21(draw: ImageDraw.ImageDraw, origin_x: int, origin_y: int,
+                          scale: float = 1.0, pinch_t: float = 0.0, color=(12, 12, 14),
+                          glow_color=(120, 120, 136)):
+    """Render authentic Apple Vision 21-joint skeletal biometric hand overlay."""
+    # Normalized 21-joint bone layout relative to wrist (0, 0)
+    # Pinch interpolation moves thumb tip towards index tip
+    idx_tip_target = (-14 * scale, -135 * scale)
+    th_tip_x = -70 * scale + pinch_t * (idx_tip_target[0] - (-70 * scale))
+    th_tip_y = -85 * scale + pinch_t * (idx_tip_target[1] - (-85 * scale))
+
+    joints = [
+        (0, 0),                                # 0: Wrist
+        (-30 * scale, -30 * scale),            # 1: Thumb CMC
+        (-50 * scale, -55 * scale),            # 2: Thumb MCP
+        (-62 * scale, -72 * scale),            # 3: Thumb IP
+        (th_tip_x, th_tip_y),                  # 4: Thumb TIP
+        (-20 * scale, -68 * scale),            # 5: Index MCP
+        (-18 * scale, -95 * scale),            # 6: Index PIP
+        (-16 * scale, -118 * scale),           # 7: Index DIP
+        (-14 * scale, -138 * scale),           # 8: Index TIP (Pointer)
+        (4 * scale, -72 * scale),              # 9: Middle MCP
+        (6 * scale, -102 * scale),             # 10: Middle PIP
+        (8 * scale, -126 * scale),             # 11: Middle DIP
+        (9 * scale, -148 * scale),             # 12: Middle TIP
+        (26 * scale, -66 * scale),             # 13: Ring MCP
+        (28 * scale, -94 * scale),             # 14: Ring PIP
+        (30 * scale, -116 * scale),            # 15: Ring DIP
+        (31 * scale, -136 * scale),            # 16: Ring TIP
+        (46 * scale, -54 * scale),             # 17: Little MCP
+        (52 * scale, -76 * scale),             # 18: Little PIP
+        (56 * scale, -95 * scale),             # 19: Little DIP
+        (59 * scale, -112 * scale),            # 20: Little TIP
+    ]
+    pts = [(int(origin_x + jx), int(origin_y + jy)) for jx, jy in joints]
+
+    # Connecting Bone Segments
+    bones = [
+        (0, 1), (1, 2), (2, 3), (3, 4),        # Thumb chain
+        (0, 5), (5, 6), (6, 7), (7, 8),        # Index chain
+        (0, 9), (9, 10), (10, 11), (11, 12),   # Middle chain
+        (0, 13), (13, 14), (14, 15), (15, 16), # Ring chain
+        (0, 17), (17, 18), (18, 19), (19, 20), # Little chain
+        (5, 9), (9, 13), (13, 17)              # Palm knuckle arch
+    ]
+    for b0, b1 in bones:
+        draw.line([pts[b0], pts[b1]], fill=glow_color, width=2)
+
+    # Render Joint Spheres & Rings
+    for idx, (px, py) in enumerate(pts):
+        r = 5 if idx in (4, 8, 12, 16, 20) else 3
+        draw.ellipse([px - r - 2, py - r - 2, px + r + 2, py + r + 2], outline=glow_color, width=1)
+        draw.ellipse([px - r, py - r, px + r, py + r], fill=color)
+
+    # Active Pointer Tip Glowing Core
+    ipt_x, ipt_y = pts[8]
+    draw.ellipse([ipt_x - 9, ipt_y - 9, ipt_x + 9, ipt_y + 9], outline=color, width=2)
+    return pts[8]  # Returns index tip coordinates
+
+
+def draw_shockwave_ring(draw: ImageDraw.ImageDraw, cx: int, cy: int, progress: float,
+                        max_radius: int = 120, color=(12, 12, 14)):
+    """Render an expanding circular tactile shockwave on pinch lock-on."""
+    if not (0.0 <= progress <= 1.0):
+        return
+    r = int(progress * max_radius)
+    w = max(1, int((1.0 - progress) * 4))
+    if r > 4:
+        draw.ellipse([cx - r, cy - r, cx + r, cy + r], outline=color, width=w)
+        # Peripheral radiating particle dots
+        num_dots = 8
+        for i in range(num_dots):
+            angle = i * (2 * math.pi / num_dots)
+            dot_dist = r + int(progress * 18)
+            dx = int(cx + dot_dist * math.cos(angle))
+            dy = int(cy + dot_dist * math.sin(angle))
+            draw.ellipse([dx - 2, dy - 2, dx + 2, dy + 2], fill=color)
+
+
+_GRAIN_CACHE = {}
+
+
+def apply_cinematic_film_grain(img: Image.Image, frame_idx: int, intensity: float = 0.012) -> Image.Image:
+    """Apply cached 35mm monochrome micro-grain plates to eliminate digital banding."""
+    global _GRAIN_CACHE
+    cache_key = (H, W, intensity)
+    if cache_key not in _GRAIN_CACHE:
+        rng = np.random.RandomState(42)
+        _GRAIN_CACHE[cache_key] = [
+            rng.normal(0.0, intensity * 255.0, (H, W, 1)).astype(np.float32)
+            for _ in range(30)
+        ]
+    grain_plates = _GRAIN_CACHE[cache_key]
+    plate = grain_plates[frame_idx % len(grain_plates)]
+    arr = np.array(img, dtype=np.float32)
+    arr = np.clip(arr + plate, 0.0, 255.0).astype(np.uint8)
+    return Image.fromarray(arr, "RGB")
+
+
 def apply_slice_curtain(current_img: Image.Image, next_img: Image.Image, progress: float, num_slices=12) -> Image.Image:
     """Slice curtain transition: alternating horizontal zebra blinds sliding apart."""
     out = current_img.copy()
