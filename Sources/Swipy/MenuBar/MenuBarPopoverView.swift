@@ -19,8 +19,27 @@ public struct MenuBarPopoverView: View {
     }
 
     public var body: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 14) {
             headerRow
+
+            Button(action: {
+                appState.toggleTracking()
+            }) {
+                HStack(spacing: 8) {
+                    Image(systemName: appState.settings.isTrackingEnabled ? "stop.fill" : "play.fill")
+                        .font(.system(size: 11))
+                    Text(appState.settings.isTrackingEnabled ? "Stop Gesture Tracking" : "Start Gesture Tracking")
+                        .font(.system(size: 12, weight: .semibold))
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 8)
+                .background(appState.settings.isTrackingEnabled ? Color(hex: "FAFAFA") : Color(hex: "171717"))
+                .foregroundColor(appState.settings.isTrackingEnabled ? Color(hex: "171717") : .white)
+                .cornerRadius(8)
+                .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(hex: "EAEAEA"), lineWidth: 1))
+            }
+            .buttonStyle(.plain)
+
             Divider().background(Color(hex: "EAEAEA"))
             statusSection
             sensitivitySlider
@@ -34,9 +53,10 @@ public struct MenuBarPopoverView: View {
     }
 
     private var headerRow: some View {
-        HStack {
+        HStack(spacing: 8) {
+            SwipyLogoView(size: 20)
             Text("Swipy")
-                .font(.system(size: 16, weight: .bold))
+                .font(.system(size: 15, weight: .bold))
                 .foregroundColor(Color(hex: "171717"))
             Spacer()
             Toggle("", isOn: Binding(
@@ -81,7 +101,7 @@ public struct MenuBarPopoverView: View {
     }
 
     private var sensitivitySlider: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 6) {
             HStack {
                 Text("Sensitivity")
                     .font(.system(size: 12))
@@ -90,12 +110,12 @@ public struct MenuBarPopoverView: View {
                 Text(String(format: "%.2fx", appState.settings.cursorSensitivity))
                     .font(.system(size: 11, design: .monospaced))
             }
-            Slider(value: $appState.settings.cursorSensitivity, in: 0.2...4.0) {
-                Text("Sensitivity")
-            }
-            .onChange(of: appState.settings.cursorSensitivity) {
-                appState.settings.save()
-            }
+            CustomSliderBar(
+                value: $appState.settings.cursorSensitivity,
+                range: 0.2...4.0,
+                step: 0.05,
+                onCommit: { appState.settings.save() }
+            )
         }
     }
 

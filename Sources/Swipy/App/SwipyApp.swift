@@ -30,22 +30,70 @@ struct SwipyApp: App {
             }
             .overlay {
                 if appState.showFloatingAppSwitcher {
-                    FloatingAppSwitcherView(isPresented: $appState.showFloatingAppSwitcher)
+                    ZStack {
+                        Color.black.opacity(0.15)
+                            .ignoresSafeArea()
+                            .onTapGesture {
+                                appState.showFloatingAppSwitcher = false
+                            }
+                        FloatingAppSwitcherView(isPresented: $appState.showFloatingAppSwitcher)
+                    }
+                    .transition(.opacity)
                 }
             }
+            .background(
+                MainWindowAccessor { window in
+                    appState.mainWindow = window
+                }
+            )
         }
         .windowStyle(.titleBar)
         .windowToolbarStyle(.unified)
     }
 
     private var sidebarView: some View {
-        List(NavigationSection.allCases, selection: $appState.selectedNav) { section in
-            Label(section.rawValue, systemImage: section.icon)
-                .tag(section)
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(spacing: 10) {
+                SwipyLogoView(size: 26, showShadow: true)
+                Text("Swipy")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundColor(.white)
+                Spacer()
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 14)
+            .padding(.bottom, 12)
+
+            Divider().background(Color(hex: "F0F0F0"))
+
+            List(NavigationSection.allCases, selection: $appState.selectedNav) { section in
+                Label(section.rawValue, systemImage: section.icon)
+                    .font(.system(size: 13, weight: .medium))
+                    .tag(section)
+            }
+            .listStyle(.sidebar)
+
+            Spacer()
+
+            sidebarStatusFooter
         }
-        .listStyle(.sidebar)
-        .navigationTitle("Swipy")
-        .frame(minWidth: 180)
+        .frame(minWidth: 200)
+    }
+
+    private var sidebarStatusFooter: some View {
+        HStack(spacing: 8) {
+            Circle()
+                .fill(appState.settings.isTrackingEnabled ? Color.green : Color.orange)
+                .frame(width: 8, height: 8)
+            Text(appState.settings.isTrackingEnabled ? "Tracking Active" : "Paused")
+                .font(.system(size: 11, weight: .medium))
+                .foregroundColor(Color(hex: "777777"))
+            Spacer()
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(Color(hex: "FAFAFA"))
+        .overlay(Rectangle().frame(height: 1).foregroundColor(Color(hex: "F0F0F0")), alignment: .top)
     }
 
     @ViewBuilder

@@ -6,23 +6,29 @@ print("==================================================")
 
 let startTime = CFAbsoluteTimeGetCurrent()
 
-print("\n[1/6] Running CoordinateMapperTests...")
+print("\n[1/8] Running CoordinateMapperTests...")
 CoordinateMapperTests.run()
 
-print("\n[2/6] Running HandPoseMappingTests...")
+print("\n[2/8] Running HandPoseMappingTests...")
 HandPoseMappingTests.run()
 
-print("\n[3/6] Running GestureRecognitionTests...")
+print("\n[3/8] Running GestureRecognitionTests...")
 GestureRecognitionTests.run()
 
-print("\n[4/6] Running MotionSmootherTests...")
+print("\n[4/8] Running MotionSmootherTests...")
 MotionSmootherTests.run()
 
-print("\n[5/6] Running SettingsTests...")
+print("\n[5/8] Running SettingsTests...")
 SettingsTests.run()
 
-print("\n[6/6] Running CursorAccelerationTests...")
+print("\n[6/8] Running CursorAccelerationTests...")
 CursorAccelerationTests.run()
+
+print("\n[7/8] Running TrackpadMotionTests...")
+TrackpadMotionTests.run()
+
+print("\n[8/8] Running PointerStabilityTests...")
+PointerStabilityTests.run()
 
 let elapsedMs = (CFAbsoluteTimeGetCurrent() - startTime) * 1000.0
 

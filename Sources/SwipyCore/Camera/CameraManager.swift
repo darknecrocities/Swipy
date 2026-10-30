@@ -21,6 +21,11 @@ public final class CameraManager: NSObject, CameraFrameProvider, @unchecked Send
         return _isRunning
     }
 
+    /// Provides access to the underlying AVCaptureSession for live video rendering layers.
+    public var session: AVCaptureSession {
+        captureSession
+    }
+
     public override init() {
         super.init()
     }
@@ -76,7 +81,13 @@ public final class CameraManager: NSObject, CameraFrameProvider, @unchecked Send
         captureSession.beginConfiguration()
         defer { captureSession.commitConfiguration() }
 
-        captureSession.sessionPreset = .vga640x480
+        if captureSession.canSetSessionPreset(.hd1280x720) {
+            captureSession.sessionPreset = .hd1280x720
+        } else if captureSession.canSetSessionPreset(.high) {
+            captureSession.sessionPreset = .high
+        } else {
+            captureSession.sessionPreset = .vga640x480
+        }
 
         // Clear existing inputs and outputs
         for input in captureSession.inputs {

@@ -54,17 +54,21 @@ public final class AppLifecycleManager: ObservableObject {
     @Published public var activeGesture: RecognizedGestureState = .idle
     @Published public var isCameraAuthorized: Bool = false
     @Published public var isAccessibilityTrusted: Bool = false
+    @Published public var isAccessibilityBannerDismissed: Bool = false
     @Published public var isCalibrating: Bool = false
     @Published public var showFloatingAppSwitcher: Bool = false
     @Published public var isOnboardingPresented: Bool = false
     @Published public var selectedNav: NavigationSection = .dashboard
     @Published public var practiceClickCount: Int = 0
 
+    public weak var mainWindow: NSWindow?
+
     private let cameraManager = CameraManager.shared
     private let visionService = HandPoseService()
     private let gestureRecognizer = GestureRecognizer.shared
     private var telemetryTimer: Timer?
     private let settingsHolder: SettingsHolder
+    private var trackingActivityToken: NSObjectProtocol?
 
     public init() {
         let initialSettings = SwipySettings.load()
@@ -76,6 +80,19 @@ public final class AppLifecycleManager: ObservableObject {
         setupSystemActionBindings()
         setupCameraPipeline()
         startTelemetryTimer()
+        setupAppActivationObserver()
+    }
+
+    private func setupAppActivationObserver() {
+        NotificationCenter.default.addObserver(
+            forName: NSApplication.didBecomeActiveNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in
+                self?.refreshPermissions()
+            }
+        }
     }
 
     private func setupSystemActionBindings() {
@@ -169,6 +186,12 @@ public final class AppLifecycleManager: ObservableObject {
     }
 
     public func startTrackingSession() {
+        if trackingActivityToken == nil {
+            trackingActivityToken = ProcessInfo.processInfo.beginActivity(
+                options: [.userInitiated, .latencyCritical],
+                reason: "Swipy Real-time Gesture Tracking"
+            )
+        }
         Task {
             let cameraOk = await CameraPermissionManager.shared.requestAccess()
             self.isCameraAuthorized = cameraOk
@@ -189,7 +212,12 @@ public final class AppLifecycleManager: ObservableObject {
     }
 
     public func stopTrackingSession() {
+        if let token = trackingActivityToken {
+            ProcessInfo.processInfo.endActivity(token)
+            trackingActivityToken = nil
+        }
         cameraManager.stopCapture()
+        visionService.resetSequence()
         MouseEventController.shared.safetyReleaseHeldButtons()
         PointerOverlayController.shared.hide()
         trackingState = .ready
@@ -197,16 +225,32 @@ public final class AppLifecycleManager: ObservableObject {
         activeGesture = .idle
     }
 
+    /// Polls and updates current system privacy permissions in real time.
+    @MainActor
+    public func refreshPermissions() {
+        let cameraOk = CameraPermissionManager.shared.isAuthorized
+        let accessibilityOk = AccessibilityPermissionManager.shared.isTrusted
+
+        self.isCameraAuthorized = cameraOk
+        self.isAccessibilityTrusted = accessibilityOk
+
+        // Automatically start or recover tracking session if user enabled it and permissions just cleared
+        if cameraOk && accessibilityOk && settings.isTrackingEnabled && !settings.isPaused && trackingState != .tracking {
+            startTrackingSession()
+        }
+    }
+
     private func startTelemetryTimer() {
-        telemetryTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
+        let timer = Timer(timeInterval: 0.5, repeats: true) { [weak self] _ in
             guard let self = self else { return }
             Task { @MainActor in
+                self.refreshPermissions()
                 self.currentFPS = DiagnosticsLogger.shared.currentFPS
                 self.currentInferenceMs = DiagnosticsLogger.shared.averageInferenceMs
-                self.isAccessibilityTrusted = AccessibilityPermissionManager.shared.isTrusted
-                self.isCameraAuthorized = CameraPermissionManager.shared.isAuthorized
             }
         }
+        RunLoop.main.add(timer, forMode: .common)
+        self.telemetryTimer = timer
     }
 
     /// Applies and persists a new profile preset.
@@ -214,5 +258,23 @@ public final class AppLifecycleManager: ObservableObject {
         settings.applyProfile(profile)
         settings.save()
         updateCachedSettings(settings)
+    }
+
+    /// Restores, activates, and presents the main Dashboard window.
+    public func openDashboard() {
+        NSApp.activate(ignoringOtherApps: true)
+        selectedNav = .dashboard
+        if let window = mainWindow ?? NSApp.windows.first(where: { !($0 is NSPanel) && $0.canBecomeMain }) {
+            window.setIsVisible(true)
+            window.deminiaturize(nil)
+            window.makeKeyAndOrderFront(nil)
+            window.orderFrontRegardless()
+        }
+    }
+
+    /// Restores the main window and launches the bounds calibration sheet.
+    public func openCalibration() {
+        openDashboard()
+        isCalibrating = true
     }
 }

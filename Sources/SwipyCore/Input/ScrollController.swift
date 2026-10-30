@@ -19,14 +19,15 @@ public final class ScrollController: @unchecked Sendable {
         isNatural: Bool = true,
         speedMultiplier: Double = 1.0
     ) {
-        let directionFactor: Double = isNatural ? 1.0 : -1.0
-        let scaledDeltaY = Int32(deltaY * speedMultiplier * directionFactor * 10.0)
-        let scaledDeltaX = Int32(deltaX * speedMultiplier * directionFactor * 10.0)
+        let directionFactor: Double = isNatural ? -1.0 : 1.0
+        let pixelScrollScale = 1200.0
+        let scaledDeltaY = Int32(deltaY * speedMultiplier * directionFactor * pixelScrollScale)
+        let scaledDeltaX = Int32(-deltaX * speedMultiplier * directionFactor * pixelScrollScale)
 
         guard scaledDeltaY != 0 || scaledDeltaX != 0 else { return }
 
         guard let event = CGEvent(
-            scrollWheelEvent2Source: nil,
+            scrollWheelEvent2Source: CGEventSource(stateID: .hidSystemState),
             units: .pixel,
             wheelCount: 2,
             wheel1: scaledDeltaY,
@@ -34,6 +35,8 @@ public final class ScrollController: @unchecked Sendable {
             wheel3: 0
         ) else { return }
 
+        // Continuous scrolling flag is mandatory for Chromium/WebKit smooth scrolling
+        event.setIntegerValueField(.scrollWheelEventIsContinuous, value: 1)
         event.post(tap: .cghidEventTap)
         DiagnosticsLogger.shared.recordEvent()
     }

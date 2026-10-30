@@ -68,6 +68,15 @@ public enum Finger: String, CaseIterable, Sendable {
     case little
 }
 
+/// High-level discrete classification of the number of extended fingers for deterministic gesture gating.
+public enum ExtendedFingerState: String, Codable, CaseIterable, Sendable {
+    case zeroFingers = "Fist (Idle)"
+    case oneFinger   = "1 Finger (Pointer)"
+    case twoFingers  = "2 Fingers (Scroll)"
+    case threeFingers = "3 Fingers (Spaces)"
+    case fourFingers = "4 Fingers (Open Palm)"
+}
+
 /// Complete normalized representation of a single recognized hand.
 public struct HandSkeleton: Codable, Equatable, Sendable {
     public let chirality: HandChirality
@@ -93,6 +102,73 @@ public struct HandSkeleton: Codable, Equatable, Sendable {
     public func distance(between first: HandJointName, and second: HandJointName) -> Double? {
         guard let p1 = joints[first], let p2 = joints[second] else { return nil }
         return p1.distance(to: p2)
+    }
+
+    /// Anatomical palm scale: rigid distance from wrist to base of middle finger (metacarpal bone reference).
+    public var palmScale: Double {
+        guard let wrist = joints[.wrist], let middleMCP = joints[.middleMCP] else { return 0.20 }
+        return max(0.05, wrist.distance(to: middleMCP))
+    }
+
+    /// Scale-invariant pinch ratio (distance between thumb and index tips divided by rigid palm length).
+    public var pinchRatio: Double {
+        guard let dist = distance(between: .thumbTip, and: .indexTip) else { return 1.0 }
+        return dist / palmScale
+    }
+
+    /// Scale-invariant middle-finger pinch ratio for secondary / right clicks.
+    public var middlePinchRatio: Double {
+        guard let dist = distance(between: .thumbTip, and: .middleTip) else { return 1.0 }
+        return dist / palmScale
+    }
+
+    /// Evaluates whether thumb and middle finger are actively engaging in a pinch/spread zoom gesture.
+    /// Crucially requires the index finger to NOT be extended, preventing any pointing interference.
+    public var isThumbMiddleZooming: Bool {
+        guard !isFingerExtended(.index) else { return false }
+        guard let dist = distance(between: .thumbTip, and: .middleTip) else { return false }
+        let ratio = dist / palmScale
+        let isRingCurled = !isFingerExtended(.ring)
+        let isLittleCurled = !isFingerExtended(.little)
+        return ratio <= 0.35 && isRingCurled && isLittleCurled
+    }
+
+    /// Evaluates whether thumb and index finger are pinching together, tolerant of natural index flexion.
+    public var isThumbIndexPinching: Bool {
+        guard let dist = distance(between: .thumbTip, and: .indexTip) else { return false }
+        let ratio = dist / palmScale
+        let isMiddleCurled = !isFingerExtended(.middle)
+        let isRingCurled = !isFingerExtended(.ring)
+        return ratio <= 0.35 && (isMiddleCurled || ratio <= 0.22) && isRingCurled
+    }
+
+    /// Evaluates which non-thumb fingers are extended to classify the macro gesture mode.
+    public var fingerPoseState: ExtendedFingerState {
+        // If thumb and index are actively pinching, preserve .oneFinger pointing/pinching mode even when index curls
+        if isThumbIndexPinching {
+            return .oneFinger
+        }
+
+        let isIndex = isFingerExtended(.index)
+        let isMiddle = isFingerExtended(.middle)
+        let isRing = isFingerExtended(.ring)
+        let isLittle = isFingerExtended(.little)
+
+        if isIndex && isMiddle && isRing && isLittle {
+            return .fourFingers
+        } else if isIndex && isMiddle && isRing {
+            return .threeFingers
+        } else if isIndex && isMiddle && !isLittle {
+            return .twoFingers
+        } else if isIndex && !isMiddle {
+            // Dominant pointing: index extended while middle is curled.
+            // Noise-free: unaffected by natural partial curling of ring/little fingers.
+            return .oneFinger
+        } else if isIndex && !isRing && !isLittle {
+            return .oneFinger
+        } else {
+            return .zeroFingers
+        }
     }
 
     /// Evaluates whether a given finger is extended based on joint hierarchy geometry.
@@ -127,15 +203,17 @@ public struct HandSkeleton: Codable, Equatable, Sendable {
         mcp: HandJointName,
         wrist: HandJoint
     ) -> Bool {
-        guard let tipPt = joints[tip],
-              let pipPt = joints[pip],
-              let mcpPt = joints[mcp] else { return false }
-
+        guard let tipPt = joints[tip] else { return false }
         let tipToWrist = tipPt.distance(to: wrist)
-        let pipToWrist = pipPt.distance(to: wrist)
-        let mcpToWrist = mcpPt.distance(to: wrist)
 
-        // The tip must be further from the wrist than both PIP and MCP
-        return tipToWrist > pipToWrist && pipToWrist > mcpToWrist
+        if let pipPt = joints[pip], let mcpPt = joints[mcp] {
+            let pipToWrist = pipPt.distance(to: wrist)
+            let mcpToWrist = mcpPt.distance(to: wrist)
+            return tipToWrist > pipToWrist && pipToWrist > mcpToWrist
+        } else if let mcpPt = joints[mcp] {
+            return tipToWrist > mcpPt.distance(to: wrist) * 1.12
+        } else {
+            return tipToWrist > palmScale * 1.05
+        }
     }
 }

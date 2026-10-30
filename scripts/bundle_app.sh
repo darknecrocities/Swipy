@@ -16,6 +16,12 @@ mkdir -p "${MACOS_DIR}"
 mkdir -p "${RESOURCES_DIR}"
 
 cp ".build/release/${APP_NAME}" "${MACOS_DIR}/${APP_NAME}"
+if [ -f "Resources/AppIcon.icns" ]; then
+    cp "Resources/AppIcon.icns" "${RESOURCES_DIR}/AppIcon.icns"
+fi
+if [ -f "Resources/AppLogo.png" ]; then
+    cp "Resources/AppLogo.png" "${RESOURCES_DIR}/AppLogo.png"
+fi
 
 cat << 'EOF' > "${CONTENTS_DIR}/Info.plist"
 <?xml version="1.0" encoding="UTF-8"?>
@@ -26,6 +32,8 @@ cat << 'EOF' > "${CONTENTS_DIR}/Info.plist"
     <string>en</string>
     <key>CFBundleExecutable</key>
     <string>Swipy</string>
+    <key>CFBundleIconFile</key>
+    <string>AppIcon</string>
     <key>CFBundleIdentifier</key>
     <string>com.swipy.Swipy</string>
     <key>CFBundleInfoDictionaryVersion</key>
@@ -46,12 +54,20 @@ cat << 'EOF' > "${CONTENTS_DIR}/Info.plist"
     <true/>
     <key>NSCameraUsageDescription</key>
     <string>Swipy requires camera access to detect hand gestures for touchless cursor control. Video frames are processed entirely on-device in real time and are never recorded or transmitted.</string>
+    <key>NSAccessibilityUsageDescription</key>
+    <string>Swipy requires accessibility access to move the macOS system cursor and perform clicks across applications.</string>
 </dict>
 </plist>
 EOF
 
-echo "==> Signing ${APP_NAME}.app with camera entitlements..."
-codesign --force --deep --sign - --entitlements Swipy.entitlements "${BUILD_DIR}"
+SIGN_IDENTITY=$(security find-identity -v -p codesigning 2>/dev/null | grep "Apple Development" | head -n 1 | awk -F '"' '{print $2}' || true)
+if [ -n "${SIGN_IDENTITY}" ]; then
+    echo "==> Signing ${APP_NAME}.app with Apple Development identity: ${SIGN_IDENTITY}..."
+    codesign --force --deep --sign "${SIGN_IDENTITY}" --entitlements Swipy.entitlements "${BUILD_DIR}"
+else
+    echo "==> Signing ${APP_NAME}.app with ad-hoc signature..."
+    codesign --force --deep --sign - --entitlements Swipy.entitlements "${BUILD_DIR}"
+fi
 
 echo "==> Verifying signature..."
 codesign --verify --deep --strict --verbose=2 "${BUILD_DIR}"
