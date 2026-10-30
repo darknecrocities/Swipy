@@ -52,10 +52,10 @@ public final class TrackpadMotionController: @unchecked Sendable {
         defer { lock.unlock() }
 
         // Initialize internal position from current macOS cursor if fresh, clamped to target screen.
-        // In headless CI environments where no physical mouse exists, currentQuartzCursorPosition is .zero;
+        // In headless CI environments where the cursor rests near the left/top screen edge (x < 64),
         // fall back to the display center so directional displacement tests are never clamped at x = 0.
         let currentSysPos = CursorController.shared.currentQuartzCursorPosition
-        let fallbackPos = (currentSysPos.x <= 1.0 && currentSysPos.y <= 1.0)
+        let fallbackPos = (currentSysPos.x < 64.0 || currentSysPos.y < 64.0)
             ? CGPoint(x: screenFrame.midX, y: screenFrame.midY)
             : currentSysPos
         let initialClamped = CGPoint(

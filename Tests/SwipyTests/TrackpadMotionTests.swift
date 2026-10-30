@@ -244,20 +244,20 @@ public struct TrackpadMotionTests {
 
         let p0 = trackpad.update(normalizedPoint: CGPoint(x: 0.5, y: 0.5), sensitivity: 1.0, screenFrame: screen)
 
-        // Move hand slightly with pinchRatio = 1.0 (normal)
-        let pNormal = trackpad.update(normalizedPoint: CGPoint(x: 0.52, y: 0.5), sensitivity: 1.0, screenFrame: screen, isAdaptive: false, pinchRatio: 1.0)
+        // Move hand slightly right (x: 0.50 -> 0.48, dx = +0.02) with pinchRatio = 1.0 (normal)
+        let pNormal = trackpad.update(normalizedPoint: CGPoint(x: 0.48, y: 0.5), sensitivity: 1.0, screenFrame: screen, isAdaptive: false, pinchRatio: 1.0)
         let travelNormal = abs(pNormal.x - p0.x)
 
         trackpad.reset()
         _ = trackpad.update(normalizedPoint: CGPoint(x: 0.5, y: 0.5), sensitivity: 1.0, screenFrame: screen)
 
         // Move hand same distance with pinchRatio = 0.35 (pre-pinch approach)
-        let pDamped = trackpad.update(normalizedPoint: CGPoint(x: 0.52, y: 0.5), sensitivity: 1.0, screenFrame: screen, isAdaptive: false, pinchRatio: 0.35)
+        let pDamped = trackpad.update(normalizedPoint: CGPoint(x: 0.48, y: 0.5), sensitivity: 1.0, screenFrame: screen, isAdaptive: false, pinchRatio: 0.35)
         let travelDamped = abs(pDamped.x - p0.x)
         TestHarness.assertTrue(travelDamped < travelNormal, "Pre-pinch damping reduces cursor velocity")
 
         // In pinch contact: isPinching = true -> strict freeze
-        let pFrozen = trackpad.update(normalizedPoint: CGPoint(x: 0.54, y: 0.5), sensitivity: 1.0, screenFrame: screen, isAdaptive: false, pinchRatio: 0.20, isPinching: true)
+        let pFrozen = trackpad.update(normalizedPoint: CGPoint(x: 0.46, y: 0.5), sensitivity: 1.0, screenFrame: screen, isAdaptive: false, pinchRatio: 0.20, isPinching: true)
         TestHarness.assertEqual(pFrozen.x, pDamped.x, accuracy: 0.001, "Strict freeze holds cursor position during pinch")
     }
 
