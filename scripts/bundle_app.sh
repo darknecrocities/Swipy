@@ -23,7 +23,10 @@ if [ -f "Resources/AppLogo.png" ]; then
     cp "Resources/AppLogo.png" "${RESOURCES_DIR}/AppLogo.png"
 fi
 
-cat << 'EOF' > "${CONTENTS_DIR}/Info.plist"
+GIT_SHA=$(git rev-parse --short=7 HEAD 2>/dev/null || echo "local")
+BUILD_TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+cat << EOF > "${CONTENTS_DIR}/Info.plist"
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -45,7 +48,11 @@ cat << 'EOF' > "${CONTENTS_DIR}/Info.plist"
     <key>CFBundleShortVersionString</key>
     <string>1.0.0</string>
     <key>CFBundleVersion</key>
-    <string>1</string>
+    <string>${GIT_SHA}</string>
+    <key>SwipyCommitSHA</key>
+    <string>${GIT_SHA}</string>
+    <key>SwipyBuildTimestamp</key>
+    <string>${BUILD_TIMESTAMP}</string>
     <key>LSMinimumSystemVersion</key>
     <string>14.0</string>
     <key>NSPrincipalClass</key>
@@ -87,4 +94,13 @@ ln -s /Applications "${DMG_STAGING}/Applications"
 hdiutil create -volname "Swipy" -srcfolder "${DMG_STAGING}" -ov -format UDZO "${DOWNLOADS_DIR}/Swipy-macOS.dmg" >/dev/null
 rm -rf "${DMG_STAGING}"
 
-echo "==> Successfully packaged ${BUILD_DIR}, ${DOWNLOADS_DIR}/Swipy-macOS.dmg, and ${DOWNLOADS_DIR}/Swipy-macOS.zip!"
+cat << EOF > "${DOWNLOADS_DIR}/release-manifest.json"
+{
+  "version": "1.0.0",
+  "commitSHA": "${GIT_SHA}",
+  "buildTimestamp": "${BUILD_TIMESTAMP}",
+  "downloadURL": "https://github.com/darknecrocities/Swipy/releases/download/latest/Swipy-macOS.zip"
+}
+EOF
+
+echo "==> Successfully packaged ${BUILD_DIR} (${GIT_SHA}), ${DOWNLOADS_DIR}/Swipy-macOS.dmg, ${DOWNLOADS_DIR}/Swipy-macOS.zip, and ${DOWNLOADS_DIR}/release-manifest.json!"

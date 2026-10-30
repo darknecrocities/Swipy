@@ -81,6 +81,7 @@ public final class AppLifecycleManager: ObservableObject {
         setupCameraPipeline()
         startTelemetryTimer()
         setupAppActivationObserver()
+        AppUpdateManager.shared.startAutomaticUpdateChecks()
     }
 
     private func setupAppActivationObserver() {

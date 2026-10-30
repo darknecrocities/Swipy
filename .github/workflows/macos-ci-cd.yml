@@ -39,9 +39,10 @@ jobs:
 
       - name: Verify Distribution Artifacts
         run: |
-          ls -lh website/downloads/Swipy-macOS.dmg website/downloads/Swipy-macOS.zip
+          ls -lh website/downloads/Swipy-macOS.dmg website/downloads/Swipy-macOS.zip website/downloads/release-manifest.json
           test -f website/downloads/Swipy-macOS.dmg
           test -f website/downloads/Swipy-macOS.zip
+          test -f website/downloads/release-manifest.json
 
       - name: Upload macOS Installer Artifacts
         uses: actions/upload-artifact@v4
@@ -50,12 +51,13 @@ jobs:
           path: |
             website/downloads/Swipy-macOS.dmg
             website/downloads/Swipy-macOS.zip
+            website/downloads/release-manifest.json
           retention-days: 30
 
   publish-release:
     name: Publish macOS Release Assets
     needs: build-and-test
-    if: startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/feat/') || startsWith(github.ref, 'refs/tags/v'))
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -73,10 +75,13 @@ jobs:
           name: "Swipy for macOS (${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || 'Latest Build' }})"
           body: |
             ## Swipy — Touchless Spatial Hand Control for macOS
+            - **Commit**: `${{ github.sha }}`
+            - **Branch**: `${{ github.ref_name }}`
             - **Swipy-macOS.dmg**: Drag-and-drop macOS Disk Image installer (macOS 14.0+ Sonoma / Sequoia, Apple Silicon & Intel).
-            - **Swipy-macOS.zip**: Portable compressed `Swipy.app` bundle.
+            - **Swipy-macOS.zip**: Portable compressed `Swipy.app` bundle used by the in-app OTA Auto-Updater.
           files: |
             dist/Swipy-macOS.dmg
             dist/Swipy-macOS.zip
+            dist/release-manifest.json
           prerelease: false
           generate_release_notes: true

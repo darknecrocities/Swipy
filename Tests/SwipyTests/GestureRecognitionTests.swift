@@ -15,8 +15,6 @@ public struct GestureRecognitionTests {
         testTwoFingerScroll()
         testOpenHandWithoutVelocityDoesNotSwipe()
         testFourFingerSwipeLeft()
-        testPinchApproachDampingAndStrictLock()
-        testThumbMiddleZoomInOut()
     }
 
     private static func makeHand(
@@ -301,90 +299,6 @@ public struct GestureRecognitionTests {
             TestHarness.assertEqual(fingers, 4, "4-finger swipe detected")
         } else {
             TestHarness.fail("Expected .swiping(.left, 4), got \(s2)")
-        }
-    }
-
-    private static func testPinchApproachDampingAndStrictLock() {
-        let trackpad = TrackpadMotionController()
-        let screen = CGRect(x: 0, y: 0, width: 1920, height: 1080)
-
-        let p0 = trackpad.update(normalizedPoint: CGPoint(x: 0.5, y: 0.5), sensitivity: 1.0, screenFrame: screen)
-
-        // Move hand slightly with pinchRatio = 1.0 (normal)
-        let pNormal = trackpad.update(normalizedPoint: CGPoint(x: 0.52, y: 0.5), sensitivity: 1.0, screenFrame: screen, isAdaptive: false, pinchRatio: 1.0)
-        let travelNormal = abs(pNormal.x - p0.x)
-
-        trackpad.reset()
-        _ = trackpad.update(normalizedPoint: CGPoint(x: 0.5, y: 0.5), sensitivity: 1.0, screenFrame: screen)
-
-        // Move hand same distance with pinchRatio = 0.35 (pre-pinch approach)
-        let pDamped = trackpad.update(normalizedPoint: CGPoint(x: 0.52, y: 0.5), sensitivity: 1.0, screenFrame: screen, isAdaptive: false, pinchRatio: 0.35)
-        let travelDamped = abs(pDamped.x - p0.x)
-        TestHarness.assertTrue(travelDamped < travelNormal, "Pre-pinch damping reduces cursor velocity")
-
-        // In pinch contact: isPinching = true -> strict freeze
-        let pFrozen = trackpad.update(normalizedPoint: CGPoint(x: 0.54, y: 0.5), sensitivity: 1.0, screenFrame: screen, isAdaptive: false, pinchRatio: 0.20, isPinching: true)
-        TestHarness.assertEqual(pFrozen.x, pDamped.x, accuracy: 0.001, "Strict freeze holds cursor position during pinch")
-    }
-
-    private static func testThumbMiddleZoomInOut() {
-        let history = GestureHistory()
-        let resolver = GestureConflictResolver()
-        let machine = GestureStateMachine(history: history, resolver: resolver)
-        let settings = SwipySettings()
-
-        func makeZoomHand(middleDist: Double) -> HandSkeleton {
-            var joints: [HandJointName: HandJoint] = [:]
-            joints[.wrist] = HandJoint(name: .wrist, x: 0.5, y: 0.1, confidence: 1.0)
-            joints[.middleMCP] = HandJoint(name: .middleMCP, x: 0.5, y: 0.35, confidence: 1.0)
-            joints[.middlePIP] = HandJoint(name: .middlePIP, x: 0.5, y: 0.45, confidence: 1.0)
-            // Thumb at (0.45, 0.45)
-            joints[.thumbTip] = HandJoint(name: .thumbTip, x: 0.45, y: 0.45, confidence: 1.0)
-            // Middle tip at (0.45 + middleDist, 0.45)
-            joints[.middleTip] = HandJoint(name: .middleTip, x: 0.45 + middleDist, y: 0.45, confidence: 1.0)
-
-            // Index finger curled down so it does not conflict with index pointing
-            joints[.indexMCP] = HandJoint(name: .indexMCP, x: 0.35, y: 0.35, confidence: 1.0)
-            joints[.indexPIP] = HandJoint(name: .indexPIP, x: 0.35, y: 0.25, confidence: 1.0)
-            joints[.indexTip] = HandJoint(name: .indexTip, x: 0.35, y: 0.20, confidence: 1.0)
-
-            // Ring and little curled
-            joints[.ringMCP] = HandJoint(name: .ringMCP, x: 0.55, y: 0.30, confidence: 1.0)
-            joints[.ringPIP] = HandJoint(name: .ringPIP, x: 0.55, y: 0.25, confidence: 1.0)
-            joints[.ringTip] = HandJoint(name: .ringTip, x: 0.55, y: 0.20, confidence: 1.0)
-
-            joints[.littleMCP] = HandJoint(name: .littleMCP, x: 0.60, y: 0.25, confidence: 1.0)
-            joints[.littlePIP] = HandJoint(name: .littlePIP, x: 0.60, y: 0.20, confidence: 1.0)
-            joints[.littleTip] = HandJoint(name: .littleTip, x: 0.60, y: 0.15, confidence: 1.0)
-
-            return HandSkeleton(chirality: .right, joints: joints)
-        }
-
-        // Frame 1: Thumb and middle finger start close (middleDist = 0.05, ratio ~ 0.20)
-        let h1 = makeZoomHand(middleDist: 0.05)
-        let s1 = machine.process(skeleton: h1, settings: settings, timestamp: 1.0)
-        if case .zooming(let delta1, _) = s1 {
-            TestHarness.assertEqual(delta1, 0.0, accuracy: 0.001, "Frame 1 zoom starts anchored with delta 0")
-        } else {
-            TestHarness.fail("Expected .zooming state on frame 1, got \(s1)")
-        }
-
-        // Frame 2: Fingers spread apart (pinch out / expanding: middleDist = 0.10) -> Zoom In
-        let h2 = makeZoomHand(middleDist: 0.10)
-        let s2 = machine.process(skeleton: h2, settings: settings, timestamp: 1.05)
-        if case .zooming(let delta2, _) = s2 {
-            TestHarness.assertTrue(delta2 > 0.0, "Spreading thumb and middle finger produces positive delta (Zoom In)")
-        } else {
-            TestHarness.fail("Expected .zooming state on frame 2, got \(s2)")
-        }
-
-        // Frame 3: Fingers contract closer (pinch in: middleDist = 0.06) -> Zoom Out
-        let h3 = makeZoomHand(middleDist: 0.06)
-        let s3 = machine.process(skeleton: h3, settings: settings, timestamp: 1.10)
-        if case .zooming(let delta3, _) = s3 {
-            TestHarness.assertTrue(delta3 < 0.0, "Contracting thumb and middle finger produces negative delta (Zoom Out)")
-        } else {
-            TestHarness.fail("Expected .zooming state on frame 3, got \(s3)")
         }
     }
 

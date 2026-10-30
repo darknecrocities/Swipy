@@ -10,6 +10,7 @@ public struct SettingsTests {
         testCodableSerialization()
         testPointerSettingsSerialization()
         testAllGestureCategoriesPopulatedAndMigrated()
+        testAppUpdateManifestComparisonAndParsing()
     }
 
     private static func testDefaultSettingsIntegrity() {
@@ -104,5 +105,46 @@ public struct SettingsTests {
         TestHarness.assertEqual(twoHandCount, 2, "Two-Hand Controls category populated with 2 zoom bindings")
         let indexBinding = legacySettings.bindings.first { $0.gestureType == .indexPointing }
         TestHarness.assertEqual(indexBinding?.action, .moveCursor, "Index Pointing migrated from .none to .moveCursor")
+    }
+
+    private static func testAppUpdateManifestComparisonAndParsing() {
+        let sampleJSON = """
+        {
+          "tag_name": "latest",
+          "target_commitish": "a1b2c3d4e5f60718293a",
+          "published_at": "2026-10-30T12:00:00Z",
+          "body": "## Swipy Build\\n- Commit: `9f8e7d6`\\n- Automated macOS release",
+          "assets": [
+            {
+              "name": "Swipy-macOS.zip",
+              "browser_download_url": "https://github.com/darknecrocities/Swipy/releases/download/latest/Swipy-macOS.zip"
+            }
+          ]
+        }
+        """.data(using: .utf8)!
+
+        guard let manifest = AppUpdateManager.parseGitHubReleasePayload(sampleJSON, defaultVersion: "1.0.0") else {
+            TestHarness.fail("Expected valid ReleaseManifest from GitHub release payload")
+            return
+        }
+
+        TestHarness.assertEqual(manifest.commitSHA, "9f8e7d6", "Extracted 7-char commit SHA from release body")
+        TestHarness.assertTrue(manifest.downloadURL.hasSuffix("Swipy-macOS.zip"), "Extracted Swipy-macOS.zip asset URL")
+
+        // Same commit SHA -> should NOT offer update
+        let sameUpdate = AppUpdateManager.shouldOfferUpdate(
+            localVersion: "1.0.0",
+            localCommitSHA: "9f8e7d6",
+            remote: manifest
+        )
+        TestHarness.assertFalse(sameUpdate, "Identical commit SHA does not trigger redundant update")
+
+        // Newer commit SHA on main -> SHOULD offer update immediately even if semantic version is still 1.0.0
+        let newerCommitUpdate = AppUpdateManager.shouldOfferUpdate(
+            localVersion: "1.0.0",
+            localCommitSHA: "14af833",
+            remote: manifest
+        )
+        TestHarness.assertTrue(newerCommitUpdate, "Different commit SHA on latest release triggers OTA update")
     }
 }
