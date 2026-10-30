@@ -102,6 +102,13 @@ public final class AppLifecycleManager: ObservableObject {
                 self?.showFloatingAppSwitcher.toggle()
             }
         }
+        SystemActionController.shared.onToggleTrackingPause = { [weak self] in
+            Task { @MainActor in
+                guard let self = self else { return }
+                self.settings.isPaused.toggle()
+                self.settings.save()
+            }
+        }
     }
 
     private func setupCameraPipeline() {

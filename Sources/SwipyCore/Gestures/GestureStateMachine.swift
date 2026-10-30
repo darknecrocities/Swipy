@@ -13,6 +13,11 @@ public final class GestureStateMachine: @unchecked Sendable {
 
     private var currentState: InternalState = .idle
     private var lastClickTimestamp: TimeInterval = 0
+    private var lastPinchRatio: Double = 1.0
+    private var fistHoldStartTime: TimeInterval?
+    private var victoryHoldStartTime: TimeInterval?
+    private var lastVictoryActionTimestamp: TimeInterval = 0
+    private var lastTwoFingerTapTimestamp: TimeInterval = 0
     private let history: GestureHistory
     private let resolver: GestureConflictResolver
     private let lock = NSLock()
@@ -77,6 +82,26 @@ public final class GestureStateMachine: @unchecked Sendable {
             }
         }
 
+        // Closed fist check: balling hand into a fist takes precedence over pinch and neutralizes tracking
+        if skeleton.isFist {
+            victoryHoldStartTime = nil
+            if isCurrentlyPinching || isCurrentlyZooming {
+                currentState = .idle
+            }
+            if let start = fistHoldStartTime {
+                if timestamp - start >= 0.60 {
+                    fistHoldStartTime = nil
+                    currentState = .idle
+                    return .paused
+                }
+            } else {
+                fistHoldStartTime = timestamp
+            }
+            return .idle
+        } else {
+            fistHoldStartTime = nil
+        }
+
         // Prioritize dedicated thumb + index pinch (and pinch release click)
         if skeleton.isThumbIndexPinching || isCurrentlyPinching {
             return evaluatePinchAndPoint(skeleton: skeleton, indexPt: indexPt, settings: settings, timestamp: timestamp)
@@ -91,18 +116,45 @@ public final class GestureStateMachine: @unchecked Sendable {
         // Deterministic gating based on discrete finger extension count
         switch pose {
         case .zeroFingers:
-            // Fist / resting hand: neutralize state and reject accidental gestures
+            victoryHoldStartTime = nil
             if isCurrentlyPinching || isCurrentlyZooming {
                 currentState = .idle
             }
             return .idle
 
         case .fourFingers, .threeFingers:
+            fistHoldStartTime = nil
+            victoryHoldStartTime = nil
             // Open palm: flicks are handled above; otherwise stay neutral.
             return .idle
 
         case .twoFingers:
-            // 2 fingers: evaluate Right Click or smooth 2-finger scrolling (cursor locked)
+            fistHoldStartTime = nil
+            // Peace / V-Sign: evaluate held 'V' pose for App Switcher
+            if skeleton.isVictoryPose {
+                if let start = victoryHoldStartTime {
+                    if timestamp - start >= 0.25 && timestamp - lastVictoryActionTimestamp >= 0.80 {
+                        lastVictoryActionTimestamp = timestamp
+                        victoryHoldStartTime = nil
+                        currentState = .idle
+                        return .actionTriggered(action: .toggleAppSwitcher)
+                    }
+                } else {
+                    victoryHoldStartTime = timestamp
+                }
+                return .idle
+            } else {
+                victoryHoldStartTime = nil
+            }
+
+            // Two-Finger Tap: fingertips touching together for secondary click
+            if skeleton.isTwoFingerTapping && timestamp - lastTwoFingerTapTimestamp >= 0.35 {
+                lastTwoFingerTapTimestamp = timestamp
+                currentState = .idle
+                return .rightClicked(screenPoint: indexPt)
+            }
+
+            // 2 fingers: evaluate thumb-middle Right Click or smooth 2-finger scrolling (cursor locked)
             if let rightClick = evaluateRightClick(skeleton: skeleton, settings: settings) {
                 return rightClick
             }
@@ -115,6 +167,8 @@ public final class GestureStateMachine: @unchecked Sendable {
             return evaluateScroll(skeleton: skeleton, currentPt: scrollPt)
 
         case .oneFinger:
+            fistHoldStartTime = nil
+            victoryHoldStartTime = nil
             // 1 finger (Index only): precision pointer glide, pinch-to-click, and drag
             return evaluatePinchAndPoint(skeleton: skeleton, indexPt: indexPt, settings: settings, timestamp: timestamp)
         }
@@ -184,10 +238,14 @@ public final class GestureStateMachine: @unchecked Sendable {
         settings: SwipySettings,
         timestamp: TimeInterval
     ) -> RecognizedGestureState {
-        // Dedicated thumb-index classifier or scale-invariant ratio with hysteresis
-        let isPinched = skeleton.isThumbIndexPinching || resolver.resolvePinch(distance: skeleton.pinchRatio, baseThreshold: settings.pinchThreshold)
+        let currentPinchRatio = skeleton.pinchRatio
+        let isOpeningPinch = currentPinchRatio > lastPinchRatio + 0.025
+        lastPinchRatio = currentPinchRatio
 
-        if isPinched {
+        // Dedicated thumb-index classifier or scale-invariant ratio with hysteresis
+        let isPinched = skeleton.isThumbIndexPinching || resolver.resolvePinch(distance: currentPinchRatio, baseThreshold: settings.pinchThreshold)
+
+        if isPinched && !isOpeningPinch {
             return handlePinchActive(indexPt: indexPt, settings: settings, timestamp: timestamp)
         } else {
             return handlePinchInactive(indexPt: indexPt, settings: settings, timestamp: timestamp)
@@ -258,6 +316,9 @@ public final class GestureStateMachine: @unchecked Sendable {
         currentState = .idle
         history.clear()
         resolver.reset()
+        fistHoldStartTime = nil
+        victoryHoldStartTime = nil
+        lastPinchRatio = 1.0
         return .idle
     }
 }

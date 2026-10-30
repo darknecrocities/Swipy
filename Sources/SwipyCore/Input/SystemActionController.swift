@@ -33,6 +33,7 @@ public final class SystemActionController: @unchecked Sendable {
     public var shortcutVariant: KeyComboVariant = .hidModifierSequence
 
     public var onToggleAppSwitcher: (@Sendable () -> Void)?
+    public var onToggleTrackingPause: (@Sendable () -> Void)?
 
     /// Key synthesis runs here so the camera/Vision thread never sleeps between key events.
     private let queue = DispatchQueue(label: "com.swipy.system-actions", qos: .userInteractive)
@@ -51,6 +52,7 @@ public final class SystemActionController: @unchecked Sendable {
         case .nextApplication: postApplicationSwitch(reverse: false)
         case .previousApplication: postApplicationSwitch(reverse: true)
         case .toggleAppSwitcher: onToggleAppSwitcher?()
+        case .toggleTrackingPause: onToggleTrackingPause?()
         default: break
         }
     }

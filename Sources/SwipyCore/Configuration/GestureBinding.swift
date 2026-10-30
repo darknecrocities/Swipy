@@ -37,6 +37,9 @@ public enum GestureType: String, Codable, CaseIterable, Sendable {
     case fourFingerSwipeRight = "Four-Finger Swipe Right"
     case twoHandZoom = "Two-Hand Zoom"
     case openPalmsPause = "Open Palms Hold"
+    case twoFingerTap = "Two-Finger Tap"
+    case victorySign = "Peace / V-Sign"
+    case fistHold = "Closed Fist Freeze"
 }
 
 /// Categorization of gestures for library organization and UI display.

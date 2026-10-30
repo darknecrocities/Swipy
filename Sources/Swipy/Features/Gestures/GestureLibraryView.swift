@@ -205,6 +205,9 @@ public struct GestureLibraryView: View {
             case .fourFingerSwipeRight: return "square.grid.2x2.fill"
             case .twoHandZoom: return "arrow.up.left.and.arrow.down.right"
             case .openPalmsPause: return "hand.raised"
+            case .twoFingerTap: return "hand.tap"
+            case .victorySign: return "v.circle"
+            case .fistHold: return "lock.fill"
             }
         }()
         Image(systemName: name)

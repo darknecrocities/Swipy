@@ -27,8 +27,11 @@ CursorAccelerationTests.run()
 print("\n[7/8] Running TrackpadMotionTests...")
 TrackpadMotionTests.run()
 
-print("\n[8/8] Running PointerStabilityTests...")
+print("\n[8/9] Running PointerStabilityTests...")
 PointerStabilityTests.run()
+
+print("\n[9/9] Running AdditionalGesturesTests...")
+AdditionalGesturesTests.run()
 
 let elapsedMs = (CFAbsoluteTimeGetCurrent() - startTime) * 1000.0
 

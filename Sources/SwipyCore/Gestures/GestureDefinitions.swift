@@ -22,5 +22,6 @@ public enum RecognizedGestureState: Equatable, Sendable {
     case swiping(direction: SwipeDirection, fingers: Int)
     case zooming(scaleDelta: Double, anchorPoint: CGPoint)
     case twoHandZooming(scaleDelta: Double)
+    case actionTriggered(action: GestureAction)
     case paused
 }

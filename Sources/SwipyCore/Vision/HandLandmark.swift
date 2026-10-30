@@ -135,11 +135,47 @@ public struct HandSkeleton: Codable, Equatable, Sendable {
 
     /// Evaluates whether thumb and index finger are pinching together, tolerant of natural index flexion.
     public var isThumbIndexPinching: Bool {
+        guard !isFist else { return false }
         guard let dist = distance(between: .thumbTip, and: .indexTip) else { return false }
         let ratio = dist / palmScale
         let isMiddleCurled = !isFingerExtended(.middle)
         let isRingCurled = !isFingerExtended(.ring)
         return ratio <= 0.35 && (isMiddleCurled || ratio <= 0.22) && isRingCurled
+    }
+
+    /// Evaluates whether index and middle fingers are extended apart in a Peace / V-Sign pose.
+    public var isVictoryPose: Bool {
+        guard isFingerExtended(.index),
+              isFingerExtended(.middle),
+              !isFingerExtended(.ring),
+              !isFingerExtended(.little) else { return false }
+        guard let tipDist = distance(between: .indexTip, and: .middleTip) else { return false }
+        let mcpDist = distance(between: .indexMCP, and: .middleMCP) ?? (palmScale * 0.25)
+        return tipDist >= mcpDist * 1.30 && tipDist >= palmScale * 0.20
+    }
+
+    /// Evaluates whether index and middle fingertips are touching together for a two-finger tap.
+    public var isTwoFingerTapping: Bool {
+        guard isFingerExtended(.index),
+              isFingerExtended(.middle),
+              !isFingerExtended(.ring),
+              !isFingerExtended(.little) else { return false }
+        guard let tipDist = distance(between: .indexTip, and: .middleTip) else { return false }
+        return tipDist <= palmScale * 0.14
+    }
+
+    /// Evaluates whether the hand is in a closed fist posture (all non-thumb fingers curled, not pinching).
+    public var isFist: Bool {
+        let allCurled = !isFingerExtended(.index) &&
+                        !isFingerExtended(.middle) &&
+                        !isFingerExtended(.ring) &&
+                        !isFingerExtended(.little)
+        guard allCurled else { return false }
+        // If thumb and index tips are pinched together, it is an active pinch rather than a resting fist
+        if let dist = distance(between: .thumbTip, and: .indexTip), dist / palmScale <= 0.30 {
+            return false
+        }
+        return true
     }
 
     /// Evaluates which non-thumb fingers are extended to classify the macro gesture mode.
@@ -158,7 +194,7 @@ public struct HandSkeleton: Codable, Equatable, Sendable {
             return .fourFingers
         } else if isIndex && isMiddle && isRing {
             return .threeFingers
-        } else if isIndex && isMiddle && !isLittle {
+        } else if isIndex && isMiddle {
             return .twoFingers
         } else if isIndex && !isMiddle {
             // Dominant pointing: index extended while middle is curled.
@@ -209,7 +245,22 @@ public struct HandSkeleton: Codable, Equatable, Sendable {
         if let pipPt = joints[pip], let mcpPt = joints[mcp] {
             let pipToWrist = pipPt.distance(to: wrist)
             let mcpToWrist = mcpPt.distance(to: wrist)
-            return tipToWrist > pipToWrist && pipToWrist > mcpToWrist
+
+            // Standard upright hand: monotonic distance progression from wrist
+            if tipToWrist > pipToWrist && pipToWrist > mcpToWrist {
+                return true
+            }
+
+            // Foreshortened hand (tilted towards/away from camera):
+            // Check directional projection along hand axis (MCP - wrist)
+            let palmDx = mcpPt.x - wrist.x
+            let palmDy = mcpPt.y - wrist.y
+            let fingerDx = tipPt.x - mcpPt.x
+            let fingerDy = tipPt.y - mcpPt.y
+            let dot = palmDx * fingerDx + palmDy * fingerDy
+
+            // Finger must extend in positive palm direction and tip must be beyond MCP
+            return dot > 0.02 && tipToWrist > mcpToWrist * 1.15
         } else if let mcpPt = joints[mcp] {
             return tipToWrist > mcpPt.distance(to: wrist) * 1.12
         } else {
