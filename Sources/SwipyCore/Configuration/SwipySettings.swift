@@ -157,7 +157,7 @@ public struct SwipySettings: Codable, Equatable, Sendable {
         activeRegionY = max(0.0, min(activeRegionY, 0.5))
         activeRegionWidth = max(0.3, min(activeRegionWidth, 1.0 - activeRegionX))
         activeRegionHeight = max(0.3, min(activeRegionHeight, 1.0 - activeRegionY))
-        pinchThreshold = max(0.02, min(pinchThreshold, 0.10))
+        pinchThreshold = max(0.15, min(pinchThreshold, 0.50))
         dragDelayMs = max(100, min(dragDelayMs, 1000))
         doubleClickWindowMs = max(150, min(doubleClickWindowMs, 800))
         scrollSpeed = max(0.2, min(scrollSpeed, 4.0))

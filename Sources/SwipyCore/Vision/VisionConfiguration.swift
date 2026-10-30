@@ -8,7 +8,7 @@ public struct VisionConfiguration: Codable, Equatable, Sendable {
     public var mirrorHorizontally: Bool
 
     public init(
-        maximumHandCount: Int = 2,
+        maximumHandCount: Int = 1,
         minimumJointConfidence: Float = 0.40,
         targetFrameRate: Int = 30,
         mirrorHorizontally: Bool = true

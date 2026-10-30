@@ -13,33 +13,36 @@ public final class MouseEventController: @unchecked Sendable {
     public init() {}
 
     /// Performs a single left mouse click with realistic tactile duration.
-    public func leftClick(at point: CGPoint) {
-        CGWarpMouseCursorPosition(point)
-        postMouseEvent(type: .leftMouseDown, point: point, button: .left, clickState: 1)
+    public func leftClick(at point: CGPoint? = nil) {
+        let target = point ?? CursorController.shared.currentQuartzCursorPosition
+        CGWarpMouseCursorPosition(target)
+        postMouseEvent(type: .leftMouseDown, point: target, button: .left, clickState: 1)
         usleep(25_000) // 25ms press duration
-        postMouseEvent(type: .leftMouseUp, point: point, button: .left, clickState: 1)
+        postMouseEvent(type: .leftMouseUp, point: target, button: .left, clickState: 1)
         DiagnosticsLogger.shared.recordEvent()
     }
 
     /// Performs a rapid double click with proper inter-click separation.
-    public func doubleClick(at point: CGPoint) {
-        CGWarpMouseCursorPosition(point)
-        postMouseEvent(type: .leftMouseDown, point: point, button: .left, clickState: 1)
+    public func doubleClick(at point: CGPoint? = nil) {
+        let target = point ?? CursorController.shared.currentQuartzCursorPosition
+        CGWarpMouseCursorPosition(target)
+        postMouseEvent(type: .leftMouseDown, point: target, button: .left, clickState: 1)
         usleep(20_000)
-        postMouseEvent(type: .leftMouseUp, point: point, button: .left, clickState: 1)
+        postMouseEvent(type: .leftMouseUp, point: target, button: .left, clickState: 1)
         usleep(40_000)
-        postMouseEvent(type: .leftMouseDown, point: point, button: .left, clickState: 2)
+        postMouseEvent(type: .leftMouseDown, point: target, button: .left, clickState: 2)
         usleep(20_000)
-        postMouseEvent(type: .leftMouseUp, point: point, button: .left, clickState: 2)
+        postMouseEvent(type: .leftMouseUp, point: target, button: .left, clickState: 2)
         DiagnosticsLogger.shared.recordEvent()
     }
 
     /// Performs a right mouse click with tactile duration.
-    public func rightClick(at point: CGPoint) {
-        CGWarpMouseCursorPosition(point)
-        postMouseEvent(type: .rightMouseDown, point: point, button: .right, clickState: 1)
+    public func rightClick(at point: CGPoint? = nil) {
+        let target = point ?? CursorController.shared.currentQuartzCursorPosition
+        CGWarpMouseCursorPosition(target)
+        postMouseEvent(type: .rightMouseDown, point: target, button: .right, clickState: 1)
         usleep(25_000)
-        postMouseEvent(type: .rightMouseUp, point: point, button: .right, clickState: 1)
+        postMouseEvent(type: .rightMouseUp, point: target, button: .right, clickState: 1)
         DiagnosticsLogger.shared.recordEvent()
     }
 

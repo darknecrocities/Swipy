@@ -29,7 +29,7 @@ public struct GestureProfile: Codable, Identifiable, Equatable, Sendable {
         smoothingMinCutoff: Double,
         smoothingBeta: Double,
         scrollSpeed: Double,
-        pinchThreshold: Double = 0.05,
+        pinchThreshold: Double = 0.32,
         dragDelayMs: Int = 260,
         swipeVelocityThreshold: Double = 0.55
     ) {
@@ -52,7 +52,7 @@ public struct GestureProfile: Codable, Identifiable, Equatable, Sendable {
         smoothingMinCutoff: 1.0,
         smoothingBeta: 0.007,
         scrollSpeed: 1.0,
-        pinchThreshold: 0.048,
+        pinchThreshold: 0.32,
         dragDelayMs: 250,
         swipeVelocityThreshold: 1.80
     )
@@ -64,7 +64,7 @@ public struct GestureProfile: Codable, Identifiable, Equatable, Sendable {
         smoothingMinCutoff: 0.6,
         smoothingBeta: 0.003,
         scrollSpeed: 0.75,
-        pinchThreshold: 0.042,
+        pinchThreshold: 0.28,
         dragDelayMs: 320,
         swipeVelocityThreshold: 2.20
     )
@@ -76,7 +76,7 @@ public struct GestureProfile: Codable, Identifiable, Equatable, Sendable {
         smoothingMinCutoff: 1.5,
         smoothingBeta: 0.015,
         scrollSpeed: 1.4,
-        pinchThreshold: 0.052,
+        pinchThreshold: 0.35,
         dragDelayMs: 200,
         swipeVelocityThreshold: 1.50
     )
@@ -88,7 +88,7 @@ public struct GestureProfile: Codable, Identifiable, Equatable, Sendable {
         smoothingMinCutoff: 1.2,
         smoothingBeta: 0.005,
         scrollSpeed: 0.9,
-        pinchThreshold: 0.055,
+        pinchThreshold: 0.30,
         dragDelayMs: 350,
         swipeVelocityThreshold: 1.70
     )

@@ -19,9 +19,10 @@ public final class ScrollController: @unchecked Sendable {
         isNatural: Bool = true,
         speedMultiplier: Double = 1.0
     ) {
-        let directionFactor: Double = isNatural ? 1.0 : -1.0
-        let scaledDeltaY = Int32(deltaY * speedMultiplier * directionFactor * 10.0)
-        let scaledDeltaX = Int32(deltaX * speedMultiplier * directionFactor * 10.0)
+        let directionFactor: Double = isNatural ? -1.0 : 1.0
+        let pixelScrollScale = 1200.0
+        let scaledDeltaY = Int32(deltaY * speedMultiplier * directionFactor * pixelScrollScale)
+        let scaledDeltaX = Int32(-deltaX * speedMultiplier * directionFactor * pixelScrollScale)
 
         guard scaledDeltaY != 0 || scaledDeltaX != 0 else { return }
 

@@ -122,8 +122,22 @@ public struct HandSkeleton: Codable, Equatable, Sendable {
         return dist / palmScale
     }
 
+    /// Evaluates whether thumb and index finger are pinching together, tolerant of natural index flexion.
+    public var isThumbIndexPinching: Bool {
+        guard let dist = distance(between: .thumbTip, and: .indexTip) else { return false }
+        let ratio = dist / palmScale
+        let isMiddleCurled = !isFingerExtended(.middle)
+        let isRingCurled = !isFingerExtended(.ring)
+        return ratio <= 0.35 && (isMiddleCurled || ratio <= 0.22) && isRingCurled
+    }
+
     /// Evaluates which non-thumb fingers are extended to classify the macro gesture mode.
     public var fingerPoseState: ExtendedFingerState {
+        // If thumb and index are actively pinching, preserve .oneFinger pointing/pinching mode even when index curls
+        if isThumbIndexPinching {
+            return .oneFinger
+        }
+
         let isIndex = isFingerExtended(.index)
         let isMiddle = isFingerExtended(.middle)
         let isRing = isFingerExtended(.ring)

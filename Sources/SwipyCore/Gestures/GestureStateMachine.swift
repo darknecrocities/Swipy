@@ -16,6 +16,13 @@ public final class GestureStateMachine: @unchecked Sendable {
     private let resolver: GestureConflictResolver
     private let lock = NSLock()
 
+    private var isCurrentlyPinching: Bool {
+        if case .pinching = currentState {
+            return true
+        }
+        return false
+    }
+
     public init(history: GestureHistory, resolver: GestureConflictResolver) {
         self.history = history
         self.resolver = resolver
@@ -38,6 +45,11 @@ public final class GestureStateMachine: @unchecked Sendable {
 
         history.add(skeleton: skeleton, timestamp: timestamp)
         let indexPt = CGPoint(x: indexTip.x, y: indexTip.y)
+
+        // Prioritize dedicated thumb + index pinch (and pinch release click)
+        if skeleton.isThumbIndexPinching || isCurrentlyPinching {
+            return evaluatePinchAndPoint(skeleton: skeleton, indexPt: indexPt, settings: settings, timestamp: timestamp)
+        }
 
         // Deterministic gating based on discrete finger extension count
         switch skeleton.fingerPoseState {
@@ -67,7 +79,13 @@ public final class GestureStateMachine: @unchecked Sendable {
             if let rightClick = evaluateRightClick(skeleton: skeleton, settings: settings) {
                 return rightClick
             }
-            return evaluateScroll(skeleton: skeleton, currentPt: indexPt)
+            let scrollPt: CGPoint
+            if let idxTip = skeleton[.indexTip], let midTip = skeleton[.middleTip] {
+                scrollPt = CGPoint(x: (idxTip.x + midTip.x) / 2.0, y: (idxTip.y + midTip.y) / 2.0)
+            } else {
+                scrollPt = indexPt
+            }
+            return evaluateScroll(skeleton: skeleton, currentPt: scrollPt)
 
         case .oneFinger:
             // 1 finger (Index only): precision pointer glide, pinch-to-click, and drag
@@ -112,6 +130,10 @@ public final class GestureStateMachine: @unchecked Sendable {
         case .scrolling(let lastPt):
             let dy = Double(currentPt.y - lastPt.y)
             let dx = Double(currentPt.x - lastPt.x)
+            let dist = (dy * dy + dx * dx).squareRoot()
+            if dist < 0.002 {
+                return .scrolling(deltaY: 0.0, deltaX: 0.0)
+            }
             currentState = .scrolling(lastPoint: currentPt)
             return .scrolling(deltaY: dy, deltaX: dx)
         default:
@@ -134,8 +156,8 @@ public final class GestureStateMachine: @unchecked Sendable {
         settings: SwipySettings,
         timestamp: TimeInterval
     ) -> RecognizedGestureState {
-        // Anatomical palm-scale invariant pinch ratio
-        let isPinched = resolver.resolvePinch(distance: skeleton.pinchRatio, baseThreshold: settings.pinchThreshold)
+        // Dedicated thumb-index classifier or scale-invariant ratio with hysteresis
+        let isPinched = skeleton.isThumbIndexPinching || resolver.resolvePinch(distance: skeleton.pinchRatio, baseThreshold: settings.pinchThreshold)
 
         if isPinched {
             return handlePinchActive(indexPt: indexPt, settings: settings, timestamp: timestamp)

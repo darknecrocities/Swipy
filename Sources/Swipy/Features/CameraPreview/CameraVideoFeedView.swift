@@ -25,6 +25,9 @@ public final class CameraVideoPreviewNSView: NSView {
 
     public var session: AVCaptureSession? {
         didSet {
+            if let old = oldValue {
+                NotificationCenter.default.removeObserver(self, name: .AVCaptureSessionDidStartRunning, object: old)
+            }
             guard let session = session else {
                 previewLayer?.session = nil
                 return
@@ -34,6 +37,14 @@ public final class CameraVideoPreviewNSView: NSView {
             } else {
                 setupLayer(with: session)
             }
+
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(handleSessionDidStart),
+                name: .AVCaptureSessionDidStartRunning,
+                object: session
+            )
+            applyMirroringIfNeeded()
         }
     }
 
@@ -47,6 +58,10 @@ public final class CameraVideoPreviewNSView: NSView {
         self.wantsLayer = true
     }
 
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+
     private func setupLayer(with session: AVCaptureSession) {
         let layer = AVCaptureVideoPreviewLayer(session: session)
         layer.videoGravity = .resizeAspectFill
@@ -55,11 +70,23 @@ public final class CameraVideoPreviewNSView: NSView {
         applyMirroringIfNeeded()
     }
 
+    @objc private func handleSessionDidStart() {
+        DispatchQueue.main.async { [weak self] in
+            self?.applyMirroringIfNeeded()
+        }
+    }
+
     public func applyMirroringIfNeeded() {
-        if let connection = previewLayer?.connection, connection.isVideoMirroringSupported {
+        guard let layer = previewLayer, let connection = layer.connection else { return }
+        if connection.isVideoMirroringSupported && !connection.isVideoMirrored {
             connection.automaticallyAdjustsVideoMirroring = false
             connection.isVideoMirrored = true
         }
+    }
+
+    public override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        applyMirroringIfNeeded()
     }
 
     public override func layout() {

@@ -96,27 +96,38 @@ public final class GestureRecognizer: @unchecked Sendable {
             onCursorUpdate?(screenPt, state)
 
         case .leftClicked(let normalizedPt):
-            let screenPt = calculateSmoothedPoint(normalizedPt: normalizedPt, displayFrame: displayFrame, settings: settings, timestamp: timestamp)
+            let screenPt = settings.trackingMode == .trackpad
+                ? CursorController.shared.currentQuartzCursorPosition
+                : calculateSmoothedPoint(normalizedPt: normalizedPt, displayFrame: displayFrame, settings: settings, timestamp: timestamp)
             MouseEventController.shared.leftClick(at: screenPt)
             onCursorUpdate?(screenPt, state)
 
         case .doubleClicked(let normalizedPt):
-            let screenPt = calculateSmoothedPoint(normalizedPt: normalizedPt, displayFrame: displayFrame, settings: settings, timestamp: timestamp)
+            let screenPt = settings.trackingMode == .trackpad
+                ? CursorController.shared.currentQuartzCursorPosition
+                : calculateSmoothedPoint(normalizedPt: normalizedPt, displayFrame: displayFrame, settings: settings, timestamp: timestamp)
             MouseEventController.shared.doubleClick(at: screenPt)
             onCursorUpdate?(screenPt, state)
 
         case .rightClicked(let normalizedPt):
-            let screenPt = calculateSmoothedPoint(normalizedPt: normalizedPt, displayFrame: displayFrame, settings: settings, timestamp: timestamp)
+            let screenPt = settings.trackingMode == .trackpad
+                ? CursorController.shared.currentQuartzCursorPosition
+                : calculateSmoothedPoint(normalizedPt: normalizedPt, displayFrame: displayFrame, settings: settings, timestamp: timestamp)
             MouseEventController.shared.rightClick(at: screenPt)
             onCursorUpdate?(screenPt, state)
 
         case .scrolling(let dy, let dx):
+            if isDraggingActive {
+                MouseEventController.shared.endDrag(at: CursorController.shared.currentQuartzCursorPosition)
+                isDraggingActive = false
+            }
             ScrollController.shared.scroll(
                 deltaY: dy,
                 deltaX: dx,
                 isNatural: settings.isNaturalScroll,
                 speedMultiplier: settings.scrollSpeed
             )
+            onCursorUpdate?(CursorController.shared.currentQuartzCursorPosition, state)
 
         case .swiping(let direction, let fingers):
             handleSwipeDispatch(direction: direction, fingers: fingers, settings: settings)
@@ -150,28 +161,29 @@ public final class GestureRecognizer: @unchecked Sendable {
         settings: SwipySettings,
         timestamp: TimeInterval
     ) -> CGPoint {
-        let targetPoint: CGPoint
         switch settings.trackingMode {
         case .trackpad:
-            targetPoint = trackpadMotion.update(
+            let targetPoint = trackpadMotion.update(
                 normalizedPoint: normalizedPt,
                 sensitivity: settings.cursorSensitivity,
                 screenFrame: displayFrame,
                 isAdaptive: settings.isAdaptiveAcceleration
             )
+            previousScreenPoint = targetPoint
+            lastTimestamp = timestamp
+            return targetPoint
         case .directPointer:
-            targetPoint = coordinateMapper.mapToScreen(
+            let targetPoint = coordinateMapper.mapToScreen(
                 normalizedPoint: normalizedPt,
                 previousPoint: previousScreenPoint,
                 screenFrame: displayFrame,
                 sensitivity: settings.cursorSensitivity
             )
+            let smoothed = smoother.filter(point: targetPoint, timestamp: timestamp)
+            previousScreenPoint = smoothed
+            lastTimestamp = timestamp
+            return smoothed
         }
-
-        let smoothed = smoother.filter(point: targetPoint, timestamp: timestamp)
-        previousScreenPoint = smoothed
-        lastTimestamp = timestamp
-        return smoothed
     }
 
     private func handleHalt() {

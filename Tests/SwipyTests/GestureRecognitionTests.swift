@@ -8,6 +8,7 @@ public struct GestureRecognitionTests {
         testFingerPoseClassification()
         testPointingState()
         testPinchToClick()
+        testThumbIndexPinchBentFinger()
         testLongPinchWithoutDragRegistersClick()
         testPinchHeldWithMotionTriggersDrag()
         testFistRejectedAsIdle()
@@ -19,7 +20,8 @@ public struct GestureRecognitionTests {
         indexTip: CGPoint,
         thumbTip: CGPoint,
         wrist: CGPoint = CGPoint(x: 0.5, y: 0.1),
-        isMiddleExtended: Bool = false
+        isMiddleExtended: Bool = false,
+        middleTipY: Double? = nil
     ) -> HandSkeleton {
         var joints: [HandJointName: HandJoint] = [:]
         joints[.wrist] = HandJoint(name: .wrist, x: wrist.x, y: wrist.y, confidence: 1.0)
@@ -29,7 +31,7 @@ public struct GestureRecognitionTests {
 
         joints[.thumbTip] = HandJoint(name: .thumbTip, x: thumbTip.x, y: thumbTip.y, confidence: 1.0)
 
-        let midY = isMiddleExtended ? 0.7 : 0.2
+        let midY = middleTipY ?? (isMiddleExtended ? 0.7 : 0.2)
         joints[.middleMCP] = HandJoint(name: .middleMCP, x: 0.6, y: 0.2, confidence: 1.0)
         joints[.middlePIP] = HandJoint(name: .middlePIP, x: 0.6, y: 0.35, confidence: 1.0)
         joints[.middleTip] = HandJoint(name: .middleTip, x: 0.6, y: midY, confidence: 1.0)
@@ -82,6 +84,52 @@ public struct GestureRecognitionTests {
             TestHarness.assertEqual(pt.x, 0.5, accuracy: 0.001, "Short pinch release anchored left click X")
         } else {
             TestHarness.fail("Expected .leftClicked on short pinch release, got \(state3)")
+        }
+    }
+
+    private static func testThumbIndexPinchBentFinger() {
+        // Create hand where index finger is curled/bent at PIP/DIP to contact thumb tip
+        var joints: [HandJointName: HandJoint] = [:]
+        joints[.wrist] = HandJoint(name: .wrist, x: 0.5, y: 0.1, confidence: 1.0)
+        joints[.middleMCP] = HandJoint(name: .middleMCP, x: 0.55, y: 0.25, confidence: 1.0)
+        joints[.middlePIP] = HandJoint(name: .middlePIP, x: 0.55, y: 0.22, confidence: 1.0)
+        joints[.middleTip] = HandJoint(name: .middleTip, x: 0.55, y: 0.18, confidence: 1.0)
+
+        joints[.ringMCP] = HandJoint(name: .ringMCP, x: 0.60, y: 0.23, confidence: 1.0)
+        joints[.ringPIP] = HandJoint(name: .ringPIP, x: 0.60, y: 0.20, confidence: 1.0)
+        joints[.ringTip] = HandJoint(name: .ringTip, x: 0.60, y: 0.16, confidence: 1.0)
+
+        // Index finger curled down to meet thumb: tip is lower than PIP
+        joints[.indexMCP] = HandJoint(name: .indexMCP, x: 0.48, y: 0.25, confidence: 1.0)
+        joints[.indexPIP] = HandJoint(name: .indexPIP, x: 0.48, y: 0.32, confidence: 1.0)
+        joints[.indexTip] = HandJoint(name: .indexTip, x: 0.45, y: 0.26, confidence: 1.0)
+
+        // Thumb tip right at index tip
+        joints[.thumbTip] = HandJoint(name: .thumbTip, x: 0.452, y: 0.262, confidence: 1.0)
+
+        let bentPinchHand = HandSkeleton(chirality: .right, joints: joints)
+        TestHarness.assertTrue(bentPinchHand.isThumbIndexPinching, "isThumbIndexPinching is true even with bent index")
+        TestHarness.assertEqual(bentPinchHand.fingerPoseState, .oneFinger, "Bent index pinch retains .oneFinger pose")
+
+        let history = GestureHistory()
+        let resolver = GestureConflictResolver()
+        let machine = GestureStateMachine(history: history, resolver: resolver)
+        let settings = SwipySettings(pinchThreshold: 0.32)
+
+        let s1 = machine.process(skeleton: bentPinchHand, settings: settings, timestamp: 1.0)
+        TestHarness.assertTrue(isPinchPending(s1), "Bent index pinch produces .pinchPending")
+
+        // Release fingers
+        var releaseJoints = joints
+        releaseJoints[.thumbTip] = HandJoint(name: .thumbTip, x: 0.35, y: 0.20, confidence: 1.0)
+        releaseJoints[.indexTip] = HandJoint(name: .indexTip, x: 0.48, y: 0.45, confidence: 1.0)
+        let releasedHand = HandSkeleton(chirality: .right, joints: releaseJoints)
+
+        let s2 = machine.process(skeleton: releasedHand, settings: settings, timestamp: 1.1)
+        if case .leftClicked = s2 {
+            TestHarness.assertTrue(true, "Bent index pinch release fires .leftClicked")
+        } else {
+            TestHarness.fail("Expected .leftClicked on bent index pinch release, got \(s2)")
         }
     }
 
@@ -142,10 +190,10 @@ public struct GestureRecognitionTests {
         let machine = GestureStateMachine(history: history, resolver: resolver)
         let settings = SwipySettings()
 
-        let scrollHand1 = makeHand(indexTip: CGPoint(x: 0.5, y: 0.6), thumbTip: CGPoint(x: 0.3, y: 0.3), isMiddleExtended: true)
+        let scrollHand1 = makeHand(indexTip: CGPoint(x: 0.5, y: 0.6), thumbTip: CGPoint(x: 0.3, y: 0.3), isMiddleExtended: true, middleTipY: 0.6)
         _ = machine.process(skeleton: scrollHand1, settings: settings, timestamp: 1.0)
 
-        let scrollHand2 = makeHand(indexTip: CGPoint(x: 0.5, y: 0.65), thumbTip: CGPoint(x: 0.3, y: 0.3), isMiddleExtended: true)
+        let scrollHand2 = makeHand(indexTip: CGPoint(x: 0.5, y: 0.65), thumbTip: CGPoint(x: 0.3, y: 0.3), isMiddleExtended: true, middleTipY: 0.65)
         let s2 = machine.process(skeleton: scrollHand2, settings: settings, timestamp: 1.05)
 
         if case .scrolling(let dy, _) = s2 {
