@@ -69,10 +69,30 @@ def draw_dynamic_highlight(canvas_img: Image.Image, cx: int, cy: int, radius: in
     canvas_img.paste(overlay, (0, 0), overlay)
 
 
-def apply_camera_shift(img: Image.Image, scene_frame: int, scene_total_frames: int,
-                       zoom_amount: float = 0.032, pan_x_amount: float = 18.0,
-                       pan_y_amount: float = 8.0) -> Image.Image:
-    """Apply subtle organic camera shift (pan + slow push-in zoom) to keep frames dynamic."""
+def draw_kinetic_text(canvas_img: Image.Image, text: str, x: int, y: int, font,
+                      fill_color=(10, 10, 12), progress: float = 1.0, offset_y: int = 35,
+                      anchor: str = "mm") -> None:
+    """Render kinetic animated text with smooth easing slide-up and opacity fade."""
+    p = max(0.0, min(1.0, progress))
+    if p <= 0.0:
+        return
+    cur_y = y + int((1.0 - ease_snap(p)) * offset_y)
+    draw = ImageDraw.Draw(canvas_img)
+    if p >= 0.98:
+        draw.text((x, cur_y), text, font=font, fill=fill_color, anchor=anchor)
+    else:
+        alpha = int(ease_snap(p) * 255)
+        overlay = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+        o_draw = ImageDraw.Draw(overlay)
+        fc = fill_color if len(fill_color) == 3 else fill_color[:3]
+        o_draw.text((x, cur_y), text, font=font, fill=(*fc, alpha), anchor=anchor)
+        canvas_img.paste(overlay, (0, 0), overlay)
+
+
+def apply_prominent_camera_shift(img: Image.Image, scene_frame: int, scene_total_frames: int,
+                                 zoom_amount: float = 0.065, pan_x_amount: float = 45.0,
+                                 pan_y_amount: float = 18.0) -> Image.Image:
+    """Apply prominent cinematic camera shift (visible pan + slow push-in zoom)."""
     p = max(0.0, min(1.0, scene_frame / max(1.0, float(scene_total_frames))))
     zoom = 1.0 + zoom_amount * p
     pan_x = pan_x_amount * math.sin(p * math.pi)
@@ -88,6 +108,24 @@ def apply_camera_shift(img: Image.Image, scene_frame: int, scene_total_frames: i
     crop_x0 = max(0, min(new_w - W, cx - W // 2))
     crop_y0 = max(0, min(new_h - H, cy - H // 2))
     return resized.crop((crop_x0, crop_y0, crop_x0 + W, crop_y0 + H))
+
+
+apply_camera_shift = apply_prominent_camera_shift
+
+
+def apply_tactile_recoil_punch(img: Image.Image, frame_offset: int, duration: int = 8,
+                               strength: float = 0.016) -> Image.Image:
+    """Apply sharp micro-zoom impulse bump on tactile pinch click."""
+    if not (0 <= frame_offset < duration):
+        return img
+    p = frame_offset / float(duration)
+    recoil_scale = 1.0 + strength * (1.0 - p) * math.sin(p * math.pi)
+    new_w = int(W * recoil_scale)
+    new_h = int(H * recoil_scale)
+    resized = img.resize((new_w, new_h), Image.Resampling.BILINEAR)
+    x0 = (new_w - W) // 2
+    y0 = (new_h - H) // 2
+    return resized.crop((x0, y0, x0 + W, y0 + H))
 
 
 def draw_hud_brackets(draw: ImageDraw.ImageDraw, box, color=(12, 12, 14), tick_len=24, width=3):

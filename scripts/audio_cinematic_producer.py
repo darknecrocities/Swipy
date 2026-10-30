@@ -34,38 +34,44 @@ SCRIPT_LINES = [
     {
         "id": "scene_01_hook",
         "title": "The Touchless Vision",
-        "text": "What if your Mac could understand your hands? Not by touching the glass, but through the natural air in front of you.",
+        "text": "What if your Mac could understand your hands? Not by reaching out to touch the glass, but through the natural air in front of you. This is touchless computing.",
         "target_dur_sec": 8.0,
+        "rate": "+15%",
     },
     {
         "id": "scene_02_reveal",
         "title": "Product Hero Reveal",
-        "text": "Meet Swipy. A native app that turns your FaceTime camera into an intelligent spatial trackpad, with zero extra hardware.",
+        "text": "Meet Swipy. A native macOS app that transforms your built-in FaceTime camera into an intelligent spatial trackpad. No sensors to wear, no extra hardware. Just pure, fluid control.",
         "target_dur_sec": 12.0,
+        "rate": "+6%",
     },
     {
         "id": "scene_03_precision",
         "title": "Vision & Cursor Precision",
-        "text": "Glide your index finger to steer the cursor with sub-millimeter precision. Touch your thumb and index together to grab and drag windows effortlessly.",
+        "text": "Glide your index finger to steer the cursor with sub-millimeter precision. Touch your thumb and index together to grab, lock on, and drag windows effortlessly across your workspace.",
         "target_dur_sec": 12.0,
+        "rate": "+5%",
     },
     {
         "id": "scene_04_gestures",
         "title": "18 Native Gestures",
-        "text": "Swipe four fingers to switch Spaces. Tap, scroll, or freeze tracking with eighteen native gestures designed for your everyday workflow.",
+        "text": "Swipe four fingers through the air to switch Spaces. Tap, scroll with open palm, or clench your fist to freeze tracking. Eighteen native gestures designed for your everyday workflow.",
         "target_dur_sec": 12.0,
+        "rate": "+6%",
     },
     {
         "id": "scene_05_privacy",
         "title": "100% On-Device Privacy",
-        "text": "Best of all, your privacy is absolute. Everything runs entirely on-device with Apple Vision. Zero video ever leaves your Mac.",
+        "text": "Best of all, your privacy is absolute. Everything runs entirely on-device with Apple Vision and the Neural Engine. Zero video ever leaves your Mac, and zero network calls are made.",
         "target_dur_sec": 10.0,
+        "rate": "+8%",
     },
     {
         "id": "scene_06_cta",
         "title": "Commercial Finale & Invitation",
-        "text": "Control your Mac with a wave of your hand. Free, open source, and built for Apple Silicon. Download Swipy today.",
+        "text": "Control your Mac with a wave of your hand. Completely free, open source, and built natively for Apple Silicon. Download Swipy today and experience touchless computing.",
         "target_dur_sec": 10.0,
+        "rate": "+7%",
     },
 ]
 
@@ -90,7 +96,8 @@ async def synthesize_and_measure():
         raw_mp3 = os.path.join(SCRATCH_DIR, f"{item['id']}_raw.mp3")
         clean_wav = os.path.join(SCRATCH_DIR, f"{item['id']}_clean.wav")
 
-        communicate = edge_tts.Communicate(item["text"], "en-US-ChristopherNeural", rate="+3%")
+        voice_rate = item.get("rate", "+5%")
+        communicate = edge_tts.Communicate(item["text"], "en-US-ChristopherNeural", rate=voice_rate)
         await communicate.save(raw_mp3)
 
         # Broadcast vocal dynamics filter chain
@@ -129,8 +136,8 @@ async def synthesize_and_measure():
 
     for idx, stem in enumerate(stem_data):
         scene_start_sec = current_sec
-        # Voice begins 0.5s (downbeat) after scene opens
-        vo_start_sec = scene_start_sec + 0.50
+        # Voice begins 0.35s (prompt downbeat) after scene opens
+        vo_start_sec = scene_start_sec + 0.35
         vo_end_sec = vo_start_sec + stem["dur"]
         
         # Enforce deliberate scene duration locked to target 120 BPM bars
