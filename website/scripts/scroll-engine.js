@@ -303,6 +303,30 @@
       });
     }
 
+    // Interactive Gatekeeper Terminal Command Copy
+    const faqCopyBtn = document.getElementById('faq-terminal-copy-btn');
+    if (faqCopyBtn) {
+      faqCopyBtn.addEventListener('click', function () {
+        const cmd = 'xattr -cr /Applications/Swipy.app';
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(cmd).then(function () {
+            const label = document.getElementById('copy-btn-text');
+            if (label) {
+              const prev = label.textContent;
+              label.textContent = '✓ Copied!';
+              faqCopyBtn.style.background = '#28C840';
+              faqCopyBtn.style.color = '#FFFFFF';
+              setTimeout(function () {
+                label.textContent = prev;
+                faqCopyBtn.style.background = '';
+                faqCopyBtn.style.color = '';
+              }, 2000);
+            }
+          }).catch(function () {});
+        }
+      });
+    }
+
     requestAnimationFrame(onScrollFrame);
   }
 

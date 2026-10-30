@@ -32,6 +32,17 @@
   --space-md: clamp(1.25rem, 1.05rem + 0.8vw, 1.85rem);
   --space-lg: clamp(2rem, 1.6rem + 1.6vw, 3.25rem);
   --space-xl: clamp(3.25rem, 2.4rem + 3vw, 5.5rem);
+  --space-2xl: clamp(4.5rem, 3.5rem + 4vw, 7.5rem);
+
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+  --radius-xl: 28px;
+  --radius-full: 9999px;
+
+  --duration-fast: 0.22s;
+  --duration-normal: 0.35s;
 
   --shadow-xs: 0 1px 2px oklch(0.12 0 0 / 0.04);
   --shadow-card: 0 10px 30px -6px oklch(0.12 0 0 / 0.05), 0 2px 8px -2px oklch(0.12 0 0 / 0.03);
@@ -40,6 +51,7 @@
 
   --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-spring: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-apple: cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 *, *::before, *::after {
