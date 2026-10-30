@@ -217,6 +217,7 @@ public final class AppLifecycleManager: ObservableObject {
             trackingActivityToken = nil
         }
         cameraManager.stopCapture()
+        visionService.resetSequence()
         MouseEventController.shared.safetyReleaseHeldButtons()
         PointerOverlayController.shared.hide()
         trackingState = .ready

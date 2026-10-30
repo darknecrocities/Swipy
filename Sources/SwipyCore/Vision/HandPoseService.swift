@@ -8,12 +8,25 @@ public final class HandPoseService: @unchecked Sendable {
     private let processingQueue = DispatchQueue(label: "com.swipy.vision.processing", qos: .userInteractive)
     private var isBusy = false
     private let lock = NSLock()
+    private var sequenceHandler = VNSequenceRequestHandler()
+    private lazy var handPoseRequest: VNDetectHumanHandPoseRequest = {
+        let request = VNDetectHumanHandPoseRequest()
+        request.maximumHandCount = configuration.maximumHandCount
+        return request
+    }()
 
     public init(configuration: VisionConfiguration = VisionConfiguration()) {
         self.configuration = configuration
     }
 
-    /// Processes a pixel buffer and extracts recognized hand skeletons.
+    /// Resets the internal stateful sequence handler on session restart or tracking interruption.
+    public func resetSequence() {
+        lock.lock()
+        defer { lock.unlock() }
+        sequenceHandler = VNSequenceRequestHandler()
+    }
+
+    /// Processes a pixel buffer and extracts recognized hand skeletons with temporal continuity.
     public func processPixelBuffer(_ pixelBuffer: CVPixelBuffer) -> HandPoseResult? {
         lock.lock()
         if isBusy {
@@ -31,17 +44,13 @@ public final class HandPoseService: @unchecked Sendable {
         }
 
         let startTime = CFAbsoluteTimeGetCurrent()
-        let request = VNDetectHumanHandPoseRequest()
-        request.maximumHandCount = configuration.maximumHandCount
-
-        let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: .up, options: [:])
         do {
-            try handler.perform([request])
+            try sequenceHandler.perform([handPoseRequest], on: pixelBuffer, orientation: .up)
         } catch {
             return HandPoseResult.empty(state: .error)
         }
 
-        guard let observations = request.results, !observations.isEmpty else {
+        guard let observations = handPoseRequest.results, !observations.isEmpty else {
             let duration = (CFAbsoluteTimeGetCurrent() - startTime) * 1000.0
             return HandPoseResult(primaryHand: nil, secondaryHand: nil, state: .noHandDetected, inferenceDurationMs: duration)
         }

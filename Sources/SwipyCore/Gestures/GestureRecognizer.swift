@@ -41,6 +41,7 @@ public final class GestureRecognizer: @unchecked Sendable {
         }
 
         guard let skeleton = pose.primaryHand else {
+            _ = stateMachine.process(skeleton: nil, settings: settings, timestamp: pose.timestamp)
             handleHalt()
             return
         }

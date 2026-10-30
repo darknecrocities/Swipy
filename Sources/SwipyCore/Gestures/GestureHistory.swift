@@ -80,6 +80,18 @@ public final class GestureHistory: @unchecked Sendable {
         return CGVector(dx: vx, dy: vy)
     }
 
+    /// Re-anchors baseline to the designated timestamp, clearing pre-swipe trajectory samples
+    /// so subsequent chained swipes have an unpolluted baseline.
+    public func resetBaseline(at timestamp: TimeInterval) {
+        lock.lock()
+        defer { lock.unlock() }
+        if let latest = samples.last {
+            samples = [latest]
+        } else {
+            samples.removeAll()
+        }
+    }
+
     /// Clears historical data on tracking interruption.
     public func clear() {
         lock.lock()

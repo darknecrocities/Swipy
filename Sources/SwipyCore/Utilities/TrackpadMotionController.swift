@@ -97,8 +97,18 @@ public final class TrackpadMotionController: @unchecked Sendable {
         let moveY: Double
         if isAdaptive {
             let speed = (pixelDx * pixelDx + pixelDy * pixelDy).squareRoot()
-            // Trackpad acceleration: smooth sub-pixel control at low velocity, swift travel at high velocity
-            let accel = min(2.8, max(0.85, 1.0 + (speed / 90.0)))
+            // Authentic macOS MouseTracker ballistics:
+            // 1. Precision zone: micro-dampened for surgical aiming at icons/links
+            // 2. Linear zone: predictable 1:1 finger tracking
+            // 3. Ballistic sweep zone: swift cross-display reach with minimal physical effort
+            let accel: Double
+            if speed < 12.0 {
+                accel = 0.55 + 0.45 * (speed / 12.0)
+            } else if speed < 50.0 {
+                accel = 1.0 + 0.5 * ((speed - 12.0) / 38.0)
+            } else {
+                accel = min(3.2, 1.5 + ((speed - 50.0) / 45.0))
+            }
             moveX = pixelDx * accel
             moveY = pixelDy * accel
         } else {

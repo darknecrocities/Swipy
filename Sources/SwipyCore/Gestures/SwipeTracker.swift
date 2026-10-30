@@ -31,10 +31,10 @@ final class SwipeTracker {
     static let graceSeconds: TimeInterval = 0.25
     /// Open palm must be held this long before a flick can fire, so a hand entering the frame never triggers.
     static let armSeconds: TimeInterval = 0.10
-    static let windowSeconds: TimeInterval = 0.25
-    static let minDistance: Double = 0.08
-    static let axisDominance: Double = 1.6
-    static let returnStrokeSeconds: TimeInterval = 0.70
+    static let windowSeconds: TimeInterval = 0.15
+    static let minDistance: Double = 0.07
+    static let axisDominance: Double = 1.5
+    static let returnStrokeSeconds: TimeInterval = 0.30
 
     private var openSince: TimeInterval?
     private var lastOpen: TimeInterval = -.infinity
@@ -48,6 +48,12 @@ final class SwipeTracker {
         recentFingerPeak = 0
         peakTimestamp = -.infinity
         lastFired = nil
+    }
+
+    /// Re-arms the tracker immediately following an accepted swipe, preventing stroke contamination.
+    func didFireSwipe(direction: SwipeDirection, timestamp: TimeInterval) {
+        lastFired = (direction, timestamp)
+        openSince = timestamp
     }
 
     /// Updates the open-palm latch from this frame's pose. Call once per frame.

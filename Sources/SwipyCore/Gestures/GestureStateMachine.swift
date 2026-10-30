@@ -66,6 +66,8 @@ public final class GestureStateMachine: @unchecked Sendable {
                 timestamp: timestamp, resolver: resolver
             ) {
                 currentState = .idle
+                swipeTracker.didFireSwipe(direction: flick.direction, timestamp: timestamp)
+                history.resetBaseline(at: timestamp)
                 return .swiping(direction: flick.direction, fingers: flick.fingers)
             }
             // Blurred mid-flick frame: hold still instead of moving the cursor or scrolling.
