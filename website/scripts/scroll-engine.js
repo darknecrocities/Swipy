@@ -15,11 +15,15 @@
     const navButtons = document.querySelectorAll('[data-nav-target]');
     const prevBtn = document.getElementById('carousel-prev-btn');
     const nextBtn = document.getElementById('carousel-next-btn');
+    const mobileToggle = document.getElementById('mobile-nav-toggle');
+    const mobileDropdown = document.getElementById('mobile-nav-dropdown');
+    const mobileBackdrop = document.getElementById('mobile-nav-backdrop');
 
     const HORIZ_STATIONS = ['station-01', 'station-02', 'station-03'];
     let currentX = 0;
     let targetX = 0;
     let activeStationIdx = 0;
+    let currentActiveKey = null;
 
     function getHorizontalScrollableDistance() {
       if (!stage) return 1;
@@ -27,45 +31,103 @@
     }
 
     function setActiveNav(targetKey) {
+      if (currentActiveKey === targetKey) return;
+      currentActiveKey = targetKey;
       navButtons.forEach(function (btn) {
-        if (!btn.classList.contains('nav-pill-btn') && !btn.classList.contains('carousel-dot-pill')) return;
+        if (!btn.classList.contains('nav-pill-btn') && !btn.classList.contains('carousel-dot-pill') && !btn.classList.contains('mobile-menu-item')) return;
         const isMatch = btn.getAttribute('data-nav-target') === targetKey;
-        const wasMatch = btn.getAttribute('aria-current') === 'true';
         btn.setAttribute('aria-current', isMatch ? 'true' : 'false');
-        if (isMatch && !wasMatch && window.innerWidth <= 1080 && btn.classList.contains('nav-pill-btn')) {
-          btn.scrollIntoView({ inline: 'center', behavior: 'smooth', block: 'nearest' });
-        }
       });
     }
+
+    function closeMobileMenu() {
+      if (!mobileToggle || !mobileDropdown) return;
+      mobileToggle.classList.remove('is-active');
+      mobileToggle.setAttribute('aria-expanded', 'false');
+      mobileDropdown.classList.remove('is-open');
+      mobileDropdown.setAttribute('aria-hidden', 'true');
+      if (mobileBackdrop) {
+        mobileBackdrop.classList.remove('is-open');
+        mobileBackdrop.setAttribute('aria-hidden', 'true');
+      }
+    }
+
+    function openMobileMenu() {
+      if (!mobileToggle || !mobileDropdown) return;
+      mobileToggle.classList.add('is-active');
+      mobileToggle.setAttribute('aria-expanded', 'true');
+      mobileDropdown.classList.add('is-open');
+      mobileDropdown.setAttribute('aria-hidden', 'false');
+      if (mobileBackdrop) {
+        mobileBackdrop.classList.add('is-open');
+        mobileBackdrop.setAttribute('aria-hidden', 'false');
+      }
+    }
+
+    function toggleMobileMenu() {
+      const isOpen = mobileToggle && mobileToggle.classList.contains('is-active');
+      if (isOpen) {
+        closeMobileMenu();
+      } else {
+        openMobileMenu();
+      }
+    }
+
+    if (mobileToggle) {
+      mobileToggle.addEventListener('click', function (e) {
+        e.stopPropagation();
+        toggleMobileMenu();
+      });
+    }
+
+    if (mobileBackdrop) {
+      mobileBackdrop.addEventListener('click', closeMobileMenu);
+    }
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeMobileMenu();
+    });
+
+    document.addEventListener('click', function (e) {
+      if (mobileDropdown && mobileDropdown.classList.contains('is-open')) {
+        if (!mobileDropdown.contains(e.target) && !mobileToggle.contains(e.target)) {
+          closeMobileMenu();
+        }
+      }
+    });
 
     function scrollToSection(targetKey) {
       const vw = window.innerWidth;
       const horizDistance = getHorizontalScrollableDistance();
 
-      if (vw > 960 && stage && track) {
+      if (stage && track) {
         const maxTranslate = Math.max(1, track.scrollWidth - vw);
         if (targetKey === 'station-01') {
           window.scrollTo({ top: 0, behavior: 'smooth' });
+          closeMobileMenu();
           return;
         }
         if (targetKey === 'station-02') {
           const st2 = document.getElementById('station-02');
           const ratio = st2 ? Math.min(1, st2.offsetLeft / maxTranslate) : 0.5;
           window.scrollTo({ top: ratio * horizDistance, behavior: 'smooth' });
+          closeMobileMenu();
           return;
         }
         if (targetKey === 'station-03') {
           const st3 = document.getElementById('station-03');
           const ratio = st3 ? Math.min(1, st3.offsetLeft / maxTranslate) : 0.98;
           window.scrollTo({ top: ratio * horizDistance, behavior: 'smooth' });
+          closeMobileMenu();
           return;
         }
       }
 
       const targetEl = document.getElementById(targetKey);
       if (targetEl) {
-        const y = targetEl.getBoundingClientRect().top + (window.scrollY || window.pageYOffset) - 68;
+        const y = targetEl.getBoundingClientRect().top + (window.scrollY || window.pageYOffset) - 56;
         window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+        closeMobileMenu();
       }
     }
 
@@ -162,7 +224,7 @@
       const vw = window.innerWidth;
       const vh = window.innerHeight;
 
-      if (stage && track && vw > 960) {
+      if (stage && track) {
         const rect = stage.getBoundingClientRect();
         const scrollableDistance = getHorizontalScrollableDistance();
         const rawProgress = -rect.top / scrollableDistance;
@@ -192,26 +254,6 @@
           setActiveNav('tetris-architecture');
         } else {
           setActiveNav(HORIZ_STATIONS[activeStationIdx]);
-        }
-      } else {
-        const st3 = document.getElementById('station-03');
-        const st2 = document.getElementById('station-02');
-        if (faqSection && faqSection.getBoundingClientRect().top <= vh * 0.45) {
-          setActiveNav('faq-section');
-        } else if (gestureLibrary && gestureLibrary.getBoundingClientRect().top <= vh * 0.45) {
-          setActiveNav('gesture-library');
-        } else if (verticalStage && verticalStage.getBoundingClientRect().top <= vh * 0.45) {
-          setActiveNav('vertical-stage');
-        } else if (testItOutStage && testItOutStage.getBoundingClientRect().top <= vh * 0.48) {
-          setActiveNav('test-it-out');
-        } else if (tetrisArchStage && tetrisArchStage.getBoundingClientRect().top <= vh * 0.48) {
-          setActiveNav('tetris-architecture');
-        } else if (st3 && st3.getBoundingClientRect().top <= vh * 0.5) {
-          setActiveNav('station-03');
-        } else if (st2 && st2.getBoundingClientRect().top <= vh * 0.5) {
-          setActiveNav('station-02');
-        } else {
-          setActiveNav('station-01');
         }
       }
 
