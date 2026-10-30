@@ -10,8 +10,13 @@ DerivedData/
 .DS_Store
 *.swp
 *~
+# Python
+__pycache__/
+*.pyc
+
 assets/video-demo/*.mov
-assets/showcase-video/
+assets/showcase-video/*.mov
+assets/showcase-video/*.wav
 *.mov
 
 
