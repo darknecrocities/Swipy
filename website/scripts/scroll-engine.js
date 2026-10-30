@@ -1,14 +1,16 @@
-// Horizontal Carousel, Quick-Jump AppBar & Keeby Screen Morph Engine
+// Horizontal Carousel, Quick-Jump AppBar, Section Morphing & 3D Card Tilt Engine
 (function () {
   function initScrollTwistEngine() {
     const stage = document.getElementById('horizontal-stage');
     const track = document.getElementById('horizontal-track');
+    const tetrisArchStage = document.getElementById('tetris-architecture');
     const testItOutStage = document.getElementById('test-it-out');
     const verticalStage = document.getElementById('vertical-stage');
     const gestureLibrary = document.getElementById('gesture-library');
     const keebyScreenImg = document.getElementById('keeby-active-screen');
     const keebySteps = document.querySelectorAll('.keeby-step-card[data-screen-src]');
     const revealBlocks = document.querySelectorAll('.reveal-block');
+    const morphSections = document.querySelectorAll('.section-morph-reveal');
     const navButtons = document.querySelectorAll('[data-nav-target]');
     const prevBtn = document.getElementById('carousel-prev-btn');
     const nextBtn = document.getElementById('carousel-next-btn');
@@ -84,7 +86,7 @@
         if (activeStationIdx < HORIZ_STATIONS.length - 1) {
           scrollToSection(HORIZ_STATIONS[activeStationIdx + 1]);
         } else {
-          scrollToSection('test-it-out');
+          scrollToSection('tetris-architecture');
         }
       });
     }
@@ -130,6 +132,27 @@
       });
     });
 
+    // 3D Magnetic Card Tilt & Morph Delegation
+    document.addEventListener('pointermove', function (e) {
+      const card = e.target.closest('.tilt-card');
+      if (!card) return;
+      const rect = card.getBoundingClientRect();
+      const nx = (e.clientX - rect.left) / rect.width - 0.5;
+      const ny = (e.clientY - rect.top) / rect.height - 0.5;
+      const rx = (-ny * 7).toFixed(2);
+      const ry = (nx * 7).toFixed(2);
+      card.style.transform =
+        'perspective(900px) rotateX(' + rx + 'deg) rotateY(' + ry + 'deg) translate3d(0, -4px, 0)';
+    });
+
+    document.addEventListener('pointerout', function (e) {
+      const card = e.target.closest('.tilt-card');
+      if (!card) return;
+      if (!card.contains(e.relatedTarget)) {
+        card.style.transform = '';
+      }
+    });
+
     function onScrollFrame() {
       const vw = window.innerWidth;
       const vh = window.innerHeight;
@@ -158,6 +181,8 @@
           setActiveNav('vertical-stage');
         } else if (testItOutStage && testItOutStage.getBoundingClientRect().top <= vh * 0.48) {
           setActiveNav('test-it-out');
+        } else if (tetrisArchStage && tetrisArchStage.getBoundingClientRect().top <= vh * 0.48) {
+          setActiveNav('tetris-architecture');
         } else {
           setActiveNav(HORIZ_STATIONS[activeStationIdx]);
         }
@@ -179,6 +204,16 @@
         revealObserver.observe(el);
       });
 
+      const sectionObserver = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          entry.target.classList.toggle('is-section-active', entry.isIntersecting);
+        });
+      }, { threshold: 0.08 });
+
+      morphSections.forEach(function (sec) {
+        sectionObserver.observe(sec);
+      });
+
       const stepObserver = new IntersectionObserver(function (entries) {
         entries.forEach(function (entry) {
           if (entry.isIntersecting) {
@@ -193,6 +228,9 @@
     } else {
       revealBlocks.forEach(function (el) {
         el.classList.add('is-visible');
+      });
+      morphSections.forEach(function (sec) {
+        sec.classList.add('is-section-active');
       });
     }
 

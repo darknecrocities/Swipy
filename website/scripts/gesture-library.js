@@ -91,7 +91,7 @@
 
       filtered.forEach(function (item) {
         const card = document.createElement('article');
-        card.className = 'native-gesture-card';
+        card.className = 'native-gesture-card tilt-card';
         const svgMarkup = ICONS[item.symbol] || ICONS['hand.point.up.left'];
         card.innerHTML =
           '<div class="native-gesture-top">' +
