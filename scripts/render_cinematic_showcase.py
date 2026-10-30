@@ -101,12 +101,12 @@ def main():
     proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stderr=subprocess.DEVNULL)
 
     preview_snapshots = {
-        140: "scene1_hook.png",
-        480: "scene2_reveal.png",
-        870: "scene3_precision.png",
-        1260: "scene4_gestures.png",
-        1560: "scene5_architecture.png",
-        1800: "scene6_cta.png"
+        120: "scene1_hook.png",
+        420: "scene2_reveal.png",
+        750: "scene3_precision.png",
+        1140: "scene4_gestures.png",
+        1470: "scene5_architecture.png",
+        1770: "scene6_cta.png"
     }
 
     t0 = time.time()
