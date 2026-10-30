@@ -33,39 +33,39 @@ TIMELINE_JSON = os.path.join(OUTPUT_DIR, "showcase_timeline.json")
 SCRIPT_LINES = [
     {
         "id": "scene_01_hook",
-        "title": "Hook & Touchless Morph",
-        "text": "What if the new M6 MacBook was touchscreen? But wait... what if you didn't even have to reach out and touch the glass?",
-        "target_dur_sec": 10.0,
+        "title": "The Touchless Vision",
+        "text": "What if your Mac could understand your hands? Not by touching the glass, but through the natural air in front of you.",
+        "target_dur_sec": 8.0,
     },
     {
         "id": "scene_02_reveal",
         "title": "Product Hero Reveal",
-        "text": "Meet Swipy. It turns your built-in MacBook camera into a natural spatial trackpad. No sensors. No wearables. Just natural hand movement.",
+        "text": "Meet Swipy. A native app that turns your FaceTime camera into an intelligent spatial trackpad, with zero extra hardware.",
         "target_dur_sec": 12.0,
     },
     {
         "id": "scene_03_precision",
         "title": "Vision & Cursor Precision",
-        "text": "Point your index finger to glide the cursor across displays. Touch your thumb and index together to grab, lock on, and drag windows effortlessly.",
-        "target_dur_sec": 14.0,
+        "text": "Glide your index finger to steer the cursor with sub-millimeter precision. Touch your thumb and index together to grab and drag windows effortlessly.",
+        "target_dur_sec": 12.0,
     },
     {
         "id": "scene_04_gestures",
-        "title": "18 Gestures Bento",
-        "text": "Flick four fingers to switch Spaces. With 18 native gestures, Swipy synthesizes hardware-level macOS events right from your built-in camera.",
+        "title": "18 Native Gestures",
+        "text": "Swipe four fingers to switch Spaces. Tap, scroll, or freeze tracking with eighteen native gestures designed for your everyday workflow.",
         "target_dur_sec": 12.0,
     },
     {
         "id": "scene_05_privacy",
-        "title": "On-Device Privacy",
-        "text": "Everything is computed on-device with Apple Vision. Zero video ever leaves your Mac. Zero cloud lag. Pure privacy.",
-        "target_dur_sec": 8.0,
+        "title": "100% On-Device Privacy",
+        "text": "Best of all, your privacy is absolute. Everything runs entirely on-device with Apple Vision. Zero video ever leaves your Mac.",
+        "target_dur_sec": 10.0,
     },
     {
         "id": "scene_06_cta",
-        "title": "Marketable Finale & CTA",
-        "text": "Control your Mac with a wave of your hand. Download Swipy today for macOS.",
-        "target_dur_sec": 8.0,
+        "title": "Commercial Finale & Invitation",
+        "text": "Control your Mac with a wave of your hand. Free, open source, and built for Apple Silicon. Download Swipy today.",
+        "target_dur_sec": 10.0,
     },
 ]
 
@@ -83,14 +83,14 @@ async def synthesize_and_measure():
     """Synthesize voiceover lines, measure durations, and lock to 120 BPM downbeats."""
     os.makedirs(SCRATCH_DIR, exist_ok=True)
     os.makedirs(OUTPUT_DIR, exist_ok=True)
-    print("🎙️ Synthesizing emotive neural voiceover (en-US-AndrewMultilingualNeural)...")
+    print("🎙️ Synthesizing emotive neural voiceover (en-US-ChristopherNeural)...")
 
     stem_data = []
     for item in SCRIPT_LINES:
         raw_mp3 = os.path.join(SCRATCH_DIR, f"{item['id']}_raw.mp3")
         clean_wav = os.path.join(SCRATCH_DIR, f"{item['id']}_clean.wav")
 
-        communicate = edge_tts.Communicate(item["text"], "en-US-AndrewMultilingualNeural", rate="-3%")
+        communicate = edge_tts.Communicate(item["text"], "en-US-ChristopherNeural", rate="+3%")
         await communicate.save(raw_mp3)
 
         # Broadcast vocal dynamics filter chain

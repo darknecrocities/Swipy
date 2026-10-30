@@ -35,32 +35,59 @@ def ease_smooth(t: float) -> float:
     return t * t * t * (t * (t * 6.0 - 15.0) + 10.0)
 
 
-def draw_swiss_background(draw: ImageDraw.ImageDraw, frame_idx: int):
-    """Draw pure studio white canvas with subtle Swiss architectural grid and telemetry."""
+def draw_studio_background(draw: ImageDraw.ImageDraw, frame_idx: int):
+    """Draw pure studio white canvas with subtle organic ambient lighting (zero telemetry HUDs or tags)."""
     # Pure Studio White
     draw.rectangle([0, 0, W, H], fill=(255, 255, 255))
 
-    # Architectural Hairline vertical grid columns (every 120px)
-    for x in range(120, W, 120):
-        draw.line([(x, 0), (x, H)], fill=(242, 242, 246), width=1)
+    # Subtle soft architectural grid (hairline, light tone)
+    for x in range(160, W, 160):
+        draw.line([(x, 0), (x, H)], fill=(245, 245, 248), width=1)
+    for y in range(120, H, 120):
+        draw.line([(0, y), (W, y)], fill=(245, 245, 248), width=1)
 
-    # Architectural Hairline horizontal grid rows (every 90px)
-    for y in range(90, H, 90):
-        draw.line([(0, y), (W, y)], fill=(242, 242, 246), width=1)
 
-    # Precision drafting crosshair ticks at select intersections
-    for cx in (240, 480, 720, 960, 1200, 1440, 1680):
-        for cy in (180, 360, 540, 720, 900):
-            draw.line([(cx - 8, cy), (cx + 8, cy)], fill=(212, 212, 222), width=1)
-            draw.line([(cx, cy - 8), (cx, cy + 8)], fill=(212, 212, 222), width=1)
+draw_swiss_background = draw_studio_background
 
-    # Top Status Telemetry Header
-    font_mono = ImageFont.truetype(FONT_MONO, 18)
-    sec = frame_idx / 30.0
-    timecode = f"00:{int(sec):02d}:{int((sec % 1) * 30):02d}"
-    draw.text((64, 38), "[SWIPY // CINEMATIC PRODUCT SHOWCASE]", font=font_mono, fill=(100, 100, 112))
-    draw.text((W - 460, 38), f"30 FPS • 120 BPM • 1080P WIDESCREEN • {timecode}", font=font_mono, fill=(140, 140, 150))
-    draw.line([(64, 68), (W - 64, 68)], fill=(230, 230, 236), width=1)
+
+def draw_dynamic_highlight(canvas_img: Image.Image, cx: int, cy: int, radius: int = 140,
+                           intensity: float = 0.35, color=(0, 122, 255)):
+    """Render an organic radial spotlight illumination highlight across active features."""
+    if intensity <= 0.0 or radius <= 2:
+        return
+    overlay = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    o_draw = ImageDraw.Draw(overlay)
+    alpha_max = int(intensity * 140)
+
+    # Concentric soft feathered rings
+    r = int(radius)
+    o_draw.ellipse([cx - r, cy - r, cx + r, cy + r], fill=(*color, max(1, alpha_max // 4)))
+    r_mid = int(r * 0.65)
+    o_draw.ellipse([cx - r_mid, cy - r_mid, cx + r_mid, cy + r_mid], fill=(*color, max(1, alpha_max // 2)))
+    r_core = int(r * 0.35)
+    o_draw.ellipse([cx - r_core, cy - r_core, cx + r_core, cy + r_core], fill=(*color, alpha_max))
+    canvas_img.paste(overlay, (0, 0), overlay)
+
+
+def apply_camera_shift(img: Image.Image, scene_frame: int, scene_total_frames: int,
+                       zoom_amount: float = 0.032, pan_x_amount: float = 18.0,
+                       pan_y_amount: float = 8.0) -> Image.Image:
+    """Apply subtle organic camera shift (pan + slow push-in zoom) to keep frames dynamic."""
+    p = max(0.0, min(1.0, scene_frame / max(1.0, float(scene_total_frames))))
+    zoom = 1.0 + zoom_amount * p
+    pan_x = pan_x_amount * math.sin(p * math.pi)
+    pan_y = pan_y_amount * math.cos(p * math.pi * 0.5)
+
+    new_w = int(W * zoom)
+    new_h = int(H * zoom)
+    resized = img.resize((new_w, new_h), Image.Resampling.BILINEAR)
+
+    # Crop centered with pan offset
+    cx = (new_w // 2) + int(pan_x)
+    cy = (new_h // 2) + int(pan_y)
+    crop_x0 = max(0, min(new_w - W, cx - W // 2))
+    crop_y0 = max(0, min(new_h - H, cy - H // 2))
+    return resized.crop((crop_x0, crop_y0, crop_x0 + W, crop_y0 + H))
 
 
 def draw_hud_brackets(draw: ImageDraw.ImageDraw, box, color=(12, 12, 14), tick_len=24, width=3):
