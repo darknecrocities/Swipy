@@ -17,7 +17,8 @@ from PIL import Image
 
 from cinematic_effects import (
     W, H,
-    apply_slice_curtain, apply_symmetrical_split, apply_iris_wipe
+    apply_slice_curtain, apply_symmetrical_split, apply_iris_wipe,
+    apply_cinematic_film_grain
 )
 from cinematic_scenes import (
     render_scene_1, render_scene_2, render_scene_3,
@@ -90,7 +91,7 @@ def main():
         "-i", AUDIO_MASTER_WAV,
         "-c:v", "libx264",
         "-preset", "medium",
-        "-crf", "17",
+        "-crf", "21",
         "-pix_fmt", "yuv420p",
         "-c:a", "aac",
         "-b:a", "320k",
@@ -137,6 +138,9 @@ def main():
             final_frame = apply_transition(sc_idx, cur_img, next_img, p)
         else:
             final_frame = cur_func(frame_idx)
+
+        # Apply 35mm organic micro-grain to eliminate digital banding
+        final_frame = apply_cinematic_film_grain(final_frame, frame_idx, intensity=0.012)
 
         # Write frame to FFmpeg stdin
         proc.stdin.write(final_frame.tobytes())
