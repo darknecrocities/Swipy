@@ -1,11 +1,11 @@
-/* Circular Dot-Matrix Hand & Tetris Widget */
+/* Circular Dot-Matrix Hand Orb */
 .matrix-orb-shell {
-  width: 236px;
-  height: 236px;
+  width: 224px;
+  height: 224px;
   border-radius: 50%;
   background: var(--color-surface-pitch);
   border: 2px solid var(--color-border-strong);
-  padding: 18px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -21,15 +21,15 @@
 }
 
 .matrix-orb-canvas {
-  width: 180px;
-  height: 180px;
+  width: 170px;
+  height: 170px;
   display: block;
 }
 
 /* Interactive Card Morphing & Surface Inversion */
 .morph-surface-card {
   position: relative;
-  border-radius: 0px;
+  border-radius: 14px;
   transition:
     transform 0.45s var(--ease-spring),
     border-radius 0.45s var(--ease-spring),
@@ -43,49 +43,32 @@
 .keeby-step-card[data-active="true"] {
   background-color: var(--color-surface-pitch);
   color: var(--color-ink-inverted);
-  border-radius: 18px 4px 18px 4px;
-  transform: translate3d(-6px, -6px, 0) scale(1.02);
+  border-radius: 22px 6px 22px 6px;
+  transform: translate3d(-5px, -5px, 0) scale(1.015);
   box-shadow: 12px 12px 0 oklch(0.75 0 0);
 }
 
 .mech-card-alpha.morph-surface-card:hover {
   background-color: var(--color-canvas-pure);
   color: var(--color-ink-primary);
-  border-radius: 4px 20px 4px 20px;
+  border-radius: 6px 22px 6px 22px;
   box-shadow: 12px 12px 0 var(--color-surface-pitch);
 }
 
-.gesture-item-card.morph-surface-card:hover .gesture-icon-box {
-  background-color: var(--color-surface-pitch);
-  border-color: var(--color-ink-inverted);
-  border-radius: 10px;
-}
-
-.gesture-item-card.morph-surface-card:hover .gesture-icon-box svg {
-  stroke: var(--color-ink-inverted);
-}
-
-.gesture-item-card.morph-surface-card:hover .gesture-toggle-indicator {
-  background-color: var(--color-canvas-pure);
-}
-
-.gesture-item-card.morph-surface-card:hover .gesture-toggle-indicator::after {
-  background-color: var(--color-surface-pitch);
-}
-
-/* Station 02 & 03 Asymmetrical Staggered Layout */
+/* Slide 02 & Slide 03 Grids */
 .mechanics-stagger-grid {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
   grid-template-rows: repeat(6, 1fr);
-  gap: var(--space-md);
+  gap: var(--space-sm);
   height: 100%;
   width: 100%;
 }
 
 .mech-card-alpha {
-  grid-column: 1 / 6;
+  grid-column: 1 / 5;
   grid-row: 1 / 4;
+  align-self: start;
   background: var(--color-surface-pitch);
   color: var(--color-ink-inverted);
   padding: var(--space-md);
@@ -94,14 +77,23 @@
 }
 
 .mech-card-beta {
-  grid-column: 7 / 13;
-  grid-row: 1 / 5;
-  align-self: start;
+  grid-column: 5 / 11;
+  grid-row: 1 / 6;
+  align-self: center;
+}
+
+.mech-card-popover {
+  grid-column: 11 / 13;
+  grid-row: 1 / 6;
+  justify-self: end;
+  align-self: center;
+  z-index: 6;
 }
 
 .mech-card-gamma {
-  grid-column: 2 / 7;
+  grid-column: 1 / 6;
   grid-row: 4 / 7;
+  align-self: end;
   background: var(--color-surface-card);
   color: var(--color-ink-primary);
   border: 2px solid var(--color-border-strong);
@@ -109,17 +101,25 @@
   box-shadow: 8px 8px 0 var(--color-surface-pitch);
 }
 
-.pivot-twist-banner {
+.station-three-grid {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: var(--space-lg);
+  align-items: center;
   height: 100%;
+  width: 100%;
+}
+
+.pivot-twist-banner {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
-  padding-left: var(--space-lg);
+  padding-left: var(--space-md);
   border-left: 3px dashed var(--color-border-strong);
 }
 
-/* Exact 15-Gesture Library Section */
+/* Exact Native macOS Gesture Library Cards (Matching Uploaded Screenshot) */
 .gesture-library-section {
   max-width: 1440px;
   margin: var(--space-xl) auto 0 auto;
@@ -147,93 +147,159 @@
 .library-filter-pill {
   min-height: 44px;
   padding: 0 1.15rem;
-  font-family: var(--font-mono);
+  border-radius: 999px;
+  font-family: var(--font-sans);
   font-size: var(--text-xs);
-  text-transform: uppercase;
-  background: var(--color-canvas-paper);
+  font-weight: 600;
+  background: var(--color-surface-subtle);
   color: var(--color-ink-primary);
-  border: 1.5px solid var(--color-border-strong);
+  border: 1px solid var(--color-border-hairline);
   cursor: pointer;
-  transition: transform 0.25s var(--ease-expo), background 0.25s var(--ease-expo), color 0.25s var(--ease-expo), border-radius 0.25s var(--ease-expo);
+  transition: transform 0.2s var(--ease-expo), background 0.2s var(--ease-expo), color 0.2s var(--ease-expo);
 }
 
 .library-filter-pill[aria-pressed="true"],
 .library-filter-pill:hover {
   background: var(--color-surface-pitch);
   color: var(--color-ink-inverted);
-  transform: translate(-2px, -2px);
-  border-radius: 8px;
-  box-shadow: 4px 4px 0 var(--color-ink-primary);
+  transform: translateY(-1px);
 }
 
 .gesture-cards-matrix {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: var(--space-md);
 }
 
-.gesture-item-card {
-  background: var(--color-surface-card);
-  color: var(--color-ink-primary);
-  border: 2px solid var(--color-border-strong);
-  padding: var(--space-md);
+/* Exact App Card Parity */
+.native-gesture-card {
+  background: var(--color-canvas-pure);
+  border: 1.5px solid var(--color-border-hairline);
+  border-radius: 20px;
+  padding: 22px 24px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: var(--space-sm);
+  gap: 16px;
+  box-shadow: 0 2px 10px oklch(0.1 0 0 / 0.04);
+  transition: transform 0.28s var(--ease-spring), border-color 0.28s var(--ease-expo), box-shadow 0.28s var(--ease-spring);
 }
 
-.gesture-card-top {
+.native-gesture-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--color-border-strong);
+  box-shadow: 0 12px 24px oklch(0.1 0 0 / 0.08);
+}
+
+.native-gesture-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
-.gesture-icon-box {
-  width: 44px;
-  height: 44px;
-  background: var(--color-canvas-paper);
-  border: 1.5px solid var(--color-border-strong);
+.native-gesture-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: oklch(0.955 0 0);
+  border: 1px solid oklch(0.9 0 0);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 0.3s var(--ease-expo), border-radius 0.3s var(--ease-expo);
 }
 
-.gesture-icon-box svg {
+.native-gesture-icon svg {
   width: 22px;
   height: 22px;
   stroke: var(--color-ink-primary);
   fill: none;
-  stroke-width: 1.85;
+  stroke-width: 1.9;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
-.gesture-toggle-indicator {
-  width: 38px;
-  height: 22px;
-  background: var(--color-surface-pitch);
+.native-gesture-switch {
+  width: 52px;
+  height: 30px;
   border-radius: 999px;
+  border: none;
+  background: oklch(0.16 0 0);
   position: relative;
+  cursor: pointer;
+  transition: background 0.25s var(--ease-expo);
 }
 
-.gesture-toggle-indicator::after {
+.native-gesture-switch[aria-checked="false"] {
+  background: oklch(0.84 0 0);
+}
+
+.native-gesture-switch::after {
   content: '';
   position: absolute;
   top: 3px;
   right: 3px;
-  width: 16px;
-  height: 16px;
-  background: var(--color-canvas-pure);
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
+  background: var(--color-canvas-pure);
+  transition: transform 0.25s var(--ease-spring);
 }
 
-/* Kinetic Word & Section Reveal */
+.native-gesture-switch[aria-checked="false"]::after {
+  transform: translateX(-22px);
+}
+
+.native-gesture-title {
+  font-family: var(--font-sans);
+  font-size: 1.18rem;
+  font-weight: 700;
+  color: var(--color-ink-primary);
+  letter-spacing: -0.02em;
+  margin-bottom: 4px;
+}
+
+.native-gesture-action {
+  font-family: var(--font-sans);
+  font-size: 0.98rem;
+  font-weight: 500;
+  color: var(--color-ink-secondary);
+  padding-left: 10px;
+}
+
+.native-gesture-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 4px;
+}
+
+.native-category-badge {
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: 8px;
+  background: oklch(0.955 0 0);
+  color: var(--color-ink-secondary);
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.native-status-label {
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--color-ink-primary);
+}
+
+.native-status-label.is-paused {
+  color: var(--color-ink-muted);
+}
+
+/* Kinetic Reveal */
 .reveal-block {
   opacity: 0;
-  transform: translateY(22px);
-  transition: opacity 0.6s var(--ease-expo), transform 0.6s var(--ease-expo);
+  transform: translateY(20px);
+  transition: opacity 0.55s var(--ease-expo), transform 0.55s var(--ease-expo);
 }
 
 .reveal-block.is-visible {
@@ -241,19 +307,17 @@
   transform: translateY(0);
 }
 
-/* Container & Responsive Breakpoints */
 @container library-box (max-width: 760px) {
-  .library-header-asym {
-    grid-template-columns: 1fr;
-  }
+  .library-header-asym { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 960px) {
   .horizontal-scroll-stage { height: auto; }
-  .horizontal-sticky-viewport { position: relative; height: auto; overflow: visible; }
+  .horizontal-sticky-viewport { position: relative; height: auto; overflow: visible; flex-direction: column; }
   .horizontal-track { flex-direction: column; width: 100%; height: auto; transform: none !important; }
   .spatial-station { width: 100% !important; height: auto; padding: var(--space-lg) var(--space-md); }
-  .asym-canvas, .mechanics-stagger-grid, .keeby-sticky-grid {
+  .carousel-dock { position: relative; bottom: 0; left: 0; transform: none; margin: var(--space-md) auto; }
+  .asym-canvas, .mechanics-stagger-grid, .station-three-grid, .keeby-sticky-grid {
     display: flex;
     flex-direction: column;
     gap: var(--space-md);

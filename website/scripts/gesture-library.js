@@ -1,4 +1,4 @@
-// Exact 15-Gesture Library Engine Matching Swipy macOS App & SF Symbols
+// Exact 15-Gesture Library Engine Matching Native Swipy macOS App Screenshot
 (function () {
   const ICONS = {
     'hand.point.up.left': '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 11V4a2 2 0 0 1 4 0v7m0-3a2 2 0 0 1 4 0v2m0-1a2 2 0 0 1 4 0v5a6 6 0 0 1-6 6h-3a6 6 0 0 1-5.2-3L5.4 13a1.8 1.8 0 0 1 2.5-2.3L10 12"/></svg>',
@@ -19,21 +19,21 @@
   };
 
   const GESTURES = [
-    { name: 'Index Pointing', action: 'Point & Glide Cursor', category: 'Cursor & Clicks', symbol: 'hand.point.up.left' },
-    { name: 'Thumb-Index Pinch', action: 'Left Click', category: 'Cursor & Clicks', symbol: 'hand.pinch' },
-    { name: 'Pinch & Drag', action: 'Drag and Drop', category: 'Cursor & Clicks', symbol: 'hand.draw' },
-    { name: 'Double Pinch', action: 'Double Click', category: 'Cursor & Clicks', symbol: 'hand.tap.fill' },
-    { name: 'Thumb-Middle Pinch', action: 'Right Click', category: 'Cursor & Clicks', symbol: 'hand.tap' },
-    { name: 'Two-Finger Scroll', action: 'Scroll', category: 'Scrolling', symbol: 'arrow.up.and.down' },
-    { name: 'Three-Finger Swipe Up', action: 'Mission Control', category: 'Space Navigation', symbol: 'arrow.up' },
-    { name: 'Three-Finger Swipe Down', action: 'Show Desktop', category: 'Space Navigation', symbol: 'arrow.down' },
-    { name: 'Three-Finger Swipe Left', action: 'Next Space', category: 'Space Navigation', symbol: 'arrow.left' },
-    { name: 'Three-Finger Swipe Right', action: 'Previous Space', category: 'Space Navigation', symbol: 'arrow.right' },
-    { name: 'Four-Finger Swipe Left', action: 'Next Space', category: 'App Switching', symbol: 'square.grid.2x2' },
-    { name: 'Four-Finger Swipe Right', action: 'Previous Space', category: 'App Switching', symbol: 'square.grid.2x2.fill' },
-    { name: 'Thumb-Middle Zoom', action: 'Zoom In / Out', category: 'Two-Hand Controls', symbol: 'plus.magnifyingglass' },
-    { name: 'Two-Hand Zoom', action: 'Zoom In / Out', category: 'Two-Hand Controls', symbol: 'arrow.up.left.and.arrow.down.right' },
-    { name: 'Open Palms Hold', action: 'Pause / Resume', category: 'Safety Controls', symbol: 'hand.raised' }
+    { name: 'Index Pointing', action: 'Point & Glide Cursor', category: 'Cursor & Clicks', symbol: 'hand.point.up.left', enabled: true },
+    { name: 'Thumb-Index Pinch', action: 'Left Click', category: 'Cursor & Clicks', symbol: 'hand.pinch', enabled: true },
+    { name: 'Pinch & Drag', action: 'Drag and Drop', category: 'Cursor & Clicks', symbol: 'hand.draw', enabled: true },
+    { name: 'Double Pinch', action: 'Double Click', category: 'Cursor & Clicks', symbol: 'hand.tap.fill', enabled: true },
+    { name: 'Thumb-Middle Pinch', action: 'Right Click', category: 'Cursor & Clicks', symbol: 'hand.tap', enabled: true },
+    { name: 'Two-Finger Scroll', action: 'Scroll', category: 'Scrolling', symbol: 'arrow.up.and.down', enabled: true },
+    { name: 'Three-Finger Swipe Up', action: 'Mission Control', category: 'Space Navigation', symbol: 'arrow.up', enabled: true },
+    { name: 'Three-Finger Swipe Down', action: 'Show Desktop', category: 'Space Navigation', symbol: 'arrow.down', enabled: true },
+    { name: 'Three-Finger Swipe Left', action: 'Next Space', category: 'Space Navigation', symbol: 'arrow.left', enabled: true },
+    { name: 'Three-Finger Swipe Right', action: 'Previous Space', category: 'Space Navigation', symbol: 'arrow.right', enabled: true },
+    { name: 'Four-Finger Swipe Left', action: 'Next Space', category: 'App Switching', symbol: 'square.grid.2x2', enabled: true },
+    { name: 'Four-Finger Swipe Right', action: 'Previous Space', category: 'App Switching', symbol: 'square.grid.2x2.fill', enabled: true },
+    { name: 'Thumb-Middle Zoom', action: 'Zoom In / Out', category: 'Two-Hand Controls', symbol: 'plus.magnifyingglass', enabled: true },
+    { name: 'Two-Hand Zoom', action: 'Zoom In / Out', category: 'Two-Hand Controls', symbol: 'arrow.up.left.and.arrow.down.right', enabled: true },
+    { name: 'Open Palms Hold', action: 'Pause / Resume', category: 'Safety Controls', symbol: 'hand.raised', enabled: true }
   ];
 
   const CATEGORIES = [
@@ -91,17 +91,33 @@
 
       filtered.forEach(function (item) {
         const card = document.createElement('article');
-        card.className = 'gesture-item-card morph-surface-card';
+        card.className = 'native-gesture-card';
         const svgMarkup = ICONS[item.symbol] || ICONS['hand.point.up.left'];
         card.innerHTML =
-          '<div class="gesture-card-top">' +
-            '<div class="gesture-icon-box">' + svgMarkup + '</div>' +
-            '<div class="gesture-toggle-indicator" role="img" aria-label="Active"></div>' +
+          '<div class="native-gesture-top">' +
+            '<div class="native-gesture-icon">' + svgMarkup + '</div>' +
+            '<button type="button" class="native-gesture-switch" role="switch" aria-checked="' + String(item.enabled) + '" aria-label="Toggle ' + item.name + '"></button>' +
           '</div>' +
           '<div>' +
-            '<h3 class="tetris-block-title" style="font-size: var(--text-base); margin-bottom: 0.25rem; color: inherit;">' + item.name + '</h3>' +
-            '<p style="font-size: var(--text-sm); color: inherit; opacity: 0.85; font-weight: 500;">' + item.action + '</p>' +
+            '<h3 class="native-gesture-title">' + item.name + '</h3>' +
+            '<p class="native-gesture-action">' + item.action + '</p>' +
+          '</div>' +
+          '<div class="native-gesture-footer">' +
+            '<span class="native-category-badge">' + item.category + '</span>' +
+            '<span class="native-status-label' + (item.enabled ? '' : ' is-paused') + '">' + (item.enabled ? 'Active' : 'Paused') + '</span>' +
           '</div>';
+
+        const switchBtn = card.querySelector('.native-gesture-switch');
+        const statusEl = card.querySelector('.native-status-label');
+        if (switchBtn && statusEl) {
+          switchBtn.addEventListener('click', function () {
+            item.enabled = !item.enabled;
+            switchBtn.setAttribute('aria-checked', String(item.enabled));
+            statusEl.textContent = item.enabled ? 'Active' : 'Paused';
+            statusEl.classList.toggle('is-paused', !item.enabled);
+          });
+        }
+
         cardsContainer.appendChild(card);
       });
     }

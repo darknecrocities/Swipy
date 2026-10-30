@@ -1,17 +1,22 @@
-// Horizontal-to-Vertical Scroll Twist, Quick-Jump AppBar & Card Morphing Engine
+// Horizontal Carousel, Quick-Jump AppBar & Keeby Screen Morph Engine
 (function () {
   function initScrollTwistEngine() {
     const stage = document.getElementById('horizontal-stage');
     const track = document.getElementById('horizontal-track');
+    const testItOutStage = document.getElementById('test-it-out');
     const verticalStage = document.getElementById('vertical-stage');
     const gestureLibrary = document.getElementById('gesture-library');
     const keebyScreenImg = document.getElementById('keeby-active-screen');
     const keebySteps = document.querySelectorAll('.keeby-step-card[data-screen-src]');
     const revealBlocks = document.querySelectorAll('.reveal-block');
     const navButtons = document.querySelectorAll('[data-nav-target]');
+    const prevBtn = document.getElementById('carousel-prev-btn');
+    const nextBtn = document.getElementById('carousel-next-btn');
 
+    const HORIZ_STATIONS = ['station-01', 'station-02', 'station-03'];
     let currentX = 0;
     let targetX = 0;
+    let activeStationIdx = 0;
 
     function getHorizontalScrollableDistance() {
       if (!stage) return 1;
@@ -20,7 +25,7 @@
 
     function setActiveNav(targetKey) {
       navButtons.forEach(function (btn) {
-        if (!btn.classList.contains('nav-pill-btn')) return;
+        if (!btn.classList.contains('nav-pill-btn') && !btn.classList.contains('carousel-dot-pill')) return;
         const isMatch = btn.getAttribute('data-nav-target') === targetKey;
         btn.setAttribute('aria-current', isMatch ? 'true' : 'false');
       });
@@ -44,7 +49,7 @@
         }
         if (targetKey === 'station-03') {
           const st3 = document.getElementById('station-03');
-          const ratio = st3 ? Math.min(1, st3.offsetLeft / maxTranslate) : 0.96;
+          const ratio = st3 ? Math.min(1, st3.offsetLeft / maxTranslate) : 0.98;
           window.scrollTo({ top: ratio * horizDistance, behavior: 'smooth' });
           return;
         }
@@ -52,7 +57,7 @@
 
       const targetEl = document.getElementById(targetKey);
       if (targetEl) {
-        const y = targetEl.getBoundingClientRect().top + (window.scrollY || window.pageYOffset) - 70;
+        const y = targetEl.getBoundingClientRect().top + (window.scrollY || window.pageYOffset) - 68;
         window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
       }
     }
@@ -67,7 +72,23 @@
       });
     });
 
-    // Translate horizontal trackpad two-finger swipes (deltaX) into horizontal stage progress
+    if (prevBtn) {
+      prevBtn.addEventListener('click', function () {
+        const nextIdx = Math.max(0, activeStationIdx - 1);
+        scrollToSection(HORIZ_STATIONS[nextIdx]);
+      });
+    }
+
+    if (nextBtn) {
+      nextBtn.addEventListener('click', function () {
+        if (activeStationIdx < HORIZ_STATIONS.length - 1) {
+          scrollToSection(HORIZ_STATIONS[activeStationIdx + 1]);
+        } else {
+          scrollToSection('test-it-out');
+        }
+      });
+    }
+
     window.addEventListener('wheel', function (e) {
       if (window.innerWidth <= 960 || !stage) return;
       const scrollY = window.scrollY || window.pageYOffset;
@@ -93,7 +114,7 @@
           keebyScreenImg.src = nextSrc;
           if (nextAlt) keebyScreenImg.alt = nextAlt;
           keebyScreenImg.classList.remove('is-morphing');
-        }, 160);
+        }, 150);
       };
 
       if (document.startViewTransition) {
@@ -110,7 +131,6 @@
     });
 
     function onScrollFrame() {
-      const scrollY = window.scrollY || window.pageYOffset;
       const vw = window.innerWidth;
       const vh = window.innerHeight;
 
@@ -124,21 +144,22 @@
         targetX = clamped * maxTranslatePx;
         currentX += (targetX - currentX) * 0.16;
 
-        const velocitySkew = Math.max(-1.6, Math.min(1.6, (targetX - currentX) * 0.014));
+        const velocitySkew = Math.max(-1.4, Math.min(1.4, (targetX - currentX) * 0.012));
         track.style.transform =
           'translate3d(' + (-currentX.toFixed(1)) + 'px, 0, 0) skewX(' + velocitySkew.toFixed(2) + 'deg)';
 
-        // Update active quick-jump button based on scroll position
+        if (clamped >= 0.72) activeStationIdx = 2;
+        else if (clamped >= 0.32) activeStationIdx = 1;
+        else activeStationIdx = 0;
+
         if (gestureLibrary && gestureLibrary.getBoundingClientRect().top <= vh * 0.45) {
           setActiveNav('gesture-library');
         } else if (verticalStage && verticalStage.getBoundingClientRect().top <= vh * 0.45) {
           setActiveNav('vertical-stage');
-        } else if (clamped >= 0.72) {
-          setActiveNav('station-03');
-        } else if (clamped >= 0.32) {
-          setActiveNav('station-02');
+        } else if (testItOutStage && testItOutStage.getBoundingClientRect().top <= vh * 0.48) {
+          setActiveNav('test-it-out');
         } else {
-          setActiveNav('station-01');
+          setActiveNav(HORIZ_STATIONS[activeStationIdx]);
         }
       }
 
@@ -152,7 +173,7 @@
             entry.target.classList.add('is-visible');
           }
         });
-      }, { threshold: 0.14 });
+      }, { threshold: 0.12 });
 
       revealBlocks.forEach(function (el) {
         revealObserver.observe(el);
@@ -164,7 +185,7 @@
             morphKeebyScreen(entry.target);
           }
         });
-      }, { threshold: 0.55 });
+      }, { threshold: 0.52 });
 
       keebySteps.forEach(function (step) {
         stepObserver.observe(step);

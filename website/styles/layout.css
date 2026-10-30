@@ -28,7 +28,6 @@
   width: 28px;
   height: 28px;
   border-radius: 6px;
-  filter: grayscale(100%) contrast(115%);
 }
 
 .brand-mark span {
@@ -41,7 +40,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.4rem;
 }
 
 .nav-pill-btn {
@@ -49,7 +48,7 @@
   align-items: center;
   justify-content: center;
   min-height: 44px;
-  padding: 0 0.95rem;
+  padding: 0 0.85rem;
   font-family: var(--font-mono);
   font-size: var(--text-xs);
   text-transform: uppercase;
@@ -118,7 +117,7 @@
   outline: none;
 }
 
-/* Phase A: Horizontal Scroll Track Container */
+/* Phase A: Playful Horizontal Scroll Carousel */
 .horizontal-scroll-stage {
   position: relative;
   height: 340vh;
@@ -139,23 +138,85 @@
   display: flex;
   flex-wrap: nowrap;
   height: 100vh;
-  width: 280vw;
+  width: 300vw;
   will-change: transform;
-  padding-top: 72px;
+  padding-top: 70px;
+  padding-bottom: 58px;
 }
 
 .spatial-station {
   position: relative;
-  height: calc(100vh - 72px);
+  height: calc(100vh - 128px);
+  width: 100vw;
   flex-shrink: 0;
-  padding: var(--space-md) var(--space-lg);
+  padding: var(--space-sm) var(--space-lg);
   container-type: inline-size;
   container-name: station-box;
 }
 
-.station-hero { width: 105vw; }
-.station-mechanics { width: 95vw; }
-.station-pivot { width: 80vw; }
+/* Floating Playful Carousel Dock */
+.carousel-dock {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 6px 10px;
+  background: oklch(0.99 0 0 / 0.92);
+  backdrop-filter: blur(12px);
+  border: 2px solid var(--color-border-strong);
+  border-radius: 999px;
+  box-shadow: 6px 6px 0 var(--color-surface-pitch);
+}
+
+.carousel-arrow-btn {
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-border-strong);
+  background: var(--color-surface-card);
+  color: var(--color-ink-primary);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: transform 0.2s var(--ease-spring), background 0.2s var(--ease-expo), color 0.2s var(--ease-expo);
+}
+
+.carousel-arrow-btn:hover {
+  background: var(--color-surface-pitch);
+  color: var(--color-ink-inverted);
+  transform: scale(1.08);
+}
+
+.carousel-dots {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.carousel-dot-pill {
+  min-height: 44px;
+  padding: 0 0.95rem;
+  border-radius: 999px;
+  border: 1.5px solid transparent;
+  background: transparent;
+  color: var(--color-ink-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.25s var(--ease-expo), color 0.25s var(--ease-expo), border-color 0.25s var(--ease-expo);
+}
+
+.carousel-dot-pill[aria-current="true"],
+.carousel-dot-pill:hover {
+  background: var(--color-surface-pitch);
+  color: var(--color-ink-inverted);
+  border-color: var(--color-border-strong);
+}
 
 /* Asymmetrical Playground Canvas */
 .asym-canvas {
@@ -172,16 +233,14 @@
   grid-column: 1 / 6;
   grid-row: 1 / 4;
   align-self: start;
-  padding-top: var(--space-xs);
   z-index: 4;
 }
 
 .asym-matrix-orb {
   grid-column: 10 / 13;
   grid-row: 1 / 4;
-  justify-self: center;
+  justify-self: end;
   align-self: start;
-  padding-right: var(--space-md);
   z-index: 5;
 }
 
@@ -204,11 +263,11 @@
   z-index: 4;
 }
 
-/* Monochrome MacBook Pro Hardware Frame */
+/* Full-Color MacBook Pro & macOS Window Hardware Frames */
 .macbook-pro-frame {
   position: relative;
   width: 100%;
-  max-width: 740px;
+  max-width: 720px;
   margin: 0 auto;
   user-select: none;
 }
@@ -261,7 +320,6 @@
   height: 100%;
   object-fit: cover;
   display: block;
-  filter: grayscale(100%) contrast(106%);
   transition: opacity 0.35s var(--ease-expo), transform 0.45s var(--ease-spring);
 }
 
@@ -292,7 +350,35 @@
   border-radius: 0 0 6px 6px;
 }
 
-/* Phase B: Vertical Keeby-Style Showcase & Gesture Library */
+.macos-popover-frame {
+  width: 240px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 2px solid var(--color-border-strong);
+  background: var(--color-canvas-pure);
+  box-shadow: 10px 10px 0 var(--color-surface-pitch);
+  transition: transform 0.35s var(--ease-spring);
+}
+
+.macos-popover-frame:hover {
+  transform: translate(-4px, -4px) rotate(-1.5deg);
+}
+
+.macos-popover-frame img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.macos-window-card {
+  border-radius: 16px;
+  border: 2px solid var(--color-border-strong);
+  background: var(--color-canvas-pure);
+  padding: 8px;
+  box-shadow: 8px 8px 0 var(--color-surface-pitch);
+}
+
+/* Phase C: Vertical Keeby-Style Showcase */
 .vertical-scroll-stage {
   position: relative;
   width: 100%;
@@ -318,8 +404,8 @@
 .keeby-steps-column {
   display: flex;
   flex-direction: column;
-  gap: 20vh;
-  padding: 6vh 0 14vh 0;
+  gap: 16vh;
+  padding: 4vh 0 12vh 0;
 }
 
 .keeby-step-card {

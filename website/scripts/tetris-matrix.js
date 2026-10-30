@@ -1,4 +1,4 @@
-// Interactive Circular Dot-Matrix Hand Glyph & Ballistic Curve Engine
+// Swipy Interactive Hand Pose Matrix & "Test It Out?" Pinch/Swipe Sandbox Engine
 (function () {
   const GRID_SIZE = 15;
   const POSES = [
@@ -36,14 +36,13 @@
       ]
     },
     {
-      label: 'TETRIS MATRIX',
+      label: '4-FINGER SWIPE',
       cells: [
-        [2,2],[3,2],[4,2],[3,3],
-        [9,2],[10,2],[10,3],[11,3],
-        [5,5],[6,5],[7,5],[8,5],
-        [3,8],[3,9],[4,9],[5,9],
-        [9,7],[9,8],[10,8],[9,9],
-        [6,11],[7,11],[6,12],[7,12]
+        [2,2],[2,3],[2,4],[2,5],[5,1],[5,2],[5,3],[5,4],[5,5],
+        [8,1],[8,2],[8,3],[8,4],[8,5],[11,2],[11,3],[11,4],[11,5],
+        [3,6],[4,6],[5,6],[6,6],[7,6],[8,6],[9,6],[10,6],
+        [4,7],[5,7],[6,7],[7,7],[8,7],[9,7],
+        [5,8],[6,8],[7,8],[8,8],[6,9],[7,9]
       ]
     }
   ];
@@ -77,12 +76,7 @@
 
           ctx.fillStyle = isLit ? '#FFFFFF' : (pulse ? '#333333' : '#181818');
           const pad = 2;
-          ctx.fillRect(
-            x * cellSize + pad,
-            y * cellSize + pad,
-            cellSize - pad * 2,
-            cellSize - pad * 2
-          );
+          ctx.fillRect(x * cellSize + pad, y * cellSize + pad, cellSize - pad * 2, cellSize - pad * 2);
         }
       }
       tick++;
@@ -91,83 +85,128 @@
 
     function cyclePose() {
       activePoseIndex = (activePoseIndex + 1) % POSES.length;
-      if (captionEl) {
-        captionEl.textContent = POSES[activePoseIndex].label;
-      }
+      if (captionEl) captionEl.textContent = POSES[activePoseIndex].label;
     }
 
-    if (orbShell) {
-      orbShell.addEventListener('click', cyclePose);
-    }
+    if (orbShell) orbShell.addEventListener('click', cyclePose);
     setInterval(cyclePose, 3200);
     render();
   }
 
-  function initBallisticCurveCanvas() {
-    const canvas = document.getElementById('ballistic-curve-canvas');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    let t = 0;
+  function initInteractiveSandbox() {
+    const screen = document.getElementById('sandbox-screen');
+    const stageCanvas = document.getElementById('sandbox-stage-canvas');
+    const reticle = document.getElementById('sandbox-reticle');
+    const reticleLabel = document.getElementById('sandbox-reticle-label');
+    const gestureBadge = document.getElementById('sandbox-gesture-badge');
+    const spaceIndicator = document.getElementById('sandbox-space-indicator');
+    const cards = document.querySelectorAll('.sandbox-draggable-card');
+    const actionBtns = document.querySelectorAll('[data-sandbox-action]');
+    if (!screen || !stageCanvas) return;
 
-    function drawCurve() {
-      const w = canvas.width;
-      const h = canvas.height;
-      ctx.clearRect(0, 0, w, h);
+    const SPACES = [
+      'SPACE 01 // CREATIVE DESKTOP',
+      'SPACE 02 // CODE & TERMINAL',
+      'SPACE 03 // POINTER STUDIO'
+    ];
+    let currentSpaceIndex = 0;
+    let activeCard = null;
+    let offsetX = 0;
+    let offsetY = 0;
+    let initialPositions = [];
 
-      ctx.strokeStyle = '#333333';
-      ctx.lineWidth = 1;
-      for (let gx = 0; gx <= w; gx += 32) {
-        ctx.beginPath();
-        ctx.moveTo(gx, 0);
-        ctx.lineTo(gx, h);
-        ctx.stroke();
+    cards.forEach(function (card) {
+      initialPositions.push({
+        el: card,
+        left: card.style.left,
+        top: card.style.top
+      });
+
+      card.addEventListener('pointerdown', function (e) {
+        e.stopPropagation();
+        activeCard = card;
+        card.classList.add('is-pinched');
+        if (reticle) reticle.classList.add('is-pinching');
+        if (reticleLabel) reticleLabel.textContent = 'PINCH & DRAG';
+        if (gestureBadge) gestureBadge.textContent = 'PINCH & DRAG // LOCKED ON WINDOW';
+
+        const cardRect = card.getBoundingClientRect();
+        offsetX = e.clientX - cardRect.left;
+        offsetY = e.clientY - cardRect.top;
+        card.setPointerCapture(e.pointerId);
+      });
+    });
+
+    screen.addEventListener('pointermove', function (e) {
+      const screenRect = stageCanvas.getBoundingClientRect();
+      const relX = e.clientX - screenRect.left;
+      const relY = e.clientY - screenRect.top;
+
+      if (reticle) {
+        reticle.style.left = Math.max(20, Math.min(screenRect.width - 20, relX)) + 'px';
+        reticle.style.top = Math.max(20, Math.min(screenRect.height - 20, relY)) + 'px';
       }
-      for (let gy = 0; gy <= h; gy += 32) {
-        ctx.beginPath();
-        ctx.moveTo(0, gy);
-        ctx.lineTo(w, gy);
-        ctx.stroke();
+
+      if (activeCard) {
+        const nextLeft = Math.max(8, Math.min(screenRect.width - activeCard.offsetWidth - 8, relX - offsetX));
+        const nextTop = Math.max(8, Math.min(screenRect.height - activeCard.offsetHeight - 8, relY - offsetY));
+        activeCard.style.left = nextLeft + 'px';
+        activeCard.style.top = nextTop + 'px';
       }
+    });
 
-      ctx.strokeStyle = '#FFFFFF';
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      for (let px = 0; px <= w; px += 4) {
-        const norm = px / w;
-        let gain;
-        if (norm < 0.25) {
-          gain = 0.12 * (norm / 0.25);
-        } else if (norm < 0.65) {
-          gain = 0.12 + 0.38 * ((norm - 0.25) / 0.4);
-        } else {
-          gain = 0.50 + 0.45 * Math.pow((norm - 0.65) / 0.35, 1.35);
-        }
-        const py = h - 14 - gain * (h - 28);
-        if (px === 0) ctx.moveTo(px, py);
-        else ctx.lineTo(px, py);
+    window.addEventListener('pointerup', function () {
+      if (activeCard) {
+        activeCard.classList.remove('is-pinched');
+        activeCard = null;
       }
-      ctx.stroke();
+      if (reticle) reticle.classList.remove('is-pinching');
+      if (reticleLabel) reticleLabel.textContent = 'POINT';
+      if (gestureBadge) gestureBadge.textContent = 'INDEX POINT // GLIDING';
+    });
 
-      const progress = (Math.sin(t * 0.035) + 1) * 0.5;
-      const dotX = progress * w;
-      let dotGain;
-      if (progress < 0.25) dotGain = 0.12 * (progress / 0.25);
-      else if (progress < 0.65) dotGain = 0.12 + 0.38 * ((progress - 0.25) / 0.4);
-      else dotGain = 0.50 + 0.45 * Math.pow((progress - 0.65) / 0.35, 1.35);
-      const dotY = h - 14 - dotGain * (h - 28);
+    function switchSpace(delta) {
+      stageCanvas.classList.remove('is-mission-control');
+      currentSpaceIndex = (currentSpaceIndex + delta + SPACES.length) % SPACES.length;
+      if (spaceIndicator) spaceIndicator.textContent = SPACES[currentSpaceIndex];
+      if (gestureBadge) {
+        gestureBadge.textContent = delta > 0
+          ? '4-FINGER SWIPE LEFT // NEXT SPACE'
+          : '4-FINGER SWIPE RIGHT // PREVIOUS SPACE';
+      }
+      if (reticleLabel) reticleLabel.textContent = '4-FINGER SWIPE';
 
-      ctx.fillStyle = '#FFFFFF';
-      ctx.fillRect(dotX - 6, dotY - 6, 12, 12);
-
-      t++;
-      requestAnimationFrame(drawCurve);
+      const slideDir = delta > 0 ? -36 : 36;
+      stageCanvas.style.transform = 'translateX(' + slideDir + 'px)';
+      setTimeout(function () {
+        stageCanvas.style.transform = 'translateX(0)';
+      }, 220);
     }
 
-    drawCurve();
+    actionBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const action = btn.getAttribute('data-sandbox-action');
+        if (action === 'next-space') switchSpace(1);
+        if (action === 'prev-space') switchSpace(-1);
+        if (action === 'mission-control') {
+          stageCanvas.classList.toggle('is-mission-control');
+          if (gestureBadge) gestureBadge.textContent = '3-FINGER SWIPE UP // MISSION CONTROL';
+          if (reticleLabel) reticleLabel.textContent = 'MISSION CONTROL';
+        }
+        if (action === 'reset-cards') {
+          stageCanvas.classList.remove('is-mission-control');
+          initialPositions.forEach(function (item) {
+            item.el.style.left = item.left;
+            item.el.style.top = item.top;
+          });
+          if (gestureBadge) gestureBadge.textContent = 'WORKSPACE RESET // READY';
+        }
+      });
+    });
   }
 
   document.addEventListener('DOMContentLoaded', function () {
     initDotMatrixOrb();
-    initBallisticCurveCanvas();
+    initInteractiveSandbox();
   });
 })();
