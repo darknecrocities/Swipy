@@ -1,91 +1,6 @@
-/* Top Fixed Minimalist Glass Header */
-.spatial-nav {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-xs);
-  padding: 0.65rem clamp(0.75rem, 0.5rem + 1vw, 2rem);
-  background: oklch(1.0 0 0 / 0.82);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border-bottom: 1px solid var(--color-border-hairline);
-  box-sizing: border-box;
-}
-
-.brand-mark {
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-  text-decoration: none;
-  color: var(--color-ink-primary);
-  cursor: pointer;
-  flex-shrink: 0;
-}
-
-.brand-mark img {
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-  box-shadow: var(--shadow-xs);
-}
-
-.brand-mark span {
-  font-family: var(--font-sans);
-  font-size: 1.02rem;
-  font-weight: 700;
-  letter-spacing: -0.025em;
-}
-
-.nav-links {
-  display: flex;
-  align-items: center;
-  gap: 0.2rem;
-  padding: 3px 4px;
-  background: oklch(0.96 0 0 / 0.9);
-  border: 1px solid var(--color-border-hairline);
-  border-radius: 999px;
-  max-width: 100%;
-}
-
-.nav-pill-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  white-space: nowrap;
-  min-height: 34px;
-  padding: 0 0.9rem;
-  font-family: var(--font-sans);
-  font-size: 0.81rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  text-decoration: none;
-  color: var(--color-ink-secondary);
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 999px;
-  cursor: pointer;
-  flex-shrink: 0;
-  transition: transform 0.2s var(--ease-expo), background-color 0.2s, color 0.2s, box-shadow 0.2s;
-}
-
-.nav-pill-btn:hover,
-.nav-pill-btn:focus-visible {
-  color: var(--color-ink-primary);
-  background: oklch(1.0 0 0 / 0.7);
-  outline: none;
-}
-
-.nav-pill-btn[aria-current="true"] {
-  background: var(--color-surface-pitch);
-  color: var(--color-ink-inverted);
-  box-shadow: 0 2px 10px oklch(0.12 0 0 / 0.14);
-  outline: none;
-}
+/* ==========================================================================
+   Swipy — Main Layout & Spatial Stages
+   ========================================================================== */
 
 .hero-cta-row .nav-pill-btn,
 footer .nav-pill-btn {
@@ -105,84 +20,6 @@ footer .nav-pill-btn:hover {
   box-shadow: var(--shadow-card);
 }
 
-.nav-download-group {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  flex-shrink: 0;
-}
-
-.nav-github-btn,
-.nav-download-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.45rem;
-  min-height: 40px;
-  border-radius: 999px;
-  font-family: var(--font-sans);
-  font-size: 0.81rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  text-decoration: none;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.nav-github-btn {
-  padding: 0 0.95rem;
-  color: var(--color-ink-primary);
-  background: var(--color-surface-card);
-  border: 1px solid var(--color-border-hairline);
-  box-shadow: var(--shadow-xs);
-  transition: transform 0.2s var(--ease-expo), background-color 0.2s var(--ease-expo), color 0.2s var(--ease-expo), border-color 0.2s var(--ease-expo), box-shadow 0.2s var(--ease-expo);
-}
-
-.nav-github-btn svg {
-  width: 16px;
-  height: 16px;
-  fill: currentColor;
-  flex-shrink: 0;
-}
-
-.nav-github-btn:hover,
-.nav-github-btn:focus-visible {
-  background: var(--color-surface-subtle);
-  border-color: var(--color-border-strong);
-  transform: translateY(-1.5px);
-  box-shadow: var(--shadow-card);
-  outline: none;
-}
-
-.nav-download-btn {
-  padding: 0 1.15rem;
-  color: var(--color-ink-inverted);
-  background: var(--color-surface-pitch);
-  border: 1px solid var(--color-surface-pitch);
-  box-shadow: 0 4px 14px oklch(0.12 0 0 / 0.14);
-  transition: transform 0.25s var(--ease-expo), background-color 0.25s var(--ease-expo), color 0.25s var(--ease-expo), box-shadow 0.25s var(--ease-expo);
-}
-
-.nav-download-btn svg {
-  width: 15px;
-  height: 15px;
-  stroke: currentColor;
-  fill: none;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  flex-shrink: 0;
-}
-
-.nav-download-btn:hover,
-.nav-download-btn:focus-visible {
-  background: oklch(0.22 0 0);
-  color: var(--color-ink-inverted);
-  transform: translateY(-1.5px);
-  box-shadow: 0 8px 22px oklch(0.12 0 0 / 0.2);
-  outline: none;
-}
-
 /* Phase A: Minimalist Horizontal Scroll Carousel */
 .horizontal-scroll-stage {
   position: relative;
@@ -194,6 +31,7 @@ footer .nav-pill-btn:hover {
   position: sticky;
   top: 0;
   height: 100vh;
+  height: 100dvh;
   width: 100vw;
   overflow: hidden;
   display: flex;
@@ -202,20 +40,23 @@ footer .nav-pill-btn:hover {
 
 .horizontal-track {
   display: flex;
+  flex-direction: row;
   flex-wrap: nowrap;
   height: 100vh;
+  height: 100dvh;
   width: 300vw;
   will-change: transform;
-  padding-top: 64px;
-  padding-bottom: 64px;
+  padding-top: 56px;
+  padding-bottom: 56px;
+  box-sizing: border-box;
 }
 
 .spatial-station {
   position: relative;
-  height: calc(100vh - 128px);
+  height: 100%;
   width: 100vw;
   flex-shrink: 0;
-  padding: var(--space-xs) clamp(1rem, 2vw, 3rem);
+  padding: 0 clamp(1rem, 2vw, 3rem);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -417,79 +258,106 @@ footer .nav-pill-btn:hover {
   }
 }
 
-/* Tablet & Mobile Breakpoint (<= 960px): Stacks Horizontal Slides Naturally */
+/* Responsive Viewport Optimizations (<= 960px) */
 @media (max-width: 960px) {
-  .horizontal-scroll-stage { height: auto; }
-  .horizontal-sticky-viewport {
-    position: relative;
-    height: auto;
-    overflow: visible;
-    flex-direction: column;
-  }
-  .horizontal-track {
-    flex-direction: column;
-    width: 100%;
-    height: auto;
-    transform: none !important;
-    padding: 72px 0 24px;
-  }
+  /* Horizontal Carousel slides layout on tablet/mobile */
   .spatial-station {
-    width: 100% !important;
-    height: auto;
-    padding: clamp(2rem, 5vw, 4rem) clamp(1rem, 3vw, 2rem);
+    padding: 60px clamp(0.75rem, 3vw, 1.5rem) 54px;
   }
   .slide-two-col {
-    grid-template-columns: 1fr;
-    gap: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 0.85rem;
+    max-height: calc(100dvh - 116px);
   }
-  .carousel-dock { display: none; }
+  .slide-left-stack {
+    align-items: center;
+    text-align: center;
+    gap: 0.45rem;
+  }
+  .hero-main-heading {
+    font-size: clamp(1.35rem, 4.6vw, 2.1rem);
+    margin-bottom: 0.2rem;
+  }
+  .slide-lead-copy {
+    font-size: clamp(0.78rem, 2.6vw, 0.88rem);
+    line-height: 1.42;
+    margin-bottom: 0.35rem;
+    max-width: 44ch;
+  }
+  .hero-cta-row {
+    justify-content: center;
+    gap: 0.45rem;
+  }
+  .slide-left-stack .morph-surface-card {
+    display: none;
+  }
+  .macbook-pro-frame {
+    max-width: clamp(240px, 74vw, 360px);
+  }
+  .orb-floating-badge {
+    top: -12px;
+    right: 4px;
+    transform: scale(0.68);
+    transform-origin: top right;
+  }
+  .slide-right-dual {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 0.65rem;
+  }
+  .macos-popover-frame {
+    width: clamp(90px, 24vw, 125px);
+    flex-shrink: 0;
+  }
+
+  /* Compact Horizontal Carousel Bottom Dock */
+  .carousel-dock {
+    bottom: 12px;
+    padding: 3px 6px;
+    gap: 0.25rem;
+    max-width: calc(100vw - 1.5rem);
+  }
+  .carousel-arrow-btn {
+    min-width: 32px;
+    min-height: 32px;
+    font-size: 0.8rem;
+  }
+  .carousel-dot-pill {
+    min-height: 32px;
+    padding: 0 0.65rem;
+    font-size: 0.74rem;
+  }
+
+  /* Keeby Vertical Showcase Responsive Layout */
   .keeby-sticky-grid {
     display: flex;
     flex-direction: column;
-    gap: 2rem;
+    gap: 1.5rem;
   }
   .keeby-sticky-hardware {
     position: sticky;
-    top: 60px;
+    top: 56px;
     z-index: 12;
-    padding: 10px 0;
+    padding: 8px 0;
     background: oklch(1.0 0 0 / 0.94);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
   }
   .keeby-steps-column {
-    gap: 2rem;
-    padding: 0 0 4rem 0;
+    gap: 1.5rem;
+    padding: 0 0 3rem 0;
   }
 }
 
-/* Mobile Screens (<= 768px) */
-@media (max-width: 768px) {
-  .slide-right-dual {
-    flex-direction: column;
-    align-items: center;
-    gap: 1.25rem;
-  }
-  .orb-floating-badge {
-    top: -14px;
-    right: 8px;
-  }
-}
-
-/* Compact Mobile Screens (<= 540px) */
-@media (max-width: 540px) {
-  .spatial-nav {
-    padding: 0.5rem 0.75rem;
-  }
-  .brand-mark span,
-  .nav-github-btn span {
+/* Compact Mobile (< 520px) */
+@media (max-width: 520px) {
+  .carousel-dot-pill .dot-label {
     display: none;
-  }
-  .nav-github-btn {
-    padding: 0 0.65rem;
-  }
-  .nav-download-btn {
-    padding: 0 0.85rem;
-    font-size: 0.76rem;
   }
 }

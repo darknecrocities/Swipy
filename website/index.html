@@ -7,6 +7,7 @@
   <link rel="icon" type="image/png" href="../Resources/AppLogo.png" />
   <link rel="apple-touch-icon" href="../Resources/AppLogo.png" />
   <link rel="stylesheet" href="styles/tokens.css" />
+  <link rel="stylesheet" href="styles/navigation.css" />
   <link rel="stylesheet" href="styles/layout.css" />
   <link rel="stylesheet" href="styles/hardware-frames.css" />
   <link rel="stylesheet" href="styles/animations.css" />
@@ -45,8 +46,70 @@
         </svg>
         <span>Download for Mac</span>
       </a>
+      <button type="button" id="mobile-nav-toggle" class="mobile-nav-toggle" aria-expanded="false" aria-controls="mobile-nav-dropdown" aria-label="Toggle navigation menu">
+        <span class="hamburger-bar bar-1"></span>
+        <span class="hamburger-bar bar-2"></span>
+        <span class="hamburger-bar bar-3"></span>
+      </button>
     </div>
   </header>
+
+  <!-- MOBILE SLIDE-DOWN NAVIGATION DROPDOWN -->
+  <div id="mobile-nav-dropdown" class="mobile-nav-dropdown" aria-hidden="true">
+    <div class="mobile-nav-dropdown-inner">
+      <div class="mobile-nav-group-label">Navigate Sections</div>
+      <nav class="mobile-nav-grid" aria-label="Mobile Navigation Menu">
+        <button type="button" class="mobile-menu-item" data-nav-target="station-01" aria-current="true">
+          <span class="menu-item-tag">01</span>
+          <span class="menu-item-title">Overview</span>
+        </button>
+        <button type="button" class="mobile-menu-item" data-nav-target="station-02">
+          <span class="menu-item-tag">02</span>
+          <span class="menu-item-title">Live Tracking &amp; Skeleton</span>
+        </button>
+        <button type="button" class="mobile-menu-item" data-nav-target="station-03">
+          <span class="menu-item-tag">03</span>
+          <span class="menu-item-title">Precision Tuning</span>
+        </button>
+        <button type="button" class="mobile-menu-item" data-nav-target="tetris-architecture">
+          <span class="menu-item-tag">Blocks</span>
+          <span class="menu-item-title">Spatial Architecture</span>
+        </button>
+        <button type="button" class="mobile-menu-item" data-nav-target="test-it-out">
+          <span class="menu-item-tag">Demo</span>
+          <span class="menu-item-title">Test It Out (Web Camera)</span>
+        </button>
+        <button type="button" class="mobile-menu-item" data-nav-target="vertical-stage">
+          <span class="menu-item-tag">Setup</span>
+          <span class="menu-item-title">Workstation Showcase</span>
+        </button>
+        <button type="button" class="mobile-menu-item" data-nav-target="gesture-library">
+          <span class="menu-item-tag">Library</span>
+          <span class="menu-item-title">18 Gestures Reference</span>
+        </button>
+        <button type="button" class="mobile-menu-item" data-nav-target="faq-section">
+          <span class="menu-item-tag">Guide</span>
+          <span class="menu-item-title">FAQ &amp; Gatekeeper Guide</span>
+        </button>
+      </nav>
+
+      <div class="mobile-nav-footer">
+        <a href="https://github.com/darknecrocities/Swipy" target="_blank" rel="noopener noreferrer" class="mobile-action-link github-link">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
+          </svg>
+          <span>View on GitHub</span>
+        </a>
+        <a href="downloads/Swipy-macOS.dmg" download="Swipy-macOS.dmg" class="mobile-action-link download-link">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" />
+          </svg>
+          <span>Download macOS DMG</span>
+        </a>
+      </div>
+    </div>
+  </div>
+  <div id="mobile-nav-backdrop" class="mobile-nav-backdrop" aria-hidden="true"></div>
 
   <main>
     <!-- PHASE A: COLLISION-FREE MINIMALIST HORIZONTAL CAROUSEL -->
@@ -185,9 +248,9 @@
         <div class="carousel-dock" role="region" aria-label="Horizontal Carousel Controls">
           <button type="button" id="carousel-prev-btn" class="carousel-arrow-btn" aria-label="Previous Slide">&larr;</button>
           <div class="carousel-dots">
-            <button type="button" class="carousel-dot-pill" data-nav-target="station-01" aria-current="true">01 Overview</button>
-            <button type="button" class="carousel-dot-pill" data-nav-target="station-02">02 Live Camera &amp; Menu Bar</button>
-            <button type="button" class="carousel-dot-pill" data-nav-target="station-03">03 Precision Tuning</button>
+            <button type="button" class="carousel-dot-pill" data-nav-target="station-01" aria-current="true"><span>01</span><span class="dot-label"> Overview</span></button>
+            <button type="button" class="carousel-dot-pill" data-nav-target="station-02"><span>02</span><span class="dot-label"> Live Camera</span></button>
+            <button type="button" class="carousel-dot-pill" data-nav-target="station-03"><span>03</span><span class="dot-label"> Tuning</span></button>
           </div>
           <button type="button" id="carousel-next-btn" class="carousel-arrow-btn" aria-label="Next Slide">&rarr;</button>
         </div>
