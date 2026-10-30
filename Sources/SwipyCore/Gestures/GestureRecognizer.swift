@@ -152,6 +152,17 @@ public final class GestureRecognizer: @unchecked Sendable {
         case .swiping(let direction, let fingers):
             handleSwipeDispatch(direction: direction, fingers: fingers, settings: settings)
 
+        case .zooming(let scaleDelta, let anchorPoint):
+            if isDraggingActive {
+                MouseEventController.shared.endDrag(at: CursorController.shared.currentQuartzCursorPosition)
+                isDraggingActive = false
+            }
+            ZoomController.shared.zoom(scaleDelta: scaleDelta, at: anchorPoint)
+            if let indexTip = skeleton[.indexTip] {
+                trackpadMotion.resetReference(to: CGPoint(x: indexTip.x, y: indexTip.y))
+            }
+            onCursorUpdate?(anchorPoint, state)
+
         case .idle, .twoHandZooming, .paused:
             break
         }

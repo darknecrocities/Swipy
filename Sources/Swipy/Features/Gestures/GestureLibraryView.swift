@@ -128,6 +128,7 @@ public struct GestureLibraryView: View {
             case .indexPointing: return "hand.point.up.left"
             case .thumbIndexPinch: return "hand.pinch"
             case .thumbMiddlePinch: return "hand.tap"
+            case .thumbMiddleZoom: return "plus.magnifyingglass"
             case .doublePinch: return "hand.tap.fill"
             case .twoFingerScroll: return "arrow.up.and.down"
             case .threeFingerSwipeUp: return "arrow.up"

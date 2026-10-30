@@ -81,7 +81,7 @@ public final class PointerOverlayController: NSObject {
 
     private func isPinching(_ gesture: RecognizedGestureState) -> Bool {
         switch gesture {
-        case .pinchPending, .dragging: return true
+        case .pinchPending, .dragging, .zooming: return true
         default: return false
         }
     }

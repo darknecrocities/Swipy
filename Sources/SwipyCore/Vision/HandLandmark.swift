@@ -122,6 +122,16 @@ public struct HandSkeleton: Codable, Equatable, Sendable {
         return dist / palmScale
     }
 
+    /// Evaluates whether thumb and middle finger are actively engaging in a pinch/spread zoom gesture.
+    public var isThumbMiddleZooming: Bool {
+        guard let dist = distance(between: .thumbTip, and: .middleTip) else { return false }
+        let ratio = dist / palmScale
+        let isRingCurled = !isFingerExtended(.ring)
+        let thumbIndexDist = distance(between: .thumbTip, and: .indexTip) ?? 1.0
+        // Active engagement: middle and thumb closer together than thumb-to-index (or ratio <= 0.40) and ring is curled
+        return ratio <= 0.55 && (dist < thumbIndexDist || ratio <= 0.40) && isRingCurled
+    }
+
     /// Evaluates whether thumb and index finger are pinching together, tolerant of natural index flexion.
     public var isThumbIndexPinching: Bool {
         guard let dist = distance(between: .thumbTip, and: .indexTip) else { return false }

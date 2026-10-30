@@ -8,6 +8,7 @@ public final class GestureStateMachine: @unchecked Sendable {
         case pointing
         case pinching(startTime: TimeInterval, startPoint: CGPoint, isDragging: Bool)
         case scrolling(lastPoint: CGPoint)
+        case zooming(lastRatio: Double, anchorPoint: CGPoint)
     }
 
     private var currentState: InternalState = .idle
@@ -18,6 +19,13 @@ public final class GestureStateMachine: @unchecked Sendable {
 
     private var isCurrentlyPinching: Bool {
         if case .pinching = currentState {
+            return true
+        }
+        return false
+    }
+
+    private var isCurrentlyZooming: Bool {
+        if case .zooming = currentState {
             return true
         }
         return false
@@ -51,11 +59,16 @@ public final class GestureStateMachine: @unchecked Sendable {
             return evaluatePinchAndPoint(skeleton: skeleton, indexPt: indexPt, settings: settings, timestamp: timestamp)
         }
 
+        // Thumb + Middle finger zoom (pinching in & pinching out, cursor strictly locked)
+        if skeleton.isThumbMiddleZooming || isCurrentlyZooming {
+            return evaluateThumbMiddleZoom(skeleton: skeleton, settings: settings, timestamp: timestamp)
+        }
+
         // Deterministic gating based on discrete finger extension count
         switch skeleton.fingerPoseState {
         case .zeroFingers:
             // Fist / resting hand: neutralize state and reject accidental gestures
-            if case .pinching = currentState {
+            if isCurrentlyPinching || isCurrentlyZooming {
                 currentState = .idle
             }
             return .idle
@@ -141,6 +154,32 @@ public final class GestureStateMachine: @unchecked Sendable {
         default:
             currentState = .scrolling(lastPoint: currentPt)
             return .scrolling(deltaY: 0.0, deltaX: 0.0)
+        }
+    }
+
+    private func evaluateThumbMiddleZoom(
+        skeleton: HandSkeleton,
+        settings: SwipySettings,
+        timestamp: TimeInterval
+    ) -> RecognizedGestureState {
+        let currentRatio = skeleton.middlePinchRatio
+        switch currentState {
+        case .zooming(let lastRatio, let anchorPt):
+            if !skeleton.isThumbMiddleZooming && currentRatio > 0.65 {
+                currentState = .idle
+                return .idle
+            }
+            let delta = currentRatio - lastRatio
+            if abs(delta) < 0.003 {
+                return .zooming(scaleDelta: 0.0, anchorPoint: anchorPt)
+            }
+            currentState = .zooming(lastRatio: currentRatio, anchorPoint: anchorPt)
+            return .zooming(scaleDelta: delta, anchorPoint: anchorPt)
+
+        default:
+            let anchor = CursorController.shared.currentQuartzCursorPosition
+            currentState = .zooming(lastRatio: currentRatio, anchorPoint: anchor)
+            return .zooming(scaleDelta: 0.0, anchorPoint: anchor)
         }
     }
 
