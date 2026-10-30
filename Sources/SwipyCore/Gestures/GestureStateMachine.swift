@@ -99,15 +99,17 @@ public final class GestureStateMachine: @unchecked Sendable {
         timestamp: TimeInterval,
         fingerCount: Int
     ) -> RecognizedGestureState? {
-        // Require genuine physical displacement across the observation window
-        guard let disp = history.displacement(for: .wrist, windowSeconds: 0.20) else { return nil }
-        let distance = (disp.dx * disp.dx + disp.dy * disp.dy).squareRoot()
-        guard distance >= 0.14 else { return nil }
+        // Track middleMCP (rigid palm centroid) or wrist for robust motion tracking
+        let joint: HandJointName = skeleton[.middleMCP] != nil ? .middleMCP : .wrist
 
-        guard let vel = history.velocity(for: .wrist, windowSeconds: 0.18) else { return nil }
+        guard let disp = history.displacement(for: joint, windowSeconds: 0.22) else { return nil }
+        let distance = (disp.dx * disp.dx + disp.dy * disp.dy).squareRoot()
+        guard distance >= 0.05 else { return nil }
+
+        guard let vel = history.velocity(for: joint, windowSeconds: 0.20) else { return nil }
         let speed = (vel.dx * vel.dx + vel.dy * vel.dy).squareRoot()
 
-        let requiredSpeed = fingerCount == 4 ? max(2.0, settings.swipeVelocityThreshold) : max(1.5, settings.swipeVelocityThreshold)
+        let requiredSpeed = max(0.40, settings.swipeVelocityThreshold)
         guard speed >= requiredSpeed,
               resolver.canExecuteSwipe(timestamp: timestamp, cooldownMs: settings.swipeCooldownMs) else {
             return nil
@@ -116,7 +118,7 @@ public final class GestureStateMachine: @unchecked Sendable {
         // Mirror X velocity to account for selfie camera orientation (dx < 0 is user swiping right)
         let mirroredVx = -vel.dx
         let direction: SwipeDirection
-        if abs(mirroredVx) > abs(vel.dy) * 1.3 {
+        if abs(mirroredVx) > abs(vel.dy) * 1.2 {
             direction = mirroredVx > 0 ? .right : .left
         } else {
             direction = vel.dy > 0 ? .up : .down

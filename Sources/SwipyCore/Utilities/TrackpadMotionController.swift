@@ -21,18 +21,30 @@ public final class TrackpadMotionController: @unchecked Sendable {
         internalScreenPosition = nil
     }
 
+    /// Re-anchors trackpad reference baseline to prevent cursor jumps after a pinch or gesture transition.
+    public func resetReference(to normalizedPoint: CGPoint? = nil) {
+        lock.lock()
+        defer { lock.unlock() }
+        previousNormalizedPoint = normalizedPoint
+        internalScreenPosition = CursorController.shared.currentQuartzCursorPosition
+    }
+
     /// Computes relative cursor displacement from hand movement in camera space.
     /// - Parameters:
     ///   - normalizedPoint: Hand landmark in Vision coordinates (0..1).
     ///   - sensitivity: User sensitivity multiplier.
     ///   - screenFrame: Target display bounds in Quartz coordinates.
     ///   - isAdaptive: Whether to apply non-linear trackpad acceleration curves.
+    ///   - pinchRatio: Current distance ratio between thumb and index for pre-pinch damping.
+    ///   - isPinching: Whether fingers are actively touching/pinched (strict freeze).
     /// - Returns: New target cursor position in Quartz screen coordinates.
     public func update(
         normalizedPoint: CGPoint,
         sensitivity: Double,
         screenFrame: CGRect,
-        isAdaptive: Bool = true
+        isAdaptive: Bool = true,
+        pinchRatio: Double = 1.0,
+        isPinching: Bool = false
     ) -> CGPoint {
         lock.lock()
         defer { lock.unlock() }
@@ -44,6 +56,12 @@ public final class TrackpadMotionController: @unchecked Sendable {
             y: max(screenFrame.minY, min(screenFrame.maxY - 1, currentSysPos.y))
         )
         let activePos = internalScreenPosition ?? initialClamped
+
+        // Strict freeze: if pinching, lock cursor firmly on target position
+        if isPinching {
+            previousNormalizedPoint = normalizedPoint
+            return activePos
+        }
 
         guard let prev = previousNormalizedPoint else {
             previousNormalizedPoint = normalizedPoint
@@ -65,8 +83,15 @@ public final class TrackpadMotionController: @unchecked Sendable {
 
         // Scale normalized displacement to physical screen pixel space
         let baseTravelMultiplier = 1.8
-        let pixelDx = dx * Double(screenFrame.size.width) * sensitivity * baseTravelMultiplier
-        let pixelDy = dy * Double(screenFrame.size.height) * sensitivity * baseTravelMultiplier
+        var pixelDx = dx * Double(screenFrame.size.width) * sensitivity * baseTravelMultiplier
+        var pixelDy = dy * Double(screenFrame.size.height) * sensitivity * baseTravelMultiplier
+
+        // Pre-pinch damping: as fingers approach each other to prepare for a click, decelerate velocity
+        if pinchRatio < 0.60 {
+            let damping = max(0.12, min(1.0, (pinchRatio - 0.30) / 0.30))
+            pixelDx *= damping
+            pixelDy *= damping
+        }
 
         let moveX: Double
         let moveY: Double

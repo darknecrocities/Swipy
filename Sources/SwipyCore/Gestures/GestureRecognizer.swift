@@ -76,8 +76,14 @@ public final class GestureRecognizer: @unchecked Sendable {
         timestamp: TimeInterval
     ) {
         switch state {
-        case .pointing(let normalizedPt), .pinchPending(let normalizedPt, _):
-            let screenPt = calculateSmoothedPoint(normalizedPt: normalizedPt, displayFrame: displayFrame, settings: settings, timestamp: timestamp)
+        case .pointing(let normalizedPt):
+            let screenPt = calculateSmoothedPoint(
+                normalizedPt: normalizedPt,
+                displayFrame: displayFrame,
+                settings: settings,
+                timestamp: timestamp,
+                skeleton: skeleton
+            )
             if isDraggingActive {
                 MouseEventController.shared.endDrag(at: screenPt)
                 isDraggingActive = false
@@ -85,8 +91,19 @@ public final class GestureRecognizer: @unchecked Sendable {
             CursorController.shared.moveCursor(to: screenPt)
             onCursorUpdate?(screenPt, state)
 
+        case .pinchPending:
+            // Strict cursor freeze on target: DO NOT move cursor while preparing or holding pinch
+            let lockedPt = CursorController.shared.currentQuartzCursorPosition
+            onCursorUpdate?(lockedPt, state)
+
         case .dragging(let normalizedPt):
-            let screenPt = calculateSmoothedPoint(normalizedPt: normalizedPt, displayFrame: displayFrame, settings: settings, timestamp: timestamp)
+            let screenPt = calculateSmoothedPoint(
+                normalizedPt: normalizedPt,
+                displayFrame: displayFrame,
+                settings: settings,
+                timestamp: timestamp,
+                skeleton: skeleton
+            )
             if !isDraggingActive {
                 isDraggingActive = true
                 MouseEventController.shared.startDrag(at: screenPt)
@@ -98,22 +115,25 @@ public final class GestureRecognizer: @unchecked Sendable {
         case .leftClicked(let normalizedPt):
             let screenPt = settings.trackingMode == .trackpad
                 ? CursorController.shared.currentQuartzCursorPosition
-                : calculateSmoothedPoint(normalizedPt: normalizedPt, displayFrame: displayFrame, settings: settings, timestamp: timestamp)
+                : calculateSmoothedPoint(normalizedPt: normalizedPt, displayFrame: displayFrame, settings: settings, timestamp: timestamp, skeleton: skeleton)
             MouseEventController.shared.leftClick(at: screenPt)
+            trackpadMotion.resetReference(to: normalizedPt)
             onCursorUpdate?(screenPt, state)
 
         case .doubleClicked(let normalizedPt):
             let screenPt = settings.trackingMode == .trackpad
                 ? CursorController.shared.currentQuartzCursorPosition
-                : calculateSmoothedPoint(normalizedPt: normalizedPt, displayFrame: displayFrame, settings: settings, timestamp: timestamp)
+                : calculateSmoothedPoint(normalizedPt: normalizedPt, displayFrame: displayFrame, settings: settings, timestamp: timestamp, skeleton: skeleton)
             MouseEventController.shared.doubleClick(at: screenPt)
+            trackpadMotion.resetReference(to: normalizedPt)
             onCursorUpdate?(screenPt, state)
 
         case .rightClicked(let normalizedPt):
             let screenPt = settings.trackingMode == .trackpad
                 ? CursorController.shared.currentQuartzCursorPosition
-                : calculateSmoothedPoint(normalizedPt: normalizedPt, displayFrame: displayFrame, settings: settings, timestamp: timestamp)
+                : calculateSmoothedPoint(normalizedPt: normalizedPt, displayFrame: displayFrame, settings: settings, timestamp: timestamp, skeleton: skeleton)
             MouseEventController.shared.rightClick(at: screenPt)
+            trackpadMotion.resetReference(to: normalizedPt)
             onCursorUpdate?(screenPt, state)
 
         case .scrolling(let dy, let dx):
@@ -138,20 +158,17 @@ public final class GestureRecognizer: @unchecked Sendable {
     }
 
     private func handleSwipeDispatch(direction: SwipeDirection, fingers: Int, settings: SwipySettings) {
-        if fingers == 4 {
-            SystemActionController.shared.triggerApplicationSwitch(native: settings.useNativeAppSwitcher)
-            return
-        }
-
         switch direction {
         case .up:
             SystemActionController.shared.triggerMissionControl()
         case .down:
             SystemActionController.shared.triggerShowDesktop()
         case .left:
-            SystemActionController.shared.triggerPreviousSpace()
-        case .right:
+            // Swiping hand left pulls the adjacent space from the right (like trackpad)
             SystemActionController.shared.triggerNextSpace()
+        case .right:
+            // Swiping hand right pulls the adjacent space from the left (like trackpad)
+            SystemActionController.shared.triggerPreviousSpace()
         }
     }
 
@@ -159,15 +176,20 @@ public final class GestureRecognizer: @unchecked Sendable {
         normalizedPt: CGPoint,
         displayFrame: CGRect,
         settings: SwipySettings,
-        timestamp: TimeInterval
+        timestamp: TimeInterval,
+        skeleton: HandSkeleton? = nil
     ) -> CGPoint {
         switch settings.trackingMode {
         case .trackpad:
+            let ratio = skeleton?.pinchRatio ?? 1.0
+            let isPinching = skeleton?.isThumbIndexPinching ?? false
             let targetPoint = trackpadMotion.update(
                 normalizedPoint: normalizedPt,
                 sensitivity: settings.cursorSensitivity,
                 screenFrame: displayFrame,
-                isAdaptive: settings.isAdaptiveAcceleration
+                isAdaptive: settings.isAdaptiveAcceleration,
+                pinchRatio: ratio,
+                isPinching: isPinching
             )
             previousScreenPoint = targetPoint
             lastTimestamp = timestamp

@@ -74,7 +74,7 @@ public struct SwipySettings: Codable, Equatable, Sendable {
         scrollSpeed: Double = 1.0,
         isNaturalScroll: Bool = true,
         isHorizontalScrollEnabled: Bool = true,
-        swipeVelocityThreshold: Double = 1.80,
+        swipeVelocityThreshold: Double = 0.60,
         swipeCooldownMs: Int = 350,
         useNativeAppSwitcher: Bool = false,
         launchAtLogin: Bool = false,
@@ -161,7 +161,7 @@ public struct SwipySettings: Codable, Equatable, Sendable {
         dragDelayMs = max(100, min(dragDelayMs, 1000))
         doubleClickWindowMs = max(150, min(doubleClickWindowMs, 800))
         scrollSpeed = max(0.2, min(scrollSpeed, 4.0))
-        swipeVelocityThreshold = max(0.5, min(swipeVelocityThreshold, 4.0))
+        swipeVelocityThreshold = max(0.3, min(swipeVelocityThreshold, 4.0))
         swipeCooldownMs = max(150, min(swipeCooldownMs, 1500))
         pointer.sanitize()
     }

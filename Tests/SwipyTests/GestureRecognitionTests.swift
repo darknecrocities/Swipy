@@ -14,6 +14,8 @@ public struct GestureRecognitionTests {
         testFistRejectedAsIdle()
         testTwoFingerScroll()
         testOpenHandWithoutVelocityDoesNotSwipe()
+        testFourFingerSwipeLeft()
+        testPinchApproachDampingAndStrictLock()
     }
 
     private static func makeHand(
@@ -255,6 +257,73 @@ public struct GestureRecognitionTests {
 
         TestHarness.assertTrue(!isSwiping(s1), "Open hand frame 1 does not swipe")
         TestHarness.assertTrue(!isSwiping(s2), "Open hand frame 2 does not swipe")
+    }
+
+    private static func testFourFingerSwipeLeft() {
+        let history = GestureHistory()
+        let resolver = GestureConflictResolver()
+        let machine = GestureStateMachine(history: history, resolver: resolver)
+        let settings = SwipySettings(swipeVelocityThreshold: 0.60)
+
+        func makeOpenHand(centerX: Double) -> HandSkeleton {
+            var joints: [HandJointName: HandJoint] = [:]
+            joints[.wrist] = HandJoint(name: .wrist, x: centerX, y: 0.2, confidence: 1.0)
+            joints[.indexMCP] = HandJoint(name: .indexMCP, x: centerX - 0.05, y: 0.4, confidence: 1.0)
+            joints[.indexPIP] = HandJoint(name: .indexPIP, x: centerX - 0.05, y: 0.6, confidence: 1.0)
+            joints[.indexTip] = HandJoint(name: .indexTip, x: centerX - 0.05, y: 0.8, confidence: 1.0)
+
+            joints[.middleMCP] = HandJoint(name: .middleMCP, x: centerX, y: 0.4, confidence: 1.0)
+            joints[.middlePIP] = HandJoint(name: .middlePIP, x: centerX, y: 0.6, confidence: 1.0)
+            joints[.middleTip] = HandJoint(name: .middleTip, x: centerX, y: 0.85, confidence: 1.0)
+
+            joints[.ringMCP] = HandJoint(name: .ringMCP, x: centerX + 0.05, y: 0.4, confidence: 1.0)
+            joints[.ringPIP] = HandJoint(name: .ringPIP, x: centerX + 0.05, y: 0.6, confidence: 1.0)
+            joints[.ringTip] = HandJoint(name: .ringTip, x: centerX + 0.05, y: 0.8, confidence: 1.0)
+
+            joints[.littleMCP] = HandJoint(name: .littleMCP, x: centerX + 0.10, y: 0.4, confidence: 1.0)
+            joints[.littlePIP] = HandJoint(name: .littlePIP, x: centerX + 0.10, y: 0.55, confidence: 1.0)
+            joints[.littleTip] = HandJoint(name: .littleTip, x: centerX + 0.10, y: 0.7, confidence: 1.0)
+
+            joints[.thumbTip] = HandJoint(name: .thumbTip, x: centerX - 0.15, y: 0.4, confidence: 1.0)
+            return HandSkeleton(chirality: .right, joints: joints)
+        }
+
+        let hand1 = makeOpenHand(centerX: 0.40)
+        _ = machine.process(skeleton: hand1, settings: settings, timestamp: 1.0)
+
+        // Hand moves to the right in sensor coordinates (dx = +0.10 in 0.15s -> velocity = 0.67, swiping left in front of webcam)
+        let hand2 = makeOpenHand(centerX: 0.50)
+        let s2 = machine.process(skeleton: hand2, settings: settings, timestamp: 1.15)
+
+        if case .swiping(let dir, let fingers) = s2 {
+            TestHarness.assertEqual(dir, .left, "Swipe direction is .left")
+            TestHarness.assertEqual(fingers, 4, "4-finger swipe detected")
+        } else {
+            TestHarness.fail("Expected .swiping(.left, 4), got \(s2)")
+        }
+    }
+
+    private static func testPinchApproachDampingAndStrictLock() {
+        let trackpad = TrackpadMotionController()
+        let screen = CGRect(x: 0, y: 0, width: 1920, height: 1080)
+
+        let p0 = trackpad.update(normalizedPoint: CGPoint(x: 0.5, y: 0.5), sensitivity: 1.0, screenFrame: screen)
+
+        // Move hand slightly with pinchRatio = 1.0 (normal)
+        let pNormal = trackpad.update(normalizedPoint: CGPoint(x: 0.52, y: 0.5), sensitivity: 1.0, screenFrame: screen, isAdaptive: false, pinchRatio: 1.0)
+        let travelNormal = abs(pNormal.x - p0.x)
+
+        trackpad.reset()
+        _ = trackpad.update(normalizedPoint: CGPoint(x: 0.5, y: 0.5), sensitivity: 1.0, screenFrame: screen)
+
+        // Move hand same distance with pinchRatio = 0.35 (pre-pinch approach)
+        let pDamped = trackpad.update(normalizedPoint: CGPoint(x: 0.52, y: 0.5), sensitivity: 1.0, screenFrame: screen, isAdaptive: false, pinchRatio: 0.35)
+        let travelDamped = abs(pDamped.x - p0.x)
+        TestHarness.assertTrue(travelDamped < travelNormal, "Pre-pinch damping reduces cursor velocity")
+
+        // In pinch contact: isPinching = true -> strict freeze
+        let pFrozen = trackpad.update(normalizedPoint: CGPoint(x: 0.54, y: 0.5), sensitivity: 1.0, screenFrame: screen, isAdaptive: false, pinchRatio: 0.20, isPinching: true)
+        TestHarness.assertEqual(pFrozen.x, pDamped.x, accuracy: 0.001, "Strict freeze holds cursor position during pinch")
     }
 
     private static func isPinchPending(_ state: RecognizedGestureState) -> Bool {
