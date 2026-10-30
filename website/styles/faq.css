@@ -1,30 +1,180 @@
-/* Swipy Minimalist Apple-HIG FAQ Section Stylesheet */
+/* ==========================================================================
+   Swipy — Minimalist Apple-HIG FAQ Section Stylesheet
+   Choreographed for 1400px Grid Integration & Responsive Two-Column Layout
+   ========================================================================== */
+
 .faq-section {
-  padding: var(--space-3xl) var(--space-lg);
-  max-width: 960px;
+  width: 100%;
+  padding: var(--space-xl) clamp(1rem, 3vw, var(--space-lg));
+  background: var(--color-canvas-pure);
+  box-sizing: border-box;
+}
+
+.faq-container {
+  max-width: 1400px;
   margin: 0 auto;
 }
 
-.faq-header {
-  margin-bottom: var(--space-2xl);
-  text-align: left;
+.faq-layout-grid {
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  gap: clamp(2rem, 4vw, 4.5rem);
+  align-items: start;
 }
 
-.faq-title {
-  font-family: var(--font-display);
-  font-size: clamp(2rem, 3.5vw, 2.75rem);
+/* --- Left Column: Sticky Editorial Support Sidebar --- */
+.faq-sidebar {
+  position: relative;
+}
+
+.faq-sidebar-sticky {
+  position: sticky;
+  top: 96px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.faq-eyebrow-pill {
+  margin-bottom: -0.25rem;
+}
+
+.faq-headline {
+  font-size: clamp(2rem, 3.2vw, 2.85rem);
   font-weight: 700;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.035em;
+  line-height: 1.15;
   color: var(--color-ink-primary);
-  margin-bottom: var(--space-xs);
 }
 
-.faq-subtitle {
+.faq-lead-copy {
   font-size: var(--text-base);
   color: var(--color-ink-secondary);
-  line-height: 1.6;
+  line-height: 1.62;
 }
 
+/* Quick Gatekeeper Terminal Card */
+.faq-terminal-card {
+  background: var(--color-surface-pitch);
+  color: var(--color-ink-inverted);
+  border: 1px solid var(--color-surface-obsidian);
+  border-radius: var(--radius-lg);
+  padding: 1.35rem 1.45rem;
+  box-shadow: var(--shadow-card);
+  margin-top: 0.25rem;
+}
+
+.terminal-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 0.65rem;
+}
+
+.terminal-traffic-lights {
+  display: flex;
+  gap: 6px;
+}
+
+.terminal-traffic-lights .mac-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.terminal-traffic-lights .mac-dot.red { background: #FF5F56; }
+.terminal-traffic-lights .mac-dot.yellow { background: #FEBC2E; }
+.terminal-traffic-lights .mac-dot.green { background: #28C840; }
+
+.terminal-card-title {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.8;
+}
+
+.terminal-card-desc {
+  font-size: var(--text-xs);
+  opacity: 0.84;
+  line-height: 1.55;
+  margin-bottom: 0.85rem;
+}
+
+.terminal-code-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.75rem;
+}
+
+.terminal-code-row code {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: #FFFFFF;
+  white-space: nowrap;
+  overflow-x: auto;
+}
+
+.terminal-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.38rem 0.72rem;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  background: #FFFFFF;
+  color: var(--color-ink-primary);
+  border: none;
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform var(--duration-fast) var(--ease-apple),
+              background-color var(--duration-fast) var(--ease-apple);
+}
+
+.terminal-copy-btn:hover {
+  background: #F0F0F4;
+  transform: translateY(-1px);
+}
+
+.faq-support-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 0.25rem;
+}
+
+.faq-link-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 1.05rem;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-subtle);
+  border: 1px solid var(--color-border-hairline);
+  font-size: var(--text-xs);
+  color: var(--color-ink-secondary);
+  text-decoration: none;
+  font-weight: 600;
+  transition: border-color var(--duration-fast) var(--ease-apple),
+              color var(--duration-fast) var(--ease-apple);
+}
+
+.faq-link-pill:hover {
+  border-color: var(--color-border-strong);
+  color: var(--color-ink-primary);
+  background: var(--color-surface-card);
+}
+
+/* --- Right Column: Refined Accordion Group --- */
 .faq-accordion-group {
   display: flex;
   flex-direction: column;
@@ -35,33 +185,27 @@
   background: var(--color-surface-card);
   border: 1px solid var(--color-border-hairline);
   border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
   overflow: hidden;
   transition: border-color var(--duration-fast) var(--ease-apple),
               box-shadow var(--duration-fast) var(--ease-apple);
 }
 
-.faq-card:hover {
-  border-color: var(--color-border-medium);
-}
-
+.faq-card:hover,
 .faq-card[open] {
-  border-color: var(--color-ink-primary);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  border-color: var(--color-border-strong);
+  box-shadow: var(--shadow-card);
 }
 
 .faq-summary {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-lg) var(--space-xl);
+  padding: 1.45rem 1.75rem;
   cursor: pointer;
   list-style: none;
-  font-family: var(--font-body);
-  font-size: var(--text-base);
-  font-weight: 600;
-  color: var(--color-ink-primary);
-  user-select: none;
   gap: var(--space-md);
+  user-select: none;
 }
 
 .faq-summary::-webkit-details-marker {
@@ -73,14 +217,55 @@
   outline-offset: -2px;
 }
 
-.faq-chevron {
-  width: 18px;
-  height: 18px;
+.faq-summary-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1;
+}
+
+.faq-tag-badge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--color-ink-muted);
+  text-transform: uppercase;
+}
+
+.faq-question-text {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--color-ink-primary);
+  letter-spacing: -0.015em;
+  line-height: 1.35;
+}
+
+.faq-chevron-chip {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--color-surface-subtle);
+  border: 1px solid var(--color-border-hairline);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
+  transition: border-color var(--duration-fast) var(--ease-apple);
+}
+
+.faq-card:hover .faq-chevron-chip {
+  border-color: var(--color-border-strong);
+}
+
+.faq-chevron {
+  width: 16px;
+  height: 16px;
   stroke: var(--color-ink-primary);
-  stroke-width: 2;
+  stroke-width: 2.2;
   fill: none;
-  transition: transform var(--duration-fast) var(--ease-apple);
+  transition: transform var(--duration-normal) var(--ease-apple);
 }
 
 .faq-card[open] .faq-chevron {
@@ -88,44 +273,93 @@
 }
 
 .faq-content {
-  padding: 0 var(--space-xl) var(--space-lg) var(--space-xl);
+  padding: 0 1.75rem 1.75rem 1.75rem;
   font-size: var(--text-sm);
   color: var(--color-ink-secondary);
-  line-height: 1.65;
+  line-height: 1.68;
   border-top: 1px solid var(--color-surface-subtle);
 }
 
 .faq-content p {
-  margin-top: var(--space-md);
+  margin-top: 1rem;
 }
 
-/* Step-by-Step Gatekeeper Guide */
+.faq-content strong {
+  color: var(--color-ink-primary);
+  font-weight: 600;
+}
+
+/* --- Gatekeeper Guide Sub-Components --- */
+.gatekeeper-info-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  background: var(--color-surface-subtle);
+  border: 1px solid var(--color-border-hairline);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+  margin-top: 1.15rem;
+}
+
+.gatekeeper-info-banner .banner-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--color-ink-primary);
+  color: #FFFFFF;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.gatekeeper-info-banner p {
+  margin: 0;
+  font-size: var(--text-xs);
+  line-height: 1.55;
+  color: var(--color-ink-primary);
+}
+
+.gatekeeper-lead-sub {
+  font-weight: 600;
+  color: var(--color-ink-primary);
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
 .gatekeeper-steps {
   display: flex;
   flex-direction: column;
-  gap: var(--space-md);
-  margin-top: var(--space-md);
+  gap: 1.15rem;
+  margin-top: 0.75rem;
 }
 
 .gatekeeper-step-item {
   display: flex;
   align-items: flex-start;
-  gap: var(--space-md);
+  gap: 1rem;
+  background: var(--color-canvas-pure);
+  border: 1px solid var(--color-border-hairline);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
 }
 
 .step-number-badge {
   flex-shrink: 0;
-  width: 26px;
-  height: 26px;
-  border-radius: var(--radius-full);
-  background: var(--color-ink-primary);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--color-surface-pitch);
   color: #FFFFFF;
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 700;
   margin-top: 2px;
 }
 
@@ -134,34 +368,93 @@
 }
 
 .step-details strong {
+  font-size: var(--text-sm);
   color: var(--color-ink-primary);
-  font-weight: 600;
+  font-weight: 700;
 }
 
-.terminal-callout {
-  margin-top: var(--space-md);
-  padding: var(--space-sm) var(--space-md);
+.step-details p {
+  margin-top: 0.35rem;
+  font-size: var(--text-xs);
+  line-height: 1.6;
+}
+
+.mac-inline-chip {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 6px;
   background: var(--color-surface-subtle);
   border: 1px solid var(--color-border-hairline);
-  border-radius: var(--radius-sm);
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 11px;
+  font-weight: 600;
   color: var(--color-ink-primary);
+  white-space: nowrap;
+}
+
+.mac-system-btn {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 6px;
+  background: #007AFF;
+  color: #FFFFFF;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(0, 122, 255, 0.25);
+  white-space: nowrap;
+}
+
+.faq-metrics-pill-row {
   display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1.15rem;
+}
+
+.faq-metric-tag {
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  overflow-x: auto;
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-subtle);
+  border: 1px solid var(--color-border-hairline);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-ink-primary);
+}
+
+/* --- Responsive Breakpoints --- */
+@media (max-width: 1024px) {
+  .faq-layout-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-xl);
+  }
+  .faq-sidebar-sticky {
+    position: static;
+  }
 }
 
 @media (max-width: 640px) {
   .faq-section {
-    padding: var(--space-xl) var(--space-md);
+    padding: var(--space-lg) clamp(0.75rem, 2vw, 1rem);
   }
   .faq-summary {
-    padding: var(--space-md);
-    font-size: var(--text-sm);
+    padding: 1.15rem 1.25rem;
   }
   .faq-content {
-    padding: 0 var(--space-md) var(--space-md) var(--space-md);
+    padding: 0 1.25rem 1.25rem 1.25rem;
+  }
+  .gatekeeper-step-item {
+    padding: 0.85rem 1rem;
+    gap: 0.75rem;
+  }
+  .terminal-code-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .terminal-copy-btn {
+    align-self: flex-end;
   }
 }
