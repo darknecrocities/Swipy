@@ -17,7 +17,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 from cinematic_effects import (
     W, H, FONT_HEADING, FONT_SANS, FONT_MONO,
-    draw_studio_background, draw_pill_badge, draw_macbook_bezel,
+    draw_studio_background, draw_pill_badge, draw_pill_badge_left, draw_macbook_bezel,
     draw_vector_check, draw_specular_sheen, draw_shockwave_ring,
     draw_dynamic_highlight, draw_kinetic_text,
     apply_prominent_camera_shift, apply_tactile_recoil_punch,
@@ -86,28 +86,29 @@ def render_scene_1(frame_idx: int) -> Image.Image:
 
     rel_frame = frame_idx
 
-    # Dynamic upward displacement shift as narrative progresses
-    shift_up = int(ease_snap(max(0.0, min(1.0, (rel_frame - 60) / 40.0))) * 55)
+    # Phase A: The Vision Question (Frames 0 - 95, cleanly fades & slides out at 72-95)
+    if rel_frame < 95:
+        p_exit = max(0.0, min(1.0, (rel_frame - 70) / 24.0))
+        exit_y = int(ease_snap(p_exit) * -45)
+        fade_prog = 1.0 - p_exit
+        draw_kinetic_text(img, "WHAT IF YOUR MAC", W // 2, 420 + exit_y, f_huge, (10, 10, 12),
+                          progress=min(rel_frame / 26.0, fade_prog), offset_y=40, anchor="mm")
+        draw_kinetic_text(img, "COULD UNDERSTAND YOUR HANDS?", W // 2, 525 + exit_y, f_huge, (10, 10, 12),
+                          progress=min((rel_frame - 14) / 28.0, fade_prog), offset_y=40, anchor="mm")
+        draw_kinetic_text(img, "Not by reaching out to touch the glass.", W // 2, 630 + exit_y, f_sub, (110, 110, 122),
+                          progress=min((rel_frame - 32) / 28.0, fade_prog), offset_y=35, anchor="mm")
 
-    # Part A: Kinetic Line Entrances
-    draw_kinetic_text(img, "WHAT IF YOUR MAC", W // 2, 420 - shift_up, f_huge, (10, 10, 12),
-                      progress=rel_frame / 26.0, offset_y=40, anchor="mm")
-    draw_kinetic_text(img, "COULD UNDERSTAND YOUR HANDS?", W // 2, 525 - shift_up, f_huge, (10, 10, 12),
-                      progress=(rel_frame - 14) / 28.0, offset_y=40, anchor="mm")
-    draw_kinetic_text(img, "Not by reaching out to touch the glass.", W // 2, 630 - shift_up, f_sub, (110, 110, 122),
-                      progress=(rel_frame - 32) / 28.0, offset_y=35, anchor="mm")
-
-    # Part B: The Kinetic Reveal of TOUCHLESS (Frames 100 - 240)
-    if rel_frame >= 100:
-        p_morph = ease_snap(min(1.0, (rel_frame - 100) / 36.0))
-        draw_kinetic_text(img, "THROUGH THE NATURAL AIR IN FRONT OF YOU.", W // 2, 385, f_large, (110, 110, 122),
-                          progress=(rel_frame - 100) / 28.0, offset_y=35, anchor="mm")
+    # Phase B: The Clean Touchless Reveal on Pristine Stage (Frames 95 - 240, zero overlap)
+    else:
+        p_morph = ease_snap(min(1.0, (rel_frame - 95) / 36.0))
+        draw_kinetic_text(img, "THROUGH THE NATURAL AIR IN FRONT OF YOU.", W // 2, 380, f_large, (110, 110, 122),
+                          progress=(rel_frame - 95) / 28.0, offset_y=35, anchor="mm")
 
         # Inverted Pitch Black Pill Badge with Pure White Typography
         f_pill = ImageFont.truetype(FONT_HEADING, 66)
         pill_w = int(720 * p_morph)
         pill_h = 120
-        px0, py0 = (W - pill_w) // 2, 480
+        px0, py0 = (W - pill_w) // 2, 470
         px1, py1 = px0 + pill_w, py0 + pill_h
 
         if pill_w > 40:
@@ -115,52 +116,54 @@ def render_scene_1(frame_idx: int) -> Image.Image:
             if p_morph > 0.65:
                 draw.text((W // 2, py0 + pill_h // 2), "TOUCHLESS.", font=f_pill, fill=(255, 255, 255), anchor="mm")
                 # Specular sheen gliding across black pill
-                sheen_p = (rel_frame - 135) / 50.0
+                sheen_p = (rel_frame - 130) / 50.0
                 draw_specular_sheen(img, [px0, py0, px1, py1], sheen_p)
 
         # Concentric Soft Acoustic Wavefield
-        ripple_r = int(((rel_frame - 100) * 8) % 240)
-        draw.ellipse([W // 2 - ripple_r, 790 - ripple_r, W // 2 + ripple_r, 790 + ripple_r], outline=(210, 210, 224), width=2)
-        draw_kinetic_text(img, "This is touchless computing.", W // 2, 850, f_sub, (110, 110, 122),
-                          progress=(rel_frame - 140) / 26.0, offset_y=25, anchor="mm")
+        ripple_r = int(((rel_frame - 95) * 8) % 240)
+        draw.ellipse([W // 2 - ripple_r, 780 - ripple_r, W // 2 + ripple_r, 780 + ripple_r], outline=(210, 210, 224), width=2)
+        draw_kinetic_text(img, "This is touchless computing.", W // 2, 840, f_sub, (110, 110, 122),
+                          progress=(rel_frame - 135) / 26.0, offset_y=25, anchor="mm")
 
     return apply_prominent_camera_shift(img, rel_frame, 240, zoom_amount=0.065, pan_x_amount=40.0, pan_y_amount=16.0)
 
 
 def render_scene_2(frame_idx: int) -> Image.Image:
-    """Scene 2: Gliding MacBook Reveal & Kinetic Typography (Frames 240 - 600, 12s)."""
+    """Scene 2: Gliding MacBook Reveal & Clean Typography (Frames 240 - 600, 12s)."""
     img = Image.new("RGB", (W, H), (255, 255, 255))
     draw = ImageDraw.Draw(img)
     draw_studio_background(draw, frame_idx)
 
     rel_frame = frame_idx - 240
-    f_title = ImageFont.truetype(FONT_HEADING, 76)
-    f_body = ImageFont.truetype(FONT_SANS, 26)
-    f_sub = ImageFont.truetype(FONT_SANS, 22)
-    f_badge = ImageFont.truetype(FONT_HEADING, 18)
+    f_title = ImageFont.truetype(FONT_HEADING, 70)
+    f_body = ImageFont.truetype(FONT_SANS, 24)
+    f_sub = ImageFont.truetype(FONT_SANS, 20)
+    f_badge = ImageFont.truetype(FONT_HEADING, 16)
 
-    # Left Column: Kinetic Text Entrances
-    draw_kinetic_text(img, "MEET SWIPY.", 120, 280, f_title, (10, 10, 12),
+    # Left Column: Kinetic Text Entrances (wrapped safely within 620px)
+    draw_kinetic_text(img, "MEET SWIPY.", 120, 270, f_title, (10, 10, 12),
                       progress=rel_frame / 32.0, offset_y=45, anchor="la")
-    draw_kinetic_text(img, "A native macOS app that transforms your FaceTime camera", 120, 390, f_body, (50, 50, 60),
+    draw_kinetic_text(img, "A native macOS app that transforms your FaceTime camera", 120, 375, f_body, (40, 40, 48),
                       progress=(rel_frame - 20) / 32.0, offset_y=35, anchor="la")
-    draw_kinetic_text(img, "into an intelligent spatial trackpad.", 120, 435, f_body, (50, 50, 60),
+    draw_kinetic_text(img, "into an intelligent spatial trackpad.", 120, 415, f_body, (40, 40, 48),
                       progress=(rel_frame - 35) / 32.0, offset_y=35, anchor="la")
-    draw_kinetic_text(img, "No sensors to wear, no extra hardware. Just pure, fluid control.", 120, 500, f_sub, (100, 100, 110),
-                      progress=(rel_frame - 55) / 32.0, offset_y=30, anchor="la")
+    draw_kinetic_text(img, "No wearable sensors. Just pure, fluid control.", 120, 480, f_sub, (100, 100, 110),
+                      progress=(rel_frame - 50) / 32.0, offset_y=30, anchor="la")
 
-    # Feature Badges Row (Sliding in)
-    p_badge = ease_snap(max(0.0, min(1.0, (rel_frame - 75) / 32.0)))
-    badge_off_x = int((1.0 - p_badge) * -120)
-    draw_pill_badge(draw, "100% ON-DEVICE VISION", 280 + badge_off_x, 595, f_badge, bg_color=(10, 10, 12), text_color=(255, 255, 255))
-    draw_pill_badge(draw, "< 7MS ULTRA-LOW LATENCY", 560 + badge_off_x, 595, f_badge, bg_color=(240, 240, 246), text_color=(10, 10, 12))
+    # Feature Badges Row (Explicit left-anchored with 20px gutter, zero overlap)
+    p_badge = ease_snap(max(0.0, min(1.0, (rel_frame - 70) / 32.0)))
+    badge_off_x = int((1.0 - p_badge) * -100)
+    b1_box = draw_pill_badge_left(draw, "100% ON-DEVICE VISION", 120 + badge_off_x, 565, f_badge,
+                                  bg_color=(10, 10, 12), text_color=(255, 255, 255), pad_x=18, pad_y=8)
+    draw_pill_badge_left(draw, "< 7MS ULTRA-LOW LATENCY", b1_box[2] + 20, 565, f_badge,
+                         bg_color=(240, 240, 246), text_color=(10, 10, 12), pad_x=18, pad_y=8)
 
-    # Prominent Hardware Entrance Glide (MacBook slides in from right with momentum)
+    # Prominent Hardware Entrance Glide (MacBook at x=880 with 190px safety buffer)
     p_glide = ease_snap(min(1.0, rel_frame / 45.0))
     glide_x = int((1.0 - p_glide) * 260)
     drift_x = int(8.0 * math.sin(rel_frame * 0.04))
     drift_y = int(6.0 * math.cos(rel_frame * 0.04))
-    mb_box = [820 + glide_x + drift_x, 150 + drift_y, 1780 + glide_x + drift_x, 890 + drift_y]
+    mb_box = [880 + glide_x + drift_x, 160 + drift_y, 1840 + glide_x + drift_x, 900 + drift_y]
 
     raw_frame = load_cached_frame(FRAMES_HERO_DIR, rel_frame)
     draw_macbook_bezel(img, raw_frame, mb_box)
@@ -221,11 +224,11 @@ def render_scene_3(frame_idx: int) -> Image.Image:
             draw.text((142 + step_off_x, sy + 22), num, font=f_step_num, fill=fg, anchor="mm")
             draw.text((180 + step_off_x, sy + 22), desc, font=f_step_text, fill=(10, 10, 12) if active else (110, 110, 120), anchor="lm")
 
-    # Right Column: Real Application Camera Feed (Gliding in from bottom)
+    # Right Column: Real Application Camera Feed (Gliding in from bottom with 320px left margin)
     p_cam_slide = ease_snap(min(1.0, rel_frame / 40.0))
     cam_off_y = int((1.0 - p_cam_slide) * 140)
     drift_y = int(5.0 * math.cos(rel_frame * 0.05))
-    cam_box = [820, 170 + cam_off_y + drift_y, 1800, 890 + cam_off_y + drift_y]
+    cam_box = [880, 170 + cam_off_y + drift_y, 1840, 890 + cam_off_y + drift_y]
 
     if os.path.exists(CAMERA_FEED_PATH):
         cam_img = Image.open(CAMERA_FEED_PATH).convert("RGB")
@@ -233,7 +236,7 @@ def render_scene_3(frame_idx: int) -> Image.Image:
 
     # Dynamic Spotlight Highlight & Tactile Shockwave on Pinch
     if is_pinching:
-        pinch_cx, pinch_cy = 1380, 520 + cam_off_y + drift_y
+        pinch_cx, pinch_cy = 1420, 520 + cam_off_y + drift_y
         draw_dynamic_highlight(img, pinch_cx, pinch_cy, radius=130, intensity=0.45, color=(0, 122, 255))
         p_shock = min(1.0, (rel_frame - pinch_frame) / 45.0)
         draw_shockwave_ring(draw, pinch_cx, pinch_cy, p_shock, max_radius=120, color=(10, 10, 12))
@@ -267,8 +270,8 @@ def render_scene_4(frame_idx: int) -> Image.Image:
     pop_slide_x = int((1.0 - p_pop) * 160)
 
     p_float = int(5.0 * math.sin(rel_frame * 0.05))
-    cards_box = [100 + cards_slide_x, 205 + p_float, 1240 + cards_slide_x, 925 + p_float]
-    popover_box = [1280 + pop_slide_x, 205 - p_float, 1820 + pop_slide_x, 925 - p_float]
+    cards_box = [80 + cards_slide_x, 205 + p_float, 1200 + cards_slide_x, 925 + p_float]
+    popover_box = [1260 + pop_slide_x, 205 - p_float, 1840 + pop_slide_x, 925 - p_float]
 
     if os.path.exists(GESTURE_CARDS_PATH):
         cards_img = Image.open(GESTURE_CARDS_PATH).convert("RGB")
@@ -323,18 +326,18 @@ def render_scene_5(frame_idx: int) -> Image.Image:
             draw_vector_check(draw, cx=145 + pt_off_x, cy=py + 12, radius=12, badge_color=(10, 10, 12), check_color=(255, 255, 255), width=2)
             draw_kinetic_text(img, pt, 175 + pt_off_x, py + 12, f_point, (20, 20, 24), progress=p_pt, offset_y=15, anchor="lm")
 
-    # Right Column: Real Settings Panel (Sliding in from right)
+    # Right Column: Real Settings Panel (Sliding in from right with 160px gutter)
     p_set = ease_snap(min(1.0, rel_frame / 45.0))
     set_slide_x = int((1.0 - p_set) * 160)
     drift_x = int(5.0 * math.sin(rel_frame * 0.05))
-    settings_box = [840 + set_slide_x + drift_x, 190, 1800 + set_slide_x + drift_x, 880]
+    settings_box = [880 + set_slide_x + drift_x, 190, 1840 + set_slide_x + drift_x, 880]
 
     if os.path.exists(CURSOR_SETTINGS_PATH):
         settings_img = Image.open(CURSOR_SETTINGS_PATH).convert("RGB")
         draw_macos_window_card(img, settings_img, settings_box, "Swipy Settings — Cursor Acceleration & Sensitivity")
 
     # Dynamic Spotlight Highlight sweeping over Sensitivity & Motion Smoothing
-    draw_dynamic_highlight(img, 1320 + set_slide_x + drift_x, 500, radius=130, intensity=0.32, color=(0, 122, 255))
+    draw_dynamic_highlight(img, 1360 + set_slide_x + drift_x, 500, radius=130, intensity=0.32, color=(0, 122, 255))
 
     return apply_prominent_camera_shift(img, rel_frame, 300, zoom_amount=0.055, pan_x_amount=35.0, pan_y_amount=-14.0)
 
