@@ -202,20 +202,26 @@
       </div>
     </section>
 
-    <!-- PHASE B: INTERACTIVE "TEST IT OUT?" PINCH & SWIPE SANDBOX -->
-    <section id="test-it-out" class="sandbox-section" aria-label="Interactive Swipy Gesture Playground">
+    <!-- PHASE B: INTERACTIVE "TEST IT OUT?" LIVE WEBCAM HAND VISION SANDBOX -->
+    <section id="test-it-out" class="sandbox-section" aria-label="Interactive Swipy Live Camera Vision Playground">
       <div class="sandbox-container">
         <div class="sandbox-header reveal-block">
           <div>
             <h2 class="tetris-block-title" style="font-size: var(--text-2xl); margin-bottom: 0.4rem;">
               TEST IT <span class="tetris-invert-chip">OUT?</span>
             </h2>
-            <p style="font-size: var(--text-base); color: var(--color-ink-secondary); max-width: 56ch; line-height: 1.55;">
-              Experience how Swipy feels right here. <strong>Pinch &amp; Hold</strong> (click and drag) any card inside the MacBook screen to pick it up and move it around, or trigger a <strong>4-Finger Swipe</strong> to glide across virtual macOS Spaces!
+            <p style="font-size: var(--text-base); color: var(--color-ink-secondary); max-width: 58ch; line-height: 1.55;">
+              Turn on your webcam right in the browser to control this sample Mac desktop with <strong>real-time 21-point Hand Vision</strong>—point your index finger to glide the cursor, pinch thumb &amp; index to grab and drag windows, or flick 4 fingers to switch Spaces!
             </p>
           </div>
 
-          <div class="sandbox-gesture-bar" role="toolbar" aria-label="Simulate Swipy Gestures">
+          <div class="sandbox-gesture-bar" role="toolbar" aria-label="Webcam Vision and Gesture Controls">
+            <button type="button" id="sandbox-camera-toggle" class="nav-download-btn" aria-pressed="false">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              <span id="sandbox-camera-btn-text">TURN ON CAMERA (WEB VISION)</span>
+            </button>
             <button type="button" class="sandbox-action-btn" data-sandbox-action="prev-space">
               &larr; 4-Finger Swipe Right
             </button>
@@ -223,10 +229,10 @@
               4-Finger Swipe Left &rarr;
             </button>
             <button type="button" class="sandbox-action-btn" data-sandbox-action="mission-control">
-              3-Finger Swipe Up (Mission Control)
+              3-Finger Swipe Up
             </button>
             <button type="button" class="sandbox-action-btn" data-sandbox-action="reset-cards">
-              Reset Workspace
+              Reset Screen
             </button>
           </div>
         </div>
@@ -239,51 +245,67 @@
                 <!-- Top Simulated macOS Menu Bar -->
                 <div class="sandbox-menubar">
                   <div class="sandbox-menubar-left">
-                    <span style="font-weight: 700;">&#63743; Swipy</span>
+                    <span style="font-weight: 700;">&#63743; Swipy Web Demo</span>
+                    <span>Finder</span>
                     <span>File</span>
+                    <span>Edit</span>
                     <span>View</span>
                     <span>Spaces</span>
                   </div>
                   <div class="sandbox-menubar-center">
-                    <span id="sandbox-space-indicator" class="sandbox-space-pill">SPACE 01 // CREATIVE DESKTOP</span>
+                    <span id="sandbox-space-indicator" class="sandbox-space-pill">SPACE 01 // MACOS WORKSPACE</span>
                   </div>
                   <div class="sandbox-menubar-right">
-                    <span id="sandbox-gesture-badge" class="sandbox-live-badge">INDEX POINT // GLIDING</span>
+                    <span id="sandbox-gesture-badge" class="sandbox-live-badge">MOUSE / CAMERA READY</span>
                   </div>
                 </div>
 
-                <!-- Interactive Draggable Cards Canvas -->
+                <!-- Sample Computer Screen Workspace -->
                 <div id="sandbox-stage-canvas" class="sandbox-stage-canvas">
-                  <div class="sandbox-draggable-card" data-card-id="camera" style="left: 5%; top: 14%;">
+                  <div class="sandbox-draggable-card" data-card-id="camera" style="left: 4%; top: 10%;">
                     <div class="sandbox-card-bar">
                       <span class="traffic-dots"><i></i><i></i><i></i></span>
-                      <span>Live Hand Feed</span>
+                      <span>Swipy — Overview</span>
                     </div>
                     <img src="../assets/images/swipy-overview-camera-feed.png" alt="Swipy Hand Feed Preview" draggable="false" />
-                    <p>Pinch &amp; drag me anywhere on the desktop</p>
+                    <p>Pinch thumb &amp; index to grab and move this window</p>
                   </div>
 
-                  <div class="sandbox-draggable-card" data-card-id="menubar" style="left: 39%; top: 18%;">
+                  <div class="sandbox-draggable-card" data-card-id="menubar" style="left: 36%; top: 14%;">
                     <div class="sandbox-card-bar">
                       <span class="traffic-dots"><i></i><i></i><i></i></span>
-                      <span>Quick Menu Bar</span>
+                      <span>Swipy — Menu Bar Control</span>
                     </div>
                     <img src="../assets/images/swipy-menubar-popover.png" alt="Swipy Menu Bar Popover" draggable="false" />
-                    <p>30 FPS On-Device Tracking</p>
+                    <p>30 FPS On-Device Vision Tracking</p>
                   </div>
 
-                  <div class="sandbox-draggable-card" data-card-id="gestures" style="left: 67%; top: 15%;">
+                  <div class="sandbox-draggable-card" data-card-id="gestures" style="left: 65%; top: 10%;">
                     <div class="sandbox-card-bar">
                       <span class="traffic-dots"><i></i><i></i><i></i></span>
-                      <span>Gesture Toggles</span>
+                      <span>Swipy — Gesture Library</span>
                     </div>
                     <img src="../assets/images/swipy-gesture-cards-native.png" alt="Swipy Gesture Cards" draggable="false" />
-                    <p>15 Customizable Hand Poses</p>
+                    <p>15 Native macOS Hand Actions</p>
                   </div>
 
-                  <!-- Drop Target Dock Zone -->
-                  <div id="sandbox-drop-dock" class="sandbox-drop-dock">
-                    <span>PINCH &amp; DROP CARDS HERE TO PIN TO DOCK, OR SWIPE HORIZONTALLY TO SWITCH SPACES</span>
+                  <!-- Live Browser Webcam Picture-in-Picture Hand Skeleton HUD -->
+                  <div id="sandbox-webcam-pip" class="sandbox-webcam-pip" hidden>
+                    <div class="sandbox-pip-header">
+                      <span class="sandbox-pip-dot"></span>
+                      <span id="sandbox-pip-status">LIVE WEB VISION // 21 JOINTS</span>
+                    </div>
+                    <div class="sandbox-pip-video-wrap">
+                      <video id="sandbox-webcam-video" autoplay playsinline muted></video>
+                      <canvas id="sandbox-webcam-canvas" width="280" height="210"></canvas>
+                    </div>
+                  </div>
+
+                  <!-- Sample macOS Bottom App Dock -->
+                  <div id="sandbox-drop-dock" class="sandbox-macos-dock">
+                    <img src="../Resources/AppLogo.png" alt="Swipy App" class="dock-app-icon" />
+                    <span class="dock-divider"></span>
+                    <span id="sandbox-dock-hint">TURN ON CAMERA TO CONTROL THIS MAC SCREEN WITH YOUR HAND, OR DRAG WITH CURSOR</span>
                   </div>
 
                   <!-- Simulated Swipy Vision Pro Floating Cursor Reticle -->
@@ -427,6 +449,7 @@
   </footer>
 
   <script src="scripts/tetris-matrix.js"></script>
+  <script src="scripts/web-vision-sandbox.js"></script>
   <script src="scripts/gesture-library.js"></script>
   <script src="scripts/scroll-engine.js"></script>
 </body>
